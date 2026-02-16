@@ -1,0 +1,197 @@
+﻿
+@{
+    ViewBag.Title = "ApproveLeaves";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    
+    <div class="card mb-4">
+        <h5 class="card-header">Leaves List</h5>
+        <div class="card-body table-responsive text-nowrap">
+            <div class="row">
+                <div class="col-md-8">
+
+                </div>
+                <div class="col-md-4">
+                    <input type="search" class="form-control" placeholder="Search.." id="search" />
+                </div>
+            </div>
+            <br />
+            <table id="leaveslist" class="table table-hover align-middle shadow-sm rounded">
+                <thead style="background-color: #3b5d50">
+                    <tr>
+                        <th style="color: white">Full Name</th>
+                        <th style="color: white">Department</th>
+                        <th style="color: white">Date Range</th>
+                        <th style="color: white">Is Approved</th>
+                        <th style="color: white" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScroll" aria-labelledby="offcanvasScrollLabel" aria-modal="true" role="dialog">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasScrollLabel" class="offcanvas-title">Leave Data</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body my-auto mx-0 flex-grow-0" id="leavedata">
+       
+    </div>
+</div>
+@section scripts{
+
+    <script>
+        $(document).ready(function () {
+            var table = $("#leaveslist").DataTable({
+                lengthChange: false,
+                info: false,
+                searching: false,
+                ajax: {
+                    url: '@Url.Action("GetLeavesList",  "Leaves", new { area = "EMS" })',
+                    type: "GET",
+                },
+                columns: [
+                    { data: "FullName" },
+                    { data: "DepartmentName" },
+                    { data: "DateRange" },
+
+                    {
+                        data: "IsApproved",
+                        render: function (data) {
+                            return data ? '<span class="badge bg-success">Approved</span>'
+                                        : '<span class="badge bg-warning">Pending</span>';
+                        }
+                    },
+                    {
+                        data: null,
+                        className: "text-center",
+                        render: function (data, type, row) {
+                            let actions = "";
+                            actions += `
+                            <button class="btn btn-icon btn-primary waves-effect waves-light leavedata"
+        data-id="${row.Id}"
+        type="button" data-bs-toggle="offcanvas"
+        data-bs-target="#offcanvasScroll" aria-controls="offcanvasScroll"
+        title="View Details">
+   <span class="mdi mdi-information-outline"></span>
+</button>
+
+`;
+                            if (!row.IsApproved) {
+                                actions += `
+        <button type="button" class="btn btn-icon btn-primary waves-effect waves-light approveLeave" data-id="${row.Id}">
+            <span class="tf-icons mdi mdi-check-circle-outline"></span>
+        </button>`;
+                            } else {
+                                actions += `
+        <button type="button" class="btn btn-icon btn-primary waves-effect waves-light editLeave" data-id="${row.Id}">
+            <span class="tf-icons mdi mdi-pencil-outline"></span>
+        </button>`;
+                            }
+
+                            return actions;
+                        }
+                    }
+                ]
+            });
+
+            // 🔹 Delete Leave
+            $("#leaveslist").on("click", ".approveLeave", function () {
+    var id = $(this).data("id");
+
+    if (confirm("Are you sure you want to approve this leave?")) {
+        $.ajax({
+            url: '@Url.Action("ApproveLeave", "Leaves", new { area = "EMS" })',
+            type: "POST",
+            data: { id: id,type: "approve" },
+            success: function (res) {
+                if (res.success) {
+                    alert("Leave Approved");
+                    table.ajax.reload();
+                } else {
+                    alert(res.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error Approving leave:", error);
+                alert("Something went wrong while Approving the leave.");
+            }
+        });
+    }
+            });
+
+                        $("#leaveslist").on("click", ".disapproveLeave", function () {
+    var id = $(this).data("id");
+
+    if (confirm("Are you sure you want to disapprove this leave?")) {
+        $.ajax({
+            url: '@Url.Action("ApproveLeave", "Leaves", new { area = "EMS" })',
+            type: "POST",
+            data: { id: id,type: "disapprove" },
+            success: function (res) {
+                if (res.success) {
+                    alert("Leave Dispproved");
+                    table.ajax.reload();
+                } else {
+                    alert(res.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error Disapproving leave:", error);
+                alert("Something went wrong while Disapproving the leave.");
+            }
+        });
+    }
+});
+            $('#leaveslist').on('draw.dt', function () {
+                $('[data-bs-toggle="popover"]').popover({
+                    placement: 'top',
+                    sanitize: false,   // allow HTML inside
+                    html: true,
+                    trigger: 'hover'   // open on hover
+                });
+            });
+
+            $(document).on("click", ".close-popover", function () {
+                $(this).closest(".popover").popover('hide');
+            });
+
+          
+$("#leaveslist").on("click", ".leavedata", function () {
+    var id = $(this).data("id");
+    $.ajax({
+        url: '@Url.Action("GetLeaveById", "Leaves", new { area = "EMS" })',
+        type: "GET",
+        data: { id: id },
+        success: function (leave) {
+            let html = `
+            <div class="mb-2"><b>Applied By:</b> ${leave.FullName}</div>
+<div class="mb-2"><b>Department:</b> ${leave.DepartmentName}</div>
+                <div class="mb-2"><b>Date Range:</b> ${leave.DateRange}</div>
+                <div class="mb-2"><b>Days:</b> ${leave.Days}</div>
+                <div class="mb-2"><b>Reason:</b> ${leave.Reason}</div>
+                <div class="mb-2"><b>Type:</b> ${leave.LeaveType}</div>
+                <div class="mb-2"><b>Applied Date:</b> ${leave.ApplyDateString}</div>
+                <div class="mb-2"><b>Approved:</b> ${leave.IsApproved ? "Approved" : "Pending"}</div>
+                <div class="mb-2"><b>Approved Date:</b> ${leave.ApprovedDateString}</div>
+            `;
+
+            $("#leavedata").html(html);
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching leave:", error);
+            $("#leavedata").html("<p class='text-danger'>Unable to load leave details.</p>");
+        }
+    });
+});
+
+
+        });
+
+    </script>
+}

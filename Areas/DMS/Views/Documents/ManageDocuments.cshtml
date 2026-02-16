@@ -1,0 +1,1079 @@
+﻿
+@{
+    ViewBag.Title = "ManageDocuments";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <div class="card shadow-sm">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-header">Documents</h5>
+
+            <div class="d-flex align-items-center me-2">
+                <!-- Search Box -->
+
+                <button class="btn btn-primary waves-effect waves-light btn-sm me-2" type="button"
+                        data-bs-toggle="offcanvas" data-bs-target="#offcanvasTop" aria-controls="offcanvasTop">
+                    <i class="mdi mdi-magnify me-1"></i> Search Filters
+                </button>
+                <!-- Add Folder Button -->
+                <button class="btn btn-sm btn-primary me-2" id="btnAddFolder">
+                    <i class="mdi mdi-folder-plus me-1"></i> Add Folder
+                </button>
+
+                <!-- Upload Button -->
+                <button class="btn btn-sm btn-primary me-2" id="btnUpload">
+                    <i class="mdi mdi-upload me-1"></i> Upload Files
+                </button>
+            </div>
+        </div>
+
+        <hr />
+        <div class="card-body">
+
+            <nav aria-label="breadcrumb" id="empFolders">
+                <ol class="breadcrumb breadcrumb-style1">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:void(0);" data-id="0">Root</a>
+                    </li>
+
+                </ol>
+            </nav>
+            <hr />
+
+            <div class="row g-4 mb-5" id="docs"></div>
+
+
+            <div class="text-center mt-3">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                    </ul>
+                </nav>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="offcanvas offcanvas-top" tabindex="-1" id="offcanvasTop" aria-labelledby="offcanvasTopLabel" aria-modal="true" role="dialog" style="height:70% !important">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasTopLabel" class="offcanvas-title">Search Filters</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="row">
+
+            <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-4 mt-2">
+                <label class="form-label">Document Name</label>
+                <input type="text" class="form-control" id="docName" placeholder="Enter Doc Name">
+            </div>
+
+            <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-4 mt-2">
+                <label class="form-label">Document Type</label>
+                <input type="text" class="form-control" id="type" placeholder="Enter Doc Type">
+            </div>
+
+            <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-4 mt-2">
+                <label class="form-label">Date Range</label>
+                <input type="text" class="form-control" id="dateRange" placeholder="Select date range">
+            </div>
+
+            <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-4 mt-2">
+                <label class="form-label">Month</label>
+                <select id="monthDropdown" class="form-control">
+                    <option value="">-- Select Month --</option>
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+
+            <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-4 mt-2">
+                <label class="form-label">Year</label>
+                <input type="text" id="yearTextBox" class="form-control" placeholder="Enter year">
+            </div>
+            <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-4 mt-2">
+                <label class="form-label">Select Folder</label>
+                <select id="empFoldersList" class="form-control">
+                </select>
+            </div>
+
+
+
+
+
+        </div>
+        <div class="col-12 text-end p-4">
+            <button type="button" class="btn btn-primary me-2 waves-effect waves-light" id="search">Search</button>
+            <button type="button" class="btn btn-outline-secondary waves-effect" data-bs-dismiss="offcanvas" id="cancelFilters">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="selectedFiles" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Upload Files</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- FilePond input -->
+                <input type="file" class="filepond" name="filepond[]" multiple data-max-file-size="10MB" data-max-files="10" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary waves-effect" data-bs-dismiss="modal">
+                    Close
+                </button>
+                <button type="button" class="btn btn-primary waves-effect waves-light" id="btn-upload-files">
+                    Upload
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="viewFileModal" tabindex="-1" aria-modal="true" role="dialog" height="90%">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalScrollableTitle"></h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            </div>
+           
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary waves-effect" data-bs-dismiss="modal">
+                    Close
+                </button>
+               
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="FoldersHirarichy" tabindex="-1" aria-hidden="true" width="50%">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Folders</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- FilePond input -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary waves-effect" data-bs-dismiss="modal">
+                    Close
+                </button>
+                <button type="button" class="btn btn-primary waves-effect waves-light" id="btnMove">
+                    Move
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).on("click", "[data-bs-target='#offcanvasTop']", function () {
+    $.ajax({
+        url: "@Url.Action("GetAllFolders", "Folders", new { area = "DMS" })",
+        type: "GET",
+        data: { empId: 10 }, // current employee id dynamically pass karo
+        success: function (res) {
+            if (res.success) {
+                let $ddl = $("#empFoldersList");
+                $ddl.empty();
+                $ddl.append(`<option value="">-- Select Folder --</option>`);
+                $ddl.append(`<option value="0">Root</option>`);
+                res.folders.forEach(f => {
+                    $ddl.append(`<option value="${f.Id}">${f.FolderName}</option>`);
+                });
+            }
+        }
+    });
+});
+
+        $(document).on("click", "#search", function () {
+            let dateRange = $("#dateRange").val();
+            let dateFrom = null, dateTo = null;
+
+            if (dateRange) {
+                let parts = dateRange.split(" to ");
+                dateFrom = parts[0] || null;
+                dateTo = parts[1] || null;
+            }
+
+            const filters = {
+                docName: $("#docName").val(),
+                type: $("#type").val(),
+                dateFrom: dateFrom,
+                dateTo: dateTo,
+                month: $("#monthDropdown").val(),
+                year: $("#yearTextBox").val(),
+                folderId: $("#empFoldersList").val()
+            };
+
+            // reset breadcrumb when searching
+            $("#empFolders ol li").remove();
+
+            $("#empFolders ol").append(`
+    <li class="breadcrumb-item ms-auto" id="clearSearchItem">
+        <a href="javascript:void(0);" id="clearSearch">Clear Search Results</a>
+    </li>
+`);
+
+            $('#btnAddFolder').prop("disabled", true);
+            $('#btnUpload').prop("disabled", true);
+            loadDocuments(0, 1, filters);
+
+            // close offcanvas after applying
+            $("#offcanvasTop").offcanvas("hide");
+        });
+        let currentPage = 1;
+let currentFolderId = null;
+let pageSize = 10;
+let activeFilters = {}; // store search filters when applied
+
+function loadDocuments(folderId = 0, page = 1, filters = {}) {
+    currentPage = page;
+    currentFolderId = folderId;
+    activeFilters = filters; // store globally so pagination keeps filters
+
+    $.ajax({
+        url: "@Url.Action("GetDocuments", "Documents", new { area = "DMS" })",
+        type: "GET",
+        data: {
+            parentId: folderId,
+            page: page,
+            pageSize: pageSize,
+            docName: filters.docName || null,
+            type: filters.type || null,
+            dateFrom: filters.dateFrom || null,
+            dateTo: filters.dateTo || null,
+            month: filters.month || null,
+            year: filters.year || null,
+            folderIdFilter: filters.folderId || null
+        },
+        success: function (res) {
+            if (res.success) {
+                $("#docs").empty();
+
+                // --- Show Folders only if no filters applied ---
+                if ((!filters.docName && !filters.type && !filters.dateRange && !filters.month && !filters.year && !filters.folderId)
+                    && res.folders && res.folders.length > 0) {
+
+                    res.folders.forEach(f => {
+                        $("#docs").append(`
+                            <div class="col-lg-3 col-md-4 folder-card">
+                                <div class="card h-90">
+                                    <div class="p-4 fcarddiv foldercard" data-id="${f.Id}" data-name="${f.FolderName}">
+                                        <span class="folder-icon-holder"><i class="mdi mdi-folder-open"></i></span>
+                                    </div>
+                                    <div class="card-body text-left">
+                                    <div class="d-flex justify-content-between align-items-center">
+    <h6 class="mb-0 foldername pointer me-3" data-bs-toggle="tooltip"
+data-bs-placement="top"
+title="${f.FolderName}"
+    data-id="${f.Id}" data-name="${f.FolderName}">${f.FolderName}</h6>
+    <div class="dropdown">
+        <button class="btn pl-1" type="button" id="dropdownMenu${f.Id}" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="mdi mdi-dots-vertical mdi-20px"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu${f.Id}">
+    <li><a class="dropdown-item edit-folder" href="javascript:void(0);" data-id="${f.Id}">Edit Folder Name</a></li>
+    <li><a class="dropdown-item move-folder" href="javascript:void(0);" data-id="${f.Id}" data-key="movefolder">Move Folder</a></li>
+     <li><a class="dropdown-item move-files" href="javascript:void(0);" data-id="${f.Id}" data-key="movefiles">Move its Files</a></li>
+      <li><a class="dropdown-item text-danger delete-folder" href="javascript:void(0);" data-id="${f.Id}">Delete Folder and its Files</a></li>
+
+     <li><a class="dropdown-item text-danger move-files-and-delete" href="javascript:void(0);" data-id="${f.Id}" data-key="movefilesanddeletefolder">Delete Folder and Move Files</a></li>
+</ul>
+
+    </div>
+</div>
+                                        <p class="card-text foldercardtext" data-id="${f.Id}" data-name="${f.FolderName}">
+                                            Folders Count: ${f.FoldersCount}<br>
+                                            Files Count: ${f.FilesCount}<br>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        `);
+                    });
+                }
+
+                // --- Show Files ---
+                if (res.files && res.files.length > 0) {
+
+                    res.files.forEach(file => {
+                        $("#docs").append(`
+                        <div class="col-lg-3 col-md-4 filecard">
+                            <div class="card h-80">
+                                <div class="p-4 fcarddiv">
+                                    <span class="icon-holder">${getIcon(file.FileType)}</span>
+                                </div>
+                                <div class="card-body text-left">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0" data-bs-toggle="tooltip"
+data-bs-placement="top"
+title="${file.FileName}">${file.FileName}</h6>
+                                        <div class="dropdown">
+                                            <button class="btn" type="button" id="dropdownMenu${file.Id}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="mdi mdi-dots-vertical mdi-20px"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu${file.Id}">
+    <li><a class="dropdown-item view-file" href="javascript:void(0);" data-id="${file.Id}" data-name="${file.FileName}">View</a></li>
+    <li><a class="dropdown-item download-file" href="javascript:void(0);" data-id="${file.Id}">Download</a></li>
+    <li><a class="dropdown-item share-file" href="javascript:void(0);" data-id="${file.Id}">Share</a></li>
+    <li><a class="dropdown-item move-single-file" href="javascript:void(0);" data-id="${file.Id}" data-sourcefolderid="${file.DocFolderId}" data-key="movesinglefile">Move File</a></li>
+    <li><a class="dropdown-item delete-file" href="javascript:void(0);" data-id="${file.Id}">Delete</a></li>
+</ul>
+
+                                        </div>
+                                    </div>
+                                    <p class="card-text">
+                                        Type: ${file.FileType}<br>
+                                        Size: ${file.FileSize}<br>
+                                        Uploaded: ${file.CreatedDateString}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                    });
+                }
+                else {
+                    $("#docs").append(`
+        <div class="col-12 d-flex justify-content-center align-items-center" style="min-height:200px;">
+            <h5 class="text-muted">No Files Found</h5>
+        </div>
+    `);
+                }
+                // --- Pagination ---
+                renderPagination(res.total, page, pageSize);
+            }
+        }
+    });
+}
+
+        // Pagination builder
+        function renderPagination(total, page, pageSize) {
+            debugger;
+
+            let totalPages = Math.ceil(total / pageSize);
+            let $pagination = $(".pagination");
+            $pagination.empty();
+
+            if (totalPages < 1) return;
+
+            // First + Prev
+            $pagination.append(`
+        <li class="page-item ${page === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="javascript:void(0);" onclick="loadDocuments(currentFolderId, 1)">
+                <i class="mdi mdi-chevron-double-left"></i>
+            </a>
+        </li>
+        <li class="page-item ${page === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="javascript:void(0);" onclick="loadDocuments(currentFolderId, ${page - 1})">
+                <i class="mdi mdi-chevron-left"></i>
+            </a>
+        </li>
+    `);
+
+            // Page numbers with ellipsis
+            let maxVisible = 5;
+            let start = Math.max(1, page - 2);
+            let end = Math.min(totalPages, page + 2);
+
+            if (start > 1) {
+                $pagination.append(`<li class="page-item"><a class="page-link" href="javascript:void(0);" onclick="loadDocuments(currentFolderId, 1)">1</a></li>`);
+                if (start > 2) $pagination.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+            }
+
+            for (let i = start; i <= end; i++) {
+                $pagination.append(`
+            <li class="page-item ${i === page ? 'active' : ''}">
+                <a class="page-link" href="javascript:void(0);" onclick="loadDocuments(currentFolderId, ${i})">${i}</a>
+            </li>
+        `);
+            }
+
+            if (end < totalPages) {
+                if (end < totalPages - 1) $pagination.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+                $pagination.append(`<li class="page-item"><a class="page-link" href="javascript:void(0);" onclick="loadDocuments(currentFolderId, ${totalPages})">${totalPages}</a></li>`);
+            }
+
+            // Next + Last
+            $pagination.append(`
+        <li class="page-item ${page === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="javascript:void(0);" onclick="loadDocuments(currentFolderId, ${page + 1})">
+                <i class="mdi mdi-chevron-right"></i>
+            </a>
+        </li>
+        <li class="page-item ${page === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="javascript:void(0);" onclick="loadDocuments(currentFolderId, ${totalPages})">
+                <i class="mdi mdi-chevron-double-right"></i>
+            </a>
+        </li>
+    `);
+        }
+
+        // Breadcrumb Click
+        $(document).on("click", "#empFolders .breadcrumb-item a", function () {
+            let id = $(this).data("id");
+
+            if ($(this).text() === "Clear Search Results") {
+                // Clear filters & load root
+                activeFilters = {};
+                $("#docName").val("");
+                $("#type").val("");
+                $("#dateRange").val("");
+                $("#monthDropdown").val("");
+                $("#yearTextBox").val("");
+                $("#empFoldersList").val("");
+                $("#empFolders ol").html(`<li class="breadcrumb-item"><a href="javascript:void(0);" data-id="0">Root</a></li>`);
+                $('#btnAddFolder').prop("disabled", false);
+                $('#btnUpload').prop("disabled", false);
+                loadDocuments(0, 1);
+            } else {
+                let $li = $(this).parent();
+                $li.nextAll().remove();
+                loadDocuments(id);
+            }
+        });
+
+        $(document).on("click", ".foldername", function () {
+            let id = $(this).data("id");
+            let name = $(this).data("name");
+
+            $("#empFolders ol").append(`<li class="breadcrumb-item"><a href="javascript:void(0);" data-id="${id}">${name}</a></li>`);
+
+            loadDocuments(id);
+        });
+
+        $(document).on("click", ".foldercard", function () {
+            let id = $(this).data("id");
+            let name = $(this).data("name");
+
+            $("#empFolders ol").append(`<li class="breadcrumb-item"><a href="javascript:void(0);" data-id="${id}">${name}</a></li>`);
+
+            loadDocuments(id);
+        });
+
+        $(document).on("click", ".foldercardtext", function () {
+            let id = $(this).data("id");
+            let name = $(this).data("name");
+
+            $("#empFolders ol").append(`<li class="breadcrumb-item"><a href="javascript:void(0);" data-id="${id}">${name}</a></li>`);
+
+            loadDocuments(id);
+        });
+
+        function getIcon2(type) {
+            switch (type.toLowerCase()) {
+                case "pdf": return `<i class="mdi mdi-file-pdf text-danger text-file"></i>`;
+                case "jpg":
+                case "jpeg":
+                case "png":
+                case "gif":
+                case "bmp":
+                case "svg": return `<i class="mdi mdi-file-image text-info"></i>`;
+                case "txt": return `<i class="mdi mdi-file-document-outline text-secondary"></i>`;
+                case "mp4":
+                case "avi":
+                case "mov":
+                case "mkv": return `<i class="mdi mdi-file-video text-primary"></i>`;
+                case "zip":
+                case "rar":
+                case "7z": return `<i class="mdi mdi-folder-zip-outline text-warning"></i>`;
+                case "ppt":
+                case "pptx": return `<i class="mdi mdi-file-powerpoint text-danger"></i>`;
+                case "xls":
+                case "xlsx":
+                case "csv": return `<i class="mdi mdi-file-excel text-success"></i>`;
+                case "doc":
+                case "docx": return `<i class="mdi mdi-file-word text-primary"></i>`;
+                default: return `<i class="mdi mdi-file-outline text-dark"></i>`;
+            }
+        }
+        function getIcon(type) {
+            switch (type.toLowerCase()) {
+                case "pdf":
+                    return `<svg class="svg-inline--fa fa-file-pdf pdf-file text-danger" style="color: red" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="file-pdf" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zM176 352l32 0c30.9 0 56 25.1 56 56s-25.1 56-56 56l-16 0 0 32c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-48 0-80c0-8.8 7.2-16 16-16zm32 80c13.3 0 24-10.7 24-24s-10.7-24-24-24l-16 0 0 48 16 0zm96-80l32 0c26.5 0 48 21.5 48 48l0 64c0 26.5-21.5 48-48 48l-32 0c-8.8 0-16-7.2-16-16l0-128c0-8.8 7.2-16 16-16zm32 128c8.8 0 16-7.2 16-16l0-64c0-8.8-7.2-16-16-16l-16 0 0 96 16 0zm80-112c0-8.8 7.2-16 16-16l48 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 32 32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 48c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-64 0-64z"></path></svg>`;
+                case "jpg":
+                case "jpeg":
+                case "png":
+                case "gif":
+                    return `<i class="mdi mdi-file-image text-info"></i>`;
+                case "zip":
+                    return `<svg class="svg-inline--fa fa-file-zipper zip-file" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="file-zipper" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM96 48c0-8.8 7.2-16 16-16l32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0c-8.8 0-16-7.2-16-16zm0 64c0-8.8 7.2-16 16-16l32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0c-8.8 0-16-7.2-16-16zm0 64c0-8.8 7.2-16 16-16l32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0c-8.8 0-16-7.2-16-16zm-6.3 71.8c3.7-14 16.4-23.8 30.9-23.8l14.8 0c14.5 0 27.2 9.7 30.9 23.8l23.5 88.2c1.4 5.4 2.1 10.9 2.1 16.4c0 35.2-28.8 63.7-64 63.7s-64-28.5-64-63.7c0-5.5 .7-11.1 2.1-16.4l23.5-88.2zM112 336c-8.8 0-16 7.2-16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0z"></path></svg>`;
+                case "ppt":
+                case "pptx":
+                    return `<svg class="svg-inline--fa fa-file-powerpoint ppt-file text-warning" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="file-powerpoint" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM136 240l68 0c42 0 76 34 76 76s-34 76-76 76l-44 0 0 32c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-56 0-104c0-13.3 10.7-24 24-24zm68 104c15.5 0 28-12.5 28-28s-12.5-28-28-28l-44 0 0 56 44 0z"></path></svg>`;
+                case "mpv4":
+                    `<svg class="svg-inline--fa fa-file-video video-file" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="file-video" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM64 288c0-17.7 14.3-32 32-32l96 0c17.7 0 32 14.3 32 32l0 96c0 17.7-14.3 32-32 32l-96 0c-17.7 0-32-14.3-32-32l0-96zM300.9 397.9L256 368l0-64 44.9-29.9c2-1.3 4.4-2.1 6.8-2.1c6.8 0 12.3 5.5 12.3 12.3l0 103.4c0 6.8-5.5 12.3-12.3 12.3c-2.4 0-4.8-.7-6.8-2.1z"></path></svg>`;
+                case "xlsx":
+                case "csv":
+                    return `<svg class="svg-inline--fa fa-file-excel excel-file text-success" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="file-excel" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM155.7 250.2L192 302.1l36.3-51.9c7.6-10.9 22.6-13.5 33.4-5.9s13.5 22.6 5.9 33.4L221.3 344l46.4 66.2c7.6 10.9 5 25.8-5.9 33.4s-25.8 5-33.4-5.9L192 385.8l-36.3 51.9c-7.6 10.9-22.6 13.5-33.4 5.9s-13.5-22.6-5.9-33.4L162.7 344l-46.4-66.2c-7.6-10.9-5-25.8 5.9-33.4s25.8-5 33.4 5.9z"></path></svg>`;
+                case "docx":
+                case "doc":
+                    return `<svg class="svg-inline--fa fa-file-lines text-file text-info" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="file-lines" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM112 256l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z"></path></svg><!-- <i class="fas fa-file-alt text-file"></i> Font Awesome fontawesome.com -->`
+                default:
+                    return `<svg xmlns="http://www.w3.org/2000/svg" class="fa-icon text-dark" viewBox="0 0 384 512" width="50" height="50">
+                        <path fill="currentColor" d="M64 0C28.7...z"/>
+                    </svg>`;
+            }
+        }
+
+        // Init
+        loadDocuments(0, 1);
+
+        $(document).on("click", "#btnAddFolder", function () {
+            let newCard = `
+                                    <div class="col-lg-3 col-md-4 folder-card">
+                            <div class="card h-90">
+
+                             <div class="p-4 fcarddiv">
+     <span class="folder-icon-holder"><i class="mdi mdi-folder-open"></i></span>
+ </div>
+
+
+
+                                <div class="card-body text-left mb-3">
+    <div class="d-flex">
+                        <input type="text" class="form-control form-control-sm folder-input" placeholder="Enter folder name" />
+                    </div>
+
+                    <!-- Second Row: Buttons -->
+                    <div class="d-flex justify-content-end mt-2">
+                        <button class="btn btn-sm btn-primary me-2 btnSaveFolder">
+                            <i class="mdi mdi-plus"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger btnCancelFolder">
+                            <i class="mdi mdi-close"></i>
+                        </button>
+                    </div>
+</div>
+
+                            </div>
+                        </div>
+
+
+    `;
+            $("#docs").prepend(newCard);
+        });
+
+       $(document).on("click", ".btnSaveFolder", function () {
+    let card = $(this).closest(".folder-card");   // fixed selector (folder-card, not folderCard)
+    let input = card.find(".folder-input");
+    let folderName = input.val().trim();
+
+    if (folderName === "") {
+        toastr.warning("Please enter a folder name");
+        return;
+           }
+           debugger;
+    // 🔹 Get current parentId from last breadcrumb
+    let lastCrumb = $("#empFolders .breadcrumb-item:last a");
+    let parentId = lastCrumb.data("id") || 0;   // Root has no parentId
+
+    // 🔹 Send request to backend
+    $.ajax({
+        url: '@Url.Action("AddFolder", "Folders", new { area = "DMS" })',
+        type: 'POST',
+        data: JSON.stringify({
+            FolderName: folderName,
+            ParentFolderId: parentId
+        }),
+        contentType: "application/json; charset=utf-8",
+        success: function (res) {
+            if (res.success) {
+                alert("Folder added successfully!");
+
+                // 🔹 Reload current folder so new folder appears
+                loadDocuments(parentId, 1);
+            } else {
+                alert(res.message || "Failed to add folder.");
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error:", error);
+            toastr.error("Something went wrong while adding the folder.");
+        }
+    });
+});
+
+        $(document).on("click", ".btnCancelFolder", function () {
+
+    let lastCrumb = $("#empFolders .breadcrumb-item:last a");
+    let parentId = lastCrumb.data("id") || 0;   // Root has no parentId
+            loadDocuments(parentId, 1);
+
+});
+
+      $(document).ready(function () {
+          flatpickr("#dateRange", {
+              mode: "range",
+              dateFormat: "Y-m-d"
+          });
+    // Show modal on button click
+    $("#btnUpload").on("click", function () {
+        $("#selectedFiles").modal("show");
+    });
+
+    // Initialize FilePond when modal opens
+    let pond;
+   $('#selectedFiles').on('shown.bs.modal', function () {
+    if (!pond) {
+        pond = FilePond.create(document.querySelector('.filepond'), {
+            allowMultiple: true,
+            instantUpload: false,
+            allowFileTypeValidation: true,
+            acceptedFileTypes: [
+                'image/*',
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            ],
+            labelIdle: 'Drag & Drop your files'
+        });
+    }
+});
+
+
+          function getBreadcrumbHierarchy() {
+              let ids = [];
+              let names = [];
+
+              $("#empFolders .breadcrumb-item a").each(function () {
+                  debugger;
+                  let id = $(this).data("id");
+                  let name = $(this).text().trim();
+
+                  if (id !== undefined) {
+                      ids.push(id);
+                      names.push(name);
+                  }
+              });
+
+              return { ids, names };
+          }
+
+    // Upload button handler
+    $("#btn-upload-files").on("click", function () {
+    if (pond.getFiles().length === 0) {
+        alert("Please select files first.");
+        return;
+    }
+
+    // get breadcrumb
+    let breadcrumb = getBreadcrumbHierarchy();
+    let folderIds = breadcrumb.ids.join(",");     // e.g. "0,2,4,6"
+    let folderNames = breadcrumb.names.join(","); // e.g. "Root,Folder1,Folder2"
+        let lastCrumb = $("#empFolders .breadcrumb-item:last a");
+        let docFolderId = 0;
+
+        if (lastCrumb.text().trim() !== "Root") {
+            docFolderId = lastCrumb.data("id");  // if not Root, take last breadcrumb id
+        }
+
+        debugger;
+    let formData = new FormData();
+    pond.getFiles().forEach((file) => {
+        formData.append("files", file.file);
+    });
+
+    formData.append("FolderIds", folderIds);
+        formData.append("FolderNames", folderNames);
+        formData.append("docFolderId", docFolderId);
+
+    $.ajax({
+        url: '@Url.Action("UploadDocuments", "Documents", new { area = "DMS" })',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+            alert("Files uploaded successfully!");
+            $("#selectedFiles").modal("hide");
+            pond.removeFiles();
+            loadDocuments(docFolderId, 1);
+        },
+        error: function (err) {
+            alert("Error uploading files.");
+        }
+    });
+});
+
+          // --- Edit Folder Name ---
+          $(document).on("click", ".edit-folder", function () {
+              let cardBody = $(this).closest(".card-body");
+              let folderNameEl = cardBody.find("h6");
+              let oldName = folderNameEl.text();
+              let folderId = $(this).data("id");
+
+              // Replace name with input + actions
+              folderNameEl.replaceWith(`
+    <div class="folder-edit-box">
+        <input type="text" class="form-control form-control-sm folder-name-input mb-2" value="${oldName}">
+        <div class="d-flex justify-content-end">
+            <button class="btn btn-sm btn-success me-1 update-folder" data-id="${folderId}">
+                <i class="mdi mdi-check"></i>
+            </button>
+            <button class="btn btn-sm btn-secondary cancel-edit" data-name="${oldName}">
+                <i class="mdi mdi-close"></i>
+            </button>
+        </div>
+    </div>
+`);
+
+          });
+
+          // --- Update Folder Name ---
+          $(document).on("click", ".update-folder", function () {
+              let folderId = $(this).data("id");
+              let cardBody = $(this).closest(".card-body");
+              let newName = cardBody.find(".folder-name-input").val().trim();
+
+              if (!newName) {
+                  alert("Folder name cannot be empty.");
+                  return;
+              }
+
+              $.ajax({
+                  url: "@Url.Action("UpdateFolderName", "Folders", new { area = "DMS"})",
+                  type: "POST",
+                  data: { id: folderId, name: newName },
+                  success: function (res) {
+                      if (res.success) {
+                          // Replace back with new folder name
+                          cardBody.find(".folder-edit-box").replaceWith(`
+                    <h6 class="mb-0 foldername pointer me-3" data-id="${folderId}" data-name="${newName}">
+                        ${newName}
+                    </h6>
+                `);
+                      } else {
+                          alert(res.message || "Failed to update folder name.");
+                      }
+                  },
+                  error: function () {
+                      alert("Error while updating folder name. Try again.");
+                  }
+              });
+          });
+
+          // --- Cancel Edit ---
+          $(document).on("click", ".cancel-edit", function () {
+              let oldName = $(this).data("name");
+              let folderId = $(this).closest(".card-body").find(".update-folder").data("id");
+
+              $(this).closest(".folder-edit-box").replaceWith(`
+        <h6 class="mb-0 foldername pointer me-3" data-id="${folderId}" data-name="${oldName}">
+            ${oldName}
+        </h6>
+    `);
+          });
+
+          // --- Delete Folder ---
+          $(document).on("click", ".delete-folder", function () {
+              let folderId = $(this).data("id");
+
+              if (!confirm("This will delete the folder and all files inside it. Do you want to continue?")) {
+                  return;
+              }
+
+              $.ajax({
+                  url: "@Url.Action("DeleteFolder", "Folders", new { area = "DMS"})",
+                  type: "POST",
+                  data: { id: folderId },
+                  success: function (res) {
+                      if (res.success) {
+                          // Remove the folder card from UI
+                          $(`#dropdownMenu${folderId}`).closest(".col-lg-3").remove();
+                      } else {
+                          alert(res.message || "Error deleting folder.");
+                      }
+                  },
+                  error: function () {
+                      alert("An error occurred while deleting the folder.");
+                  }
+              });
+          });
+
+          // Handle Move Folder / Move Files clicks
+          $(document).on("click", ".move-folder, .move-files, .move-files-and-delete", function () {
+              let folderId = $(this).data("id");
+              let key = $(this).data("key");
+              $("#btnMove").data("source-id", folderId); // store source folder id
+              $("#btnMove").data("action", key);
+
+
+               $.ajax({
+     url: "@Url.Action("GetAllFolders", "Folders", new { area = "DMS" })",
+     type: "GET", // current employee id dynamically pass karo
+                   success: function (res) {
+                       debugger;
+         if (res.success) {
+             let html = buildFolderTree(res.folders, 0, folderId);
+             $("#FoldersHirarichy .modal-body").html(html);
+             $("#FoldersHirarichy").modal("show");
+         } else {
+             alert("Failed to load folders.");
+         }
+     }
+ });
+
+          });
+
+          $(document).on("click", ".move-single-file", function () {
+              debugger;
+             let fileId = $(this).data("id");
+              let sourcefolderid = $(this).data("sourcefolderid");
+             let key = $(this).data("key");
+                       $("#btnMove").data("file-id", fileId); // store source folder id
+             $("#btnMove").data("action", key);
+
+
+              $.ajax({
+    url: "@Url.Action("GetAllFolders", "Folders", new { area = "DMS" })",
+    type: "GET", // current employee id dynamically pass karo
+                  success: function (res) {
+                      debugger;
+        if (res.success) {
+            let html = buildFolderTree(res.folders, 0, sourcefolderid);
+            $("#FoldersHirarichy .modal-body").html(html);
+            $("#FoldersHirarichy").modal("show");
+        } else {
+            alert("Failed to load folders.");
+        }
+    }
+});
+
+         });
+
+          // Recursive function to build hierarchy
+          function buildFolderTree(folders, parentId, sourceFolderId = null) {
+              let html = "<ul class='folder-tree'>";
+
+              // Root ko alag treat karo
+              let rootFolder = folders.find(f => f.Id === 0);
+              let rootdisabled = (sourceFolderId !== null && parentId === sourceFolderId) ? "disabled" : "";
+
+              if (parentId === 0 && rootFolder) {
+                  let fileLabel = "";
+                  if (rootFolder.FilesCount === 0) {
+                      fileLabel = `Total: 0 Files`;
+                  } else if (rootFolder.FilesCount === 1) {
+                      fileLabel = `Total: 1 File`;
+                  } else {
+                      fileLabel = `Total: ${rootFolder.FilesCount} Files`;
+                  }
+
+                  // Show breakdown only if there are files
+                  let typeBreakdown = rootFolder.FilesCount > 0 && rootFolder.FileCountsByType
+                      ? `, ${rootFolder.FileCountsByType}`
+                      : "";
+
+                  html += `
+        <li>
+            <label>
+                <input type="checkbox" name="targetFolder" value="0" ${rootdisabled}>
+                <b>${rootFolder.FolderName}</b> (${fileLabel}${typeBreakdown})
+            </label>
+            ${buildSubFolderTree(folders, 0, sourceFolderId)}
+        </li>
+    `;
+                  html += "</ul>";
+                  return html;
+              }
+          }
+
+          function buildSubFolderTree(folders, parentId, sourceFolderId = null) {
+              let html = "<ul class='folder-tree'>";
+
+              folders
+                  .filter(f => f.ParentFolderId === parentId)
+                  .forEach(f => {
+                      let disabled = (sourceFolderId !== null && f.Id === sourceFolderId) ? "disabled" : "";
+
+                      // Total file label (singular/plural)
+                      let totalLabel = f.FilesCount == 1
+                          ? `Total: 1 file`
+                          : `Total: ${f.FilesCount} files`;
+
+                      let breakdown = f.FilesCount > 0 && f.FileCountsByType
+                          ? `, ${f.FileCountsByType}`
+                          : "";
+
+                      html += `
+    <li>
+        <label>
+            <input type="checkbox" name="targetFolder" value="${f.Id}" ${disabled}>
+            <b>${f.FolderName}</b> (${totalLabel}, ${breakdown})
+        </label>
+        ${buildSubFolderTree(folders, f.Id, sourceFolderId)}
+    </li>
+`;
+                  });
+
+              html += "</ul>";
+              return html;
+          }
+
+
+ // Ensure only one folder is selected at a time
+          $(document).on("change", "input[name='targetFolder']", function () {
+              // Uncheck all others
+              $("input[name='targetFolder']").not(this).prop("checked", false);
+          });
+
+
+          $("#btnMove").click(function () {
+              debugger;
+              let targetFolderId = $("input[name='targetFolder']:checked").val();
+              let sourceFolderId = $(this).data("source-id") || 0;
+              let fileId = $(this).data("file-id");
+              let action = $(this).data("action");
+              let mode = "";
+              if (action === "movefolder")
+              {
+                  mode = 8
+              }
+              else if (action === "movefilesanddeletefolder")
+              {
+                mode = 9
+              }
+              else if (action === "movefiles")
+              {
+                    mode = 10
+              }
+              else if (action === "movesinglefile")
+              {
+                  mode = 11
+              }
+
+              if (!targetFolderId) {
+                  alert("Please select a destination folder.");
+                  return;
+              }
+
+              $.ajax({
+                  url: "@Url.Action("MoveorDelete", "Folders", new { area = "DMS" })",
+                  type: "POST",
+                  data: { sourceId: sourceFolderId, targetId: targetFolderId, fileId: fileId, mode: mode },
+                  success: function (res) {
+                      if (res.success) {
+                          alert("Operation completed successfully.");
+                          $("#FoldersHirarichy").modal("hide");
+                          location.reload();
+                      } else {
+                          alert(res.message || "Error performing operation.");
+                      }
+                  },
+                  error: function () {
+                      alert("Error calling server.");
+                  }
+              });
+          });
+
+          // View file
+          $(document).on("click", ".dropdown-item.view-file", function () {
+              debugger;
+              let id = $(this).data("id");
+              let name = $(this).data("name");
+              let mode = 1;
+
+    $.ajax({
+        url: `@Url.Action("GetFile", "Documents", new { area = "DMS" })`,
+        type: "GET",
+        data: { id: id, mode: mode },
+        xhrFields: {
+            responseType: "blob"   // important for binary files
+        },
+        success: function (data, status, xhr) {
+            let contentType = xhr.getResponseHeader("Content-Type");
+            let blobUrl = URL.createObjectURL(data);
+
+            let html = "";
+            if (contentType.includes("image")) {
+                html = `<img src="${blobUrl}" class="img-fluid">`;
+            } else if (contentType.includes("pdf")) {
+                html = `<iframe src="${blobUrl}" width="100%" height="1300px" style="border:none;overflow:hidden;" scrolling="no"></iframe>`;
+            }
+else if (
+                contentType.includes("msword") ||
+                contentType.includes("officedocument") ||
+                contentType.includes("text/plain")
+            ) {
+                debugger;
+                let publicUrl = `@Url.Action("PublicFile", "Documents", new { area = "DMS" })?id=${id}`;
+let url = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(publicUrl)}`;
+html = `<iframe src="${url}" width="100%" height="600px"></iframe>`;
+     } else {
+                html = `<a href="@Url.Action("GetFile", "Documents", new { area = "DMS" })?id=${id}&mode=2" target="_blank">Download and View File</a>`;
+            }
+
+            $("#viewFileModal .modal-body").html(html);
+            $("#viewFileModal .modal-header .modal-title").text(name);
+            $("#viewFileModal").modal("show");
+        },
+        error: function () {
+            alert("Unable to load file.");
+        }
+    });
+});
+
+
+          // Download file
+         $(document).on("click", ".dropdown-item.download-file", function () {
+    let id = $(this).data("id");
+    window.location = `@Url.Action("GetFile", "Documents", new { area = "DMS" })?id=${id}&mode=2`;
+});
+
+          // Delete file
+         $(document).on("click", ".dropdown-item.delete-file", function () {
+    let id = $(this).data("id");
+
+    if (confirm("Are you sure you want to delete this file?")) {
+        $.ajax({
+            url: `@Url.Action("DeleteFile", "Documents", new { area = "DMS" })`,
+            type: "POST",
+            data: { fileId: id },
+            success: function (res) {
+                if (res.success) {
+                    alert("File deleted successfully.");
+                    location.reload(); // reload page or call your reload function
+                } else {
+                    alert("Failed to delete file: " + (res.message || "Unknown error"));
+                }
+            },
+            error: function () {
+                alert("Error while deleting the file.");
+            }
+        });
+    }
+});
+
+});
+
+    </script>
+
+
+}

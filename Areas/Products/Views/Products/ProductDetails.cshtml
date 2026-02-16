@@ -1,0 +1,136 @@
+﻿
+@{
+    ViewBag.Title = "ManageDeaprtments";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <div class="col-md">
+        <!-- Add Role -->
+        <div class="card mb-4">
+            <h5 class="card-header">Product Details</h5>
+            <div class="card-body">
+                <div id="mainProductDetails"></div>
+                <div class="divider text-start divider-primary mt-3">
+                    <div class="divider-text divider-text-rights fw-bold variantTitle">Variant Details</div>
+                </div>
+                <div id="VarientDetails">
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<input type="hidden" value="@ViewBag.ProductId" id="productId" />
+
+@section scripts{
+    <script>
+    $(document).ready(function () {
+        let productId = $("#productId").val();
+
+        $.ajax({
+            url: '@Url.Action("ProductDetails", "Products", new { area = "Products"})', // your controller action
+            type: 'GET',
+            data: { id: productId },
+            success: function (res) {
+                if (!res) {
+                    $("#mainProductDetails").html("<p class='text-danger'>No product found.</p>");
+                    return;
+                }
+
+                // ---- Main Product Info ----
+                let productHtml = `
+        <div class="row">
+            <div class="col-md-6">
+                <h5>${res.Name}</h5>
+                <p><strong>SKU:</strong> ${res.SKU ?? ""}</p>
+                <p><strong>Brand:</strong> ${res.Brand ?? ""}</p>
+                <p><strong>Categories:</strong> ${res.Categories ?? ""}</p>
+                <p><strong>Description:</strong> ${res.Description ?? ""}</p>
+                <p><strong>Price:</strong> ${res.Price ?? ""}</p>
+                <p><strong>Stock:</strong> ${res.StockQuantity ?? 0}</p>
+            </div>
+            <div class="col-md-6">
+                ${res.imageslist && res.imageslist.length > 0
+                        ? `
+                        <table class="table table-bordered table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>File Name</th>
+                                    <th>Primary</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${res.imageslist.map(img => `
+                                    <tr>
+                                        <td><img src="@Url.Action("GetProductImage", "Products", new {area = "Products"})?filePath=${img.ImagePath}" class="img-thumbnail" style="max-width:80px;"/></td>
+                                        <td>${img.FileName ?? ""}</td>
+                                        <td>${img.IsPrimary ? "✅" : ""}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                      `
+                        : "<p>No Images</p>"
+                    }
+            </div>
+        </div>
+    `;
+                $("#mainProductDetails").html(productHtml);
+
+                // ---- Variants ----
+                let variantsHtml = "";
+                if (res.varients && res.varients.length > 0) {
+                    res.varients.forEach(v => {
+                        variantsHtml += `
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body">
+                        <p><strong>Colour:</strong> ${v.Colour ?? ""}</p>
+                        <p><strong>Material:</strong> ${v.Material ?? ""}</p>
+                        <p><strong>Size:</strong> ${v.Size ?? ""}</p>
+                        <p><strong>Price:</strong> ${v.Price ?? ""}</p>
+                        <p><strong>Stock:</strong> ${v.StockQuantity ?? 0}</p>
+
+                        ${v.imageslist && v.imageslist.length > 0
+                                ? `
+                                <table class="table table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>File Name</th>
+                                            <th>Primary</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${v.imageslist.map(img => `
+                                            <tr>
+                                                <td><img src="@Url.Action("GetProductImage", "Products", new {area = "Products"})?filePath=${img.ImagePath}" class="img-thumbnail" style="max-width:70px;"/></td>
+                                                <td>${img.FileName ?? ""}</td>
+                                                <td>${img.IsPrimary ? "✅" : ""}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                              `
+                                : "<p>No Variant Images</p>"
+                            }
+                    </div>
+                </div>
+            `;
+                    });
+                } else {
+                    variantsHtml = "<p>No variants available.</p>";
+                }
+
+                $("#VarientDetails").html(variantsHtml);
+            },
+            error: function () {
+                $("#mainProductDetails").html("<p class='text-danger'>Error loading product details.</p>");
+            }
+        });
+    });
+    </script>
+}

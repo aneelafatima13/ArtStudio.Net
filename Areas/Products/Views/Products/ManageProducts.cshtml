@@ -1,0 +1,507 @@
+﻿
+@{
+    ViewBag.Title = "ManageProducts";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-pills mb-3" role="tablist" id="tabsbuttons">
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="nav-link waves-effect waves-light active" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-top-list" aria-controls="navs-pills-top-list" aria-selected="true">
+                        Products List
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="nav-link waves-effect waves-light" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-top-form" aria-controls="navs-pills-top-form" aria-selected="false" tabindex="-1">
+                        Products Form
+                    </button>
+                </li>
+
+            </ul>
+            <div class="tab-content">
+
+                <div class="tab-pane fade active show" id="navs-pills-top-list" role="tabpanel">
+                    <div class="card mb-4">
+                        <h5 class="card-header">Products List</h5>
+                        <div class="card-body">
+                            
+                            <table id="productsTable" class="table table-hover align-middle shadow-sm rounded">
+                                <thead style="background-color: #3b5d50">
+                                    <tr>
+                                          <th style="color: white">Product Name</th>
+                                        <th style="color: white">Categories</th>
+
+                                        <th style="color: white" class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+
+
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="navs-pills-top-form" role="tabpanel">
+                    <div class="card mb-4">
+                        <h5 class="card-header">Add Products Info</h5>
+                        <div class="card-body">
+                            <form id="form">
+                                <input type="hidden" id="Id" value="0" />
+
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="row">
+                                            <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 mt-2">
+                                                <label class="form-label" for="Name">Name</label>
+                                                <input type="text" class="form-control" id="Name" placeholder="Enter product name">
+                                            </div>
+
+                                            <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 mt-2">
+                                                <label class="form-label" for="SKU">SKU</label>
+                                                <input type="text" class="form-control" id="SKU" placeholder="Enter product SKU">
+                                            </div>
+
+                                            <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 mt-2">
+                                                <label class="form-label" for="ProductSource">Product Source</label>
+                                                <select id="ProductSource" class="form-control">
+                                                    <option value="">-- Select Source --</option>
+                                                    <option value="InHouse">In House Manufactured</option>
+                                                    <option value="Wholesale">Wholesale Purchase</option>
+                                                    <option value="Used">Used Items</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 mt-2">
+                                                <label class="form-label" for="Brand">Brand</label>
+                                                <input type="text" class="form-control" id="Brand" placeholder="Enter brand name">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="row">
+                                            <div class="col-xxl-12 col-xl-12 col-lg-12 col-md-12 mt-2">
+                                                <label class="form-label" for="Description">Description</label>
+                                                <textarea class="form-control" rows="5" id="Description" placeholder="Enter product description"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="row" id="categoriesWrapper">
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2" id="categoriesDiv">
+                                        <label class="form-label" for="Category">Category</label>
+                                        <select id="Category" class="form-control category-dropdown">
+                                            <!-- categories populated dynamically -->
+                                        </select>
+                                    </div>
+
+
+                                </div>
+
+                                <!-- Variant details -->
+                                <div class="row variant-row" id="variantDetails">
+                                    <div class="divider text-start divider-primary mt-3">
+                                        <div class="divider-text divider-text-rights fw-bold variantTitle">Variant Details</div>
+                                    </div>
+
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2">
+                                        <label class="form-label">Upload Product Images</label>
+                                        <input class="form-control" type="file" multiple="">
+                                    </div>
+
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2">
+                                        <label class="form-label">Colour</label>
+                                        <input type="text" class="form-control" placeholder="Enter colour">
+                                    </div>
+
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2">
+                                        <label class="form-label">Material</label>
+                                        <input type="text" class="form-control" placeholder="Enter material">
+                                    </div>
+
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2">
+                                        <label class="form-label">Size</label>
+                                        <input type="text" class="form-control" placeholder="Enter size">
+                                    </div>
+
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2">
+                                        <label class="form-label">Price</label>
+                                        <input type="text" class="form-control" placeholder="Enter price">
+                                    </div>
+
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2">
+                                        <label class="form-label">Stock Quantity</label>
+                                        <input type="text" class="form-control" placeholder="Enter stock quantity">
+                                    </div>
+
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-3">
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input IsActive" type="checkbox">
+                                            <label class="form-check-label">Is Active</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-3">
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input OnSale" type="checkbox">
+                                            <label class="form-check-label">On Sale</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2 discountRateDiv" style="display:none">
+                                        <label class="form-label">Discount Rate</label>
+                                        <input type="text" class="form-control DiscountRate" placeholder="Enter discount rate %">
+                                    </div>
+
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2 discountPriceDiv" style="display:none">
+                                        <label class="form-label">Discount Price</label>
+                                        <input type="text" class="form-control DiscountPrice" placeholder="Enter discount price">
+                                    </div>
+
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-4">
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input HasMoreVariants" type="checkbox">
+                                            <label class="form-check-label">Has More Variant</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-2">
+                                    <div class="col-12 text-end p-4">
+                                        <button type="submit" class="btn btn-primary" id="btnAddProduct">Add</button>
+                                        <button type="button" class="btn btn-secondary d-none" id="btnCancelProduct">Cancel</button>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+   
+</div>
+@section scripts{
+    <script>
+        $(document).ready(function () {
+        $('#productsTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '@Url.Action("GetProducts", "Products", new { area = "Products"})',
+                type: "POST"
+            },
+            columns: [
+                {
+                    data: "ProductName",
+                    render: function (data) {
+                        return `<span class="fw-medium">${data}</span>`;
+                    }
+                },
+                {
+                    data: "Categories",
+                    render: function (data) {
+                        return `<span class="fw-medium">${data}</span>`;
+                    }
+                },
+                {
+                    data: "Id",
+                    render: function (data) {
+                        return `
+                            <a type="button" class="btn btn-icon btn-primary edit-product" href="@Url.Action("ProductDetails", "Products", new { area = "Products"})?id=${data}" data-id="${data}">
+                                <span class="tf-icons mdi mdi-information-outline"></span>
+                            </a>
+                           
+                            <button type="button" class="btn btn-icon btn-danger delete-product" data-id="${data}">
+                                <span class="tf-icons mdi mdi-delete-outline"></span>
+                            </button>
+                        `;
+                    },
+                    orderable: false
+                }
+            ]
+        });
+    });
+        $(document).ready(function () {
+            loadCategories();
+
+            // Load top-level categories
+function loadCategories() {
+    $.ajax({
+        url: '@Url.Action("GetCategories", "Categories", new { area = "Products"})',
+        type: 'POST',
+        data: { Mode: 7 },
+        success: function (res) {
+            let $cat = $("#Category");
+            $cat.empty().append(`<option value="">-- Select Category --</option>`);
+            res.forEach(c => {
+                $cat.append(`<option value="${c.Id}">${c.Name}</option>`);
+            });
+
+            // Assign level 0 to main category
+            $cat.attr("data-level", 0);
+        }
+    });
+}
+
+// Handle category/subcategory change
+            $(document).on("change", ".category-dropdown", function () {
+                debugger;
+    let categoryId = $(this).val();
+    let level = parseInt($(this).data("level"));
+
+    // Remove deeper category divs
+    $(`#categoriesWrapper .category-container`).each(function () {
+        if ($(this).data("level") > level) {
+            $(this).remove();
+        }
+    });
+
+    if (categoryId) {
+        $.ajax({
+            url: '@Url.Action("GetSubCategories", "Categories", new { area = "Products"})',
+            type: 'POST',
+            data: { parentId: categoryId },
+            success: function (res) {
+                debugger;
+                if (res.length > 0) {
+                    let nextLevel = level + 1;
+
+                    // Clone categoriesDiv
+                    let $clone = $("#categoriesDiv").clone();
+                    $clone.attr("id", `categoriesDiv_${nextLevel}`);
+                    $clone.addClass("category-container");
+                    $clone.attr("data-level", nextLevel);
+
+                    // Clear old inner content
+                    $clone.find("label").remove();
+                    $clone.find("select").remove();
+
+                    // Build new dropdown
+                    let subSelectId = `SubCategory_${categoryId}_${nextLevel}`;
+                    let html = `
+                        <label class="form-label" for="${subSelectId}">Select Sub Category</label>
+                        <select id="${subSelectId}" class="form-control category-dropdown" data-level="${nextLevel}">
+                            <option value="">-- Select Sub Category --</option>
+                    `;
+                    res.forEach(sc => {
+                        html += `<option value="${sc.Id}">${sc.Name}</option>`;
+                    });
+                    html += `</select>`;
+
+                    $clone.html(html);
+
+                    // Append clone inside wrapper
+                    $("#categoriesWrapper").append($clone);
+                }
+            }
+        });
+    }
+});
+
+            let variantCounter = 1;
+
+            function bindVariantEvents($container) {
+                // OnSale toggle for this variant
+                $container.find(".OnSale").off("change").on("change", function () {
+                    let $parent = $(this).closest(".variant-row");
+                    if ($(this).is(":checked")) {
+                        $parent.find(".discountRateDiv, .discountPriceDiv").show();
+                    } else {
+                        $parent.find(".discountRateDiv, .discountPriceDiv").hide();
+                        $parent.find(".DiscountRate, .DiscountPrice").val("");
+                    }
+                });
+
+                // HasMoreVariants toggle
+                $container.find(".HasMoreVariants").off("change").on("change", function () {
+                    if ($(this).is(":checked")) {
+                        if ($("#variantDetails_" + (variantCounter + 1)).length === 0) {
+                            cloneVariantRow();
+                        }
+                    } else {
+                        // Remove last clone if not the base row
+                        if (variantCounter > 1) {
+                            $("#variantDetails_" + variantCounter).remove();
+                            variantCounter--;
+                        }
+                    }
+                });
+            }
+
+            function cloneVariantRow() {
+                let $last = $(".variant-row").last();
+                let $clone = $last.clone();
+
+                variantCounter++;
+
+                // Update container ID
+                $clone.attr("id", "variantDetails_" + variantCounter);
+
+                // Clear input values
+                $clone.find("input[type=text], input[type=file]").val("");
+                $clone.find("input[type=checkbox]").prop("checked", false);
+
+                // Update title
+                $clone.find(".variantTitle").text("Variant Details " + variantCounter);
+
+                // Hide discount fields
+                $clone.find(".discountRateDiv, .discountPriceDiv").hide();
+
+                // Insert clone
+                $last.after($clone);
+
+                // Bind events for the clone
+                bindVariantEvents($clone);
+            }
+
+            // Initialize first row bindings
+            $(function () {
+
+                bindVariantEvents($("#variantDetails"));
+            });
+
+        });
+
+        $("#btnAddProduct").on("click", function (e) {
+    e.preventDefault();
+
+    let formData = new FormData();
+
+    // product basics
+    formData.append("Id", $("#Id").val() || 0);
+    formData.append("SKU", $("#SKU").val());
+    formData.append("Name", $("#Name").val());
+    formData.append("Description", $("#Description").val());
+    formData.append("ProductSource", $("#ProductSource").val());
+    formData.append("Brand", $("#Brand").val());
+    formData.append("AddedDate", new Date().toISOString());
+
+    // categories
+    $("#categoriesWrapper select.category-dropdown").each(function (i) {
+        let catId = $(this).val();
+        if (catId) {
+            formData.append(`categoriesorder[${i}].CategoryId`, catId);
+        }
+    });
+
+    // variants
+    $(".variant-row").each(function (vIndex) {
+        let $row = $(this);
+
+        formData.append(`varients[${vIndex}].Colour`, $row.find("input[placeholder='Enter colour']").val());
+        formData.append(`varients[${vIndex}].Material`, $row.find("input[placeholder='Enter material']").val());
+        formData.append(`varients[${vIndex}].Size`, $row.find("input[placeholder='Enter size']").val());
+        formData.append(`varients[${vIndex}].Price`, $row.find("input[placeholder='Enter price']").val());
+        formData.append(`varients[${vIndex}].StockQuantity`, $row.find("input[placeholder='Enter stock quantity']").val());
+        formData.append(`varients[${vIndex}].IsAvailable`, $row.find(".IsActive").is(":checked"));
+        formData.append(`varients[${vIndex}].OnSale`, $row.find(".OnSale").is(":checked"));
+        formData.append(`varients[${vIndex}].DiscountRate`, $row.find(".DiscountRate").val());
+        formData.append(`varients[${vIndex}].DiscountPrice`, $row.find(".DiscountPrice").val());
+
+        // files
+        let files = $row.find("input[type=file]")[0].files;
+        for (let f = 0; f < files.length; f++) {
+            formData.append(`varients[${vIndex}].imageslist[${f}].File`, files[f]);
+            formData.append(`varients[${vIndex}].imageslist[${f}].IsPrimary`, f === 0);
+        }
+    });
+
+    $.ajax({
+        url: '@Url.Action("AddProduct", "Products", new { area = "Products" })',
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+            alert("Product added successfully!");
+        },
+        error: function (err) {
+            console.error("Error:", err);
+            alert("Failed to add product.");
+        }
+    });
+});
+
+
+        @*$("#btnAddProduct").on("click", function (e) {
+    e.preventDefault();
+
+    // 1. Collect product-level data
+    let product = {
+        Id: $("#Id").val() || 0,
+        SKU: $("#SKU").val(),
+        Name: $("#Name").val(),
+        Description: $("#Description").val(),
+        ProductSource: $("#ProductSource").val(),
+        Brand: $("#Brand").val(),
+        AddedDate: new Date().toISOString(),
+        categoriesorder: [],
+        varients: []
+    };
+
+    // 2. Collect categories
+    $("#categoriesWrapper select.category-dropdown").each(function () {
+        let catId = $(this).val();
+        if (catId) {
+            product.categoriesorder.push({
+                CategoryId: catId
+            });
+        }
+    });
+
+    // 3. Collect variants (loop over all variant rows)
+    $(".variant-row").each(function (index) {
+        let $row = $(this);
+
+        let variant = {
+            Colour: $row.find("input[placeholder='Enter colour']").val(),
+            Material: $row.find("input[placeholder='Enter material']").val(),
+            Size: parseFloat($row.find("input[placeholder='Enter size']").val()) || null,
+            Price: parseFloat($row.find("input[placeholder='Enter price']").val()) || null,
+            StockQuantity: parseInt($row.find("input[placeholder='Enter stock quantity']").val()) || null,
+            IsAvailable: $row.find(".IsActive").is(":checked"),
+            OnSale: $row.find(".OnSale").is(":checked"),
+            DiscountRate: parseInt($row.find(".DiscountRate").val()) || null,
+            DiscountPrice: parseFloat($row.find(".DiscountPrice").val()) || null,
+            imageslist: []
+        };
+
+        // 4. Collect images for this variant
+        let files = $row.find("input[type=file]")[0].files;
+        for (let i = 0; i < files.length; i++) {
+            variant.imageslist.push({
+                ImagePath: files[i].name, // for demo only, backend should handle saving file
+                IsPrimary: (i === 0) // mark first image as primary
+            });
+        }
+
+        product.varients.push(variant);
+    });
+
+    console.log("Final Product Payload:", product);
+
+    // 5. Send to controller
+    $.ajax({
+        url: '@Url.Action("AddProduct", "Products", new { area = "Products" })',
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(product),
+        success: function (res) {
+            alert("Product added successfully!");
+        },
+        error: function (err) {
+            console.error("Error:", err);
+            alert("Failed to add product.");
+        }
+    });
+});*@
+
+    </script>
+    }

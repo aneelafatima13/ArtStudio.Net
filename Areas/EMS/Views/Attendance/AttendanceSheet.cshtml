@@ -1,0 +1,323 @@
+﻿
+@{
+    ViewBag.Title = "AttendanceSheet";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+    string empId = Session["EmpId"] as string;
+}
+<input type="hidden" id="empId" value="@empId" />
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <div class="card mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-header mb-0">Attendance Sheet</h5>
+            <button class="btn btn-primary waves-effect waves-light btn-sm me-3" type="button"
+                    data-bs-toggle="offcanvas" data-bs-target="#offcanvasTop" aria-controls="offcanvasTop">
+                Search Filters
+            </button>
+        </div>
+
+
+        <div class="card-body table-responsive text-nowrap">
+            
+            <table id="list" class="table table-hover align-middle shadow-sm rounded">
+                <thead style="background-color: #3b5d50">
+                    <tr>
+                        <th style="color: white">Date</th>
+                        <th style="color: white">Day</th>
+                        <th style="color: white">Attendance</th>
+                        <th style="color: white">Check In</th>
+                        <th style="color: white">Check Out</th>
+                        <th style="color: white">Status</th>
+
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="offcanvas offcanvas-top" tabindex="-1" id="offcanvasTop" aria-labelledby="offcanvasTopLabel" aria-modal="true" role="dialog" style="height:70% !important">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasTopLabel" class="offcanvas-title">Search Filters</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="row">
+            <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-4">
+                <label class="form-label">Date Range</label>
+                <input type="text" class="form-control" id="dateRange" placeholder="Select date range">
+            </div>
+
+            <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-4">
+                <label class="form-label">Days</label>
+                <select id="days" class="form-control">
+                    <option value="">-- Select day  --</option>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
+            </div>
+
+            <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-4">
+                <label class="form-label">Time</label>
+                <input class="form-control" type="time" id="time">
+            </div>
+
+            <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-4">
+                <label class="form-label">Attendance</label>
+                <select id="AttendanceType" class="form-control">
+                    <option value="">-- Select Attendance Type --</option>
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                    <option value="Leave">Leave</option>
+                    <option value="Off">Off</option>
+                    <option value="Weekend">Weekend</option>
+
+                </select>
+            </div>
+
+            <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-4 mt-2">
+                <label class="form-label">Leave Type</label>
+                <select id="leaveType" class="form-control">
+                    <option value="">-- Select Leave Type --</option>
+                    <option value="Sick Leave">Sick Leave</option>
+                    <option value="Urgent Leave">Urgent Leave</option>
+                    <option value="Casual Leave">Casual Leave</option>
+                    <option value="Annual Leave">Annual Leave</option>
+                    <option value="Unpaid Leave">Unpaid Leave</option>
+                    <option value="Maternity Leave">Maternity Leave</option>
+                    <option value="Half Day Leave">Half Day Leave</option>
+                    <option value="Early Out Leave">Early Out Leave</option>
+                    <option value="Work from Home">Work from Home</option>
+                </select>
+            </div>
+            <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-4 mt-2">
+                <label class="form-label">OFF Type</label>
+                <select id="OffType" class="form-control">
+                    <option value="">-- Select Off Type --</option>
+                    <option value="Eid ul Fitar">Eid ul Fitar</option>
+                    <option value="Eid ul Azha">Eid ul Azha</option>
+                    <option value="Eid Milad Un Nabi">Eid Milad Un Nabi</option>
+                    <option value="9 & 10 Muharram">9 & 10 Muharram</option>
+                    <option value="23 March (Resolution Day)">23 March (Resolution Day)</option>
+                    <option value="14 August (Independence Day)">14 August (Independence Day)</option>
+                    <option value="6 September (Defence Day)">6 September (Defence Day)</option>
+                    <option value="1 May (Labor Day)">1 May (Labor Day)</option>
+                    <option value="25 December (Quaid Day)">25 December (Quaid Day)</option>
+                    <option value="5 February (Kashmir Day)">5 February (Kashmir Day)</option>
+                    <option value="28 May (Youm e Takbeer Day)">28 May (Youm e Takbeer Day)</option>
+                    <option value="Official Travel">Official Travel</option>
+                    <option value="Official Holiday">Official Holiday</option>
+                </select>
+            </div>
+            <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-4 mt-2">
+                <label class="form-label">Status</label>
+                <select id="Status" class="form-control">
+                    <option value="">-- Select Status Like --</option>
+                    <option value="Early Check In">Early Check In</option>
+                    <option value="Late Check In">Late Check In</option>
+                    <option value="OnTime Check In">OnTime Check In</option>
+                    <option value="Earcly Check Out">Earcly Check Out</option>
+                    <option value="Late Check Out">Late Check Out</option>
+                    <option value="On Time Check Out">On Time Check Out</option>
+                </select>
+            </div>
+            <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-4 mt-2">
+                <label class="form-label">Month</label>
+                <select id="monthDropdown" class="form-control">
+                    <option value="">-- Select Month --</option>
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+
+
+            <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-4 mt-2">
+                <label class="form-label">Year</label>
+                <input type="text" id="yearTextBox" class="form-control" placeholder="Enter year">
+            </div>
+
+        </div>
+        <div class="col-12 text-end p-4">
+            <button type="button" class="btn btn-primary me-2 waves-effect waves-light" id="search">Search</button>
+            <button type="button" class="btn btn-outline-secondary waves-effect" data-bs-dismiss="offcanvas" id="cancelFilters">
+                Cancel
+            </button>
+        </div>
+        </div>
+    </div>
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            flatpickr("#dateRange", {
+                mode: "range",
+                dateFormat: "Y-m-d"
+            });
+           
+    var table = $("#list").DataTable({
+        lengthChange: false,
+        info: false,
+        searching: false,
+        paging: false,
+        ajax: {
+            url: '@Url.Action("GetList", "Attendance", new { area = "EMS" })',
+            type: "GET",
+            dataSrc: function (json) {
+                if (!json.success) {
+                    alert("Server Error: " + json.message);  // show exact cause
+                    return [];
+                }
+                return json.data;
+            },
+            data: function (d) {
+                
+                var dateRange = $("#dateRange").val().split(" to ");
+                d.dateFrom = dateRange.length > 0 && dateRange[0] ? dateRange[0] : null;
+                d.dateTo = dateRange.length > 1 && dateRange[1] ? dateRange[1] : null;
+                d.day = $("#days").val();
+                d.attendance = $("#AttendanceType").val();
+                d.leaveType = $("#leaveType").val();
+                d.offType = $("#OffType").val();
+                d.status = $("#Status").val();
+                d.time = $("#time").val();
+                d.month = $("#monthDropdown").val();
+                d.year = $("#yearTextBox").val();
+            }
+        },
+        columns: [
+            { data: "DateString" },
+            { data: "Day" },
+            { data: "AttendanceStatus" },
+            { data: "CheckInString" },
+            { data: "CheckOutString" },
+            { data: "Status" },
+        ],
+        order: [[0, "desc"]],
+        rowCallback: function (row, data) {
+            var $checkInCell = $("td:eq(3)", row);  // 4th column
+            var $checkOutCell = $("td:eq(4)", row); // 5th column
+
+            $checkInCell.html("");
+            $checkOutCell.html("");
+
+            var today = new Date();
+            var options = { day: "numeric", month: "long", year: "numeric" };
+            var todayString = today.toLocaleDateString("en-GB", options);
+
+            if (data.DateString === todayString &&
+                data.AttendanceStatus !== "Leave" &&
+                data.AttendanceStatus !== "Off" &&
+                data.AttendanceStatus !== "Weekend") {
+
+                if (!data.CheckInString) {
+                    $checkInCell.html(
+                        `<button class="btn btn-sm btn-success checkIn" data-id="${data.EmpId}" data-date="${data.Date}">Check In</button>`
+                    );
+                } else {
+                    $checkInCell.html(data.CheckInString);
+
+                    if (!data.CheckOutString) {
+                        $checkOutCell.html(
+                            `<button class="btn btn-sm btn-warning checkOut" data-id="${data.EmpId}" data-date="${data.Date}">Check Out</button>`
+                        );
+                    } else {
+                        $checkOutCell.html(data.CheckOutString);
+                    }
+                }
+            }
+        }
+    });
+
+    // ✅ Search button
+            $("#search").click(function () {
+                
+        table.ajax.reload();
+        $("#offcanvasTop").offcanvas("hide");
+
+    });
+
+    // ✅ Cancel filters
+            $("#cancelFilters").click(function () {
+       
+        $("#dateRange").val("");
+        $("#days").val("");
+        $("#AttendanceType").val("");
+        $("#leaveType").val("");
+        $("#OffType").val("");
+        $("#Status").val("");
+        $("#time").val("");
+        $("#monthDropdown").val("");
+        $("#yearTextBox").val("");
+
+        table.ajax.reload();
+        $("#offcanvasTop").offcanvas("hide");
+
+    });
+
+
+
+    // Refresh table manually after operations
+    function reload() { table.ajax.reload(null, false); }
+
+    // CheckIn
+            $("#list").on("click", ".checkIn", function () {
+    
+    var id = $(this).data("id");
+    $.ajax({
+        url: '@Url.Action("CheckIn", "Attendance", new { area = "EMS" })',
+        type: "POST",
+        data: { id: id },
+        success: function (res) {
+
+            if (res.success) {
+                alert(res.message);
+                reload();
+            } else {
+                alert(res.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            alert("Error: " + error);
+        }
+    });
+});
+
+// CheckOut
+            $("#list").on("click", ".checkOut", function () {
+    
+    var id = $(this).data("id");
+    $.ajax({
+        url: '@Url.Action("CheckOut", "Attendance", new { area = "EMS" })',
+        type: "POST",
+        data: { id: id },
+        success: function (res) {
+            if (res.success) {
+                reload();
+            } else {
+                alert(res.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            alert("Error: " + error);
+        }
+    });
+});
+
+
+});
+    </script>
+}

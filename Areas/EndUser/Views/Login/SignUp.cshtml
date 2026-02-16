@@ -1,0 +1,232 @@
+﻿@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ArtNest - Sign Up</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <style>
+        :root {
+            --primary-color: #3b5d50;
+            --secondary-color: #6aa08b;
+        }
+
+        body {
+            background: #f4f7ff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            background: #fff;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .btn-purple {
+            background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
+            border: none;
+            color: white;
+            font-weight: bold;
+        }
+
+            .btn-purple:hover {
+                opacity: 0.9;
+                color: white;
+                transform: translateY(-1px);
+            }
+
+        .divider {
+            border-top: 1px solid #dee2e6;
+            margin: 25px 0;
+            position: relative;
+        }
+
+            .divider span {
+                position: absolute;
+                top: -12px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #fff;
+                padding: 0 15px;
+                color: #6c757d;
+                font-size: 13px;
+            }
+
+        /* Password Toggle Styling */
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6c757d;
+            z-index: 10;
+        }
+
+        .google-btn-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid d-flex justify-content-center">
+        <div class="card auth-card p-4 p-md-5">
+            <h2 class="text-center mb-4" style="color: var(--primary-color); font-weight: bold;">Create Account</h2>
+
+            <form id="signUpForm">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label small fw-bold">Full Name</label>
+                        <input type="text" id="FullName" name="FullName" class="form-control" placeholder="John Doe" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label small fw-bold">Username</label>
+                        <input type="text" id="UserName" name="UserName" class="form-control" required />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Email address</label>
+                    <input type="email" id="Email" name="Email" class="form-control" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Phone Number</label>
+                    <input type="text" id="PhoneNumber" name="PhoneNumber" class="form-control" placeholder="+92..." />
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold">Password</label>
+                    <div class="password-container">
+                        <input type="password" id="Password" name="Password" class="form-control" required />
+                        <i class="bi bi-eye-slash toggle-password" id="togglePassword"></i>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-purple btn-lg" id="btnSubmit">SIGN UP</button>
+                </div>
+
+                <p class="text-center mt-3 small text-muted">
+                    Already have an account? <a href="@Url.Action("Login", "Login", new { area = "EndUser" })" class="fw-bold text-decoration-none" style="color: var(--primary-color);">Login</a>
+                </p>
+            </form>
+
+            <div class="divider"><span>OR</span></div>
+
+            <div class="google-btn-wrapper">
+                <div id="g_id_onload"
+                     data-client_id="@System.Configuration.ConfigurationManager.AppSettings["GoogleClientId"]"
+                     data-callback="handleGoogleSignUp"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-size="large"
+                     data-theme="outline"
+                     data-text="signup_with"
+                     data-shape="rectangular"
+                     data-width="400">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // 1. Password Visibility Toggle Logic
+        $('#togglePassword').on('click', function() {
+            const passwordField = $('#Password');
+            const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
+            passwordField.attr('type', type);
+            $(this).toggleClass('bi-eye bi-eye-slash');
+        });
+
+        // 2. Google Sign Up Callback
+        function handleGoogleSignUp(response) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GoogleSignUp", "Login", new { area = "EndUser" })",
+                data: { idToken: response.credential },
+                success: function (res) {
+                    if (res.success) {
+                        if (res.isNewUser) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Account Created!',
+                                html: `<b>Welcome!</b><br>Your credentials:<br><br>` +
+                                      `Username: <b>${res.generatedUser}</b><br>` +
+                                      `Password: <b>${res.generatedPass}</b><br><br>` +
+                                      `Please save these for manual login.`,
+                                confirmButtonText: 'Go to Home'
+                            }).then(() => {
+                                window.location.href = "@Url.Action("Home", "LocalHome", new { area = "EndUser" })";
+                            });
+                        } else {
+                            Swal.fire({ icon: 'success', title: 'Welcome Back!', text: res.message, timer: 2000, showConfirmButton: false })
+                            .then(() => { window.location.href = "@Url.Action("Home", "LocalHome", new { area = "EndUser" })"; });
+                        }
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Error', text: res.message });
+                    }
+                }
+            });
+        }
+
+        // 3. Manual Form Submit
+        $(document).ready(function () {
+            $("#signUpForm").on("submit", function (e) {
+                e.preventDefault();
+                $("#btnSubmit").prop("disabled", true).text("Processing...");
+
+                var formData = {
+                    FullName: $("#FullName").val(),
+                    PhoneNumber: $("#PhoneNumber").val(),
+                    UserName: $("#UserName").val(),
+                    Email: $("#Email").val(),
+                    Password: $("#Password").val()
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("SubmitSignUp", "Login", new { area = "EndUser" })",
+                    data: formData,
+                    success: function (response) {
+                        debugger;
+                        if (response > 0) {
+                            Swal.fire({ icon: 'success', title: 'Success!', text: 'Account created! Please login.', timer: 2000, showConfirmButton: false })
+                            .then(() => { window.location.href = "@Url.Action("Login", "Login", new { area = "EndUser" })"; });
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Error', text: 'User already exists!' });
+                            $("#btnSubmit").prop("disabled", false).text("SIGN UP");
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,657 @@
+﻿@using BizOne.Common;
+<!DOCTYPE html>
+
+<html lang="en"
+      class="light-style layout-menu-fixed layout-compact"
+      dir="ltr"
+      data-theme="theme-default"
+      data-assets-path="@Url.Content("~/BizOneAssets/")"
+      data-template="vertical-menu-template-free">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+    <title>BizOne</title>
+
+    <meta name="description" content="" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="@Url.Content("~/BizOneAssets/img/favicon/favicon.ico")" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&ampdisplay=swap"
+          rel="stylesheet" />
+
+    <link rel="stylesheet" href="@Url.Content("~/BizOneAssets/vendor/fonts/materialdesignicons.css")" />
+
+    <!-- Menu waves for no-customizer fix -->
+    <link rel="stylesheet" href="@Url.Content("~/BizOneAssets/vendor/libs/node-waves/node-waves.css")" />
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="@Url.Content("~/BizOneAssets/vendor/css/core.css")" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="@Url.Content("~/BizOneAssets/vendor/css/theme-default.css")" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="@Url.Content("~/BizOneAssets/css/demo.css")" />
+
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="@Url.Content("~/BizOneAssets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/BizOneAssets/vendor/libs/apex-charts/apex-charts.css")" />
+
+    <!-- Page CSS -->
+    <!-- Helpers -->
+    <script src="@Url.Content("~/BizOneAssets/vendor/js/helpers.js")"></script>
+    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+    <script src="@Url.Content("~/BizOneAssets/js/config.js")"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+    <link href="@Url.Content("~/BizOneAssets/vendor/css/svgcss.css")" rel="stylesheet" />
+</head>
+
+<body>
+    @{
+        string username = Session["EmpUsername"] as string;
+        string role = Session["EmpRole"] as string;
+        List<string> empRightslist = Session["EmpRightsList"] as List<string>;
+        //if (string.IsNullOrEmpty(username) || empRightslist == null)
+        //{
+        //    Response.Redirect(Url.Action("Login", "Authentication", new { area = "BizOneUsers" }));
+        //    return;
+        //}
+    }
+    <input type="hidden" id="username" value="@username" />
+    <!-- Layout wrapper -->
+    <div class="layout-wrapper layout-content-navbar">
+
+        <div class="layout-container">
+            <!-- Menu -->
+           
+            <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+                <div class="app-brand demo">
+                    <a href="index.html" class="app-brand-link">
+                        <span class="app-brand-logo demo me-1">
+
+                        </span>
+                        <span class="app-brand-text demo menu-text fw-semibold ms-2">BIZONE</span>
+                    </a>
+
+                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+                        <i class="mdi menu-toggle-icon d-xl-block align-middle mdi-20px"></i>
+                    </a>
+                </div>
+                <div class="menu-inner-shadow"></div>
+                @if (empRightslist != null)
+                {
+                    <ul class="menu-inner py-1">
+                        <!-- Dashboards -->
+                        <li class="menu-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Dashboard">
+                            <a href="@Url.Action("Dashboard", "Authentication", new { area = "BizOneUsers" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-home-outline"></i>
+                                <div data-i18n="dashboard">Dashboard</div>
+                            </a>
+                        </li>
+                        <li class="menu-header fw-medium mt-4">
+                            <span class="menu-header-text">Products Controls</span>
+                        </li>
+
+                        @if (empRightslist.Contains("Add Product"))
+                        {
+                            <li class="menu-item"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Add Rights">
+                                <a href="@Url.Action("ManageProducts", "Products", new { area = "Products" })" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
+                                    <div>Manage Products</div>
+                                </a>
+
+                            </li>
+                        }
+                        <!-- Employee Controls -->
+                        <li class="menu-header fw-medium mt-4">
+                            <span class="menu-header-text">Employee Controls</span>
+                        </li>
+
+                        @if (empRightslist.Contains("Manage Roles Rights"))
+                        {
+                            <li class="menu-item"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Add Rights">
+                                <a href="@Url.Action("ManageRights", "Rights", new { area = "Admin" })" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
+                                    <div>Manage Rights</div>
+                                </a>
+
+                            </li>
+                            <li class="menu-item"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Add Roles">
+                                <a href="@Url.Action("ManageRoles", "Roles", new { area = "Admin" })" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-briefcase-outline"></i>
+                                    <div>Manage Roles</div>
+                                </a>
+                            </li>
+                        }
+                        @if (empRightslist.Contains("Assign Rights"))
+                        {
+                            <li class="menu-item"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Assign Rights to Roles">
+                                <a href="@Url.Action("AssignRights", "Rights", new { area = "Admin" })" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-badge-account-outline"></i>
+                                    <div>Assign Rights</div>
+                                </a>
+                            </li>
+                        }
+                        @if (empRightslist.Contains("Manage Departments Rights"))
+                        {
+                            <li class="menu-item"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Add Deaprtments data">
+                                <a href="@Url.Action("ManageDeaprtments", "Departments", new { area = "Admin" })" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-account-multiple-outline"></i>
+                                    <div>Manage Departments</div>
+                                </a>
+                            </li>
+                        }
+
+
+                        @if (empRightslist.Contains("Add Employee"))
+                        {
+                            <li class="menu-item"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Add Employee data">
+                                <a href="@Url.Action("ManageEmployees", "Employees", new { area = "EMS" })" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-account-multiple-outline"></i>
+                                    <div>Manage Employees</div>
+                                </a>
+                            </li>
+                        }
+                        <li class="menu-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Set Off Days">
+                            <a href="@Url.Action("OffDaysForm", "OffDays", new { area = "Admin" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-calendar-remove-outline"></i>
+                                <div>Set Off Days</div>
+                            </a>
+                        </li>
+                        <li class="menu-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Set Off Days">
+                            <a href="@Url.Action("ManageShiftTimmings", "ShiftTimmings", new { area = "Admin" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-calendar-remove-outline"></i>
+                                <div>Set Shift Timmings</div>
+                            </a>
+                        </li>
+
+                        <!-- Attendance Controls -->
+                        <li class="menu-header fw-medium mt-4">
+                            <span class="menu-header-text">Attendance Controls</span>
+                        </li>
+                        @if (empRightslist.Contains("Attendance"))
+                        {
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Mark Attendance">
+                                <a href="@Url.Action("AttendanceSheet", "Attendance", new { area = "EMS" })" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-fingerprint"></i>
+                                    <div>Mark Attendance</div>
+                                </a>
+                            </li>
+                        }
+
+                        @if (empRightslist.Contains("Leave Form"))
+                        {
+                            <li class="menu-item"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Leave Form">
+                                <a href="@Url.Action("LeaveForm", "Leaves", new { area = "EMS" })" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-calendar-edit-outline"></i>
+                                    <div>Leave Form</div>
+                                </a>
+                            </li>
+                        }
+
+                        @if (empRightslist.Contains("Approve Leaves"))
+                        {
+                            <li class="menu-item"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Leave Form">
+                                <a href="@Url.Action("ApproveLeaves", "Leaves", new { area = "EMS" })" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-calendar-edit-outline"></i>
+                                    <div>Approve Leaves</div>
+                                </a>
+                            </li>
+                        }
+
+                        <li class="menu-header fw-medium mt-4">
+                            <span class="menu-header-text">DMS Controls</span>
+                        </li>
+                        @if (empRightslist.Contains("Upload Document"))
+                        {
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Add Categories">
+                                <a href="@Url.Action("ManageDocuments", "Documents", new { area = "DMS" })" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-shape-outline"></i>
+                                    <div>Manage Documents</div>
+                                </a>
+                            </li>
+                        }
+
+                        <!-- Products Controls -->
+                        <li class="menu-header fw-medium mt-4">
+                            <span class="menu-header-text">Products Controls</span>
+                        </li>
+                        @if (empRightslist.Contains("Add Category"))
+                        {
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Add Categories">
+                                <a href="@Url.Action("ManageCategories", "Categories", new { area = "Products" })" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-shape-outline"></i>
+                                    <div>Manage Categories</div>
+                                </a>
+                            </li>
+                        }
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Add Products">
+                            <a href="#" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-cube-outline"></i>
+                                <div>Manage Products</div>
+                            </a>
+                        </li>
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="View Orders">
+                            <a href="#" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-cart-outline"></i>
+                                <div>Manage Orders</div>
+                            </a>
+                        </li>
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Orders List assign to me">
+                            <a href="#" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-clipboard-check-outline"></i>
+                                <div>Orders Assigned to Me</div>
+                            </a>
+                        </li>
+
+                        <!-- Leads Controls -->
+                        <li class="menu-header fw-medium mt-4">
+                            <span class="menu-header-text">Leads Controls</span>
+                        </li>
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Manage Leads & Generate Quotations">
+                            <a href="#" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-account-search-outline"></i>
+                                <div>Manage Leads</div>
+                            </a>
+                        </li>
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Manage Quotations & Upload POs">
+                            <a href="#" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-file-document-edit-outline"></i>
+                                <div>Manage Quotations</div>
+                            </a>
+                        </li>
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Manage POs & Generate Invoices">
+                            <a href="#" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-file-sign"></i>
+                                <div>Manage POs</div>
+                            </a>
+                        </li>
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Manage Invoices & Generate Receipts">
+                            <a href="#" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-credit-card-outline"></i>
+                                <div>Manage Invoices</div>
+                            </a>
+                        </li>
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Manage Receipts">
+                            <a href="#" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-receipt-outline"></i>
+                                <div>Manage Receipts</div>
+                            </a>
+                        </li>
+
+                        <!-- Vendor Controls -->
+                        <li class="menu-header fw-medium mt-4">
+                            <span class="menu-header-text">Vendor Controls</span>
+                        </li>
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Manage Vendors & Upload Quotations">
+                            <a href="#" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-store-outline"></i>
+                                <div>Manage Vendors</div>
+                            </a>
+                        </li>
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Manage Quotations & Generate POs">
+                            <a href="#" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-file-document-multiple-outline"></i>
+                                <div>Manage Quotations</div>
+                            </a>
+                        </li>
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Manage POs & Upload Invoices">
+                            <a href="#" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-file-send-outline"></i>
+                                <div>Manage POs</div>
+                            </a>
+                        </li>
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Manage Invoices & Upload Receipts">
+                            <a href="#" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-credit-card-outline"></i>
+                                <div>Manage Invoices</div>
+                            </a>
+                        </li>
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Manage Receipts">
+                            <a href="#" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-receipt-text-outline"></i>
+                                <div>Manage Receipts</div>
+                            </a>
+                        </li>
+                    </ul>
+                }
+            </aside>
+            <!-- / Menu -->
+            <!-- Layout container -->
+            <div class="layout-page">
+                <!-- Navbar -->
+
+                <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
+                     id="layout-navbar">
+                    <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+                        <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+                            <i class="mdi mdi-menu mdi-24px"></i>
+                        </a>
+                    </div>
+
+                    <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+                        @*<div class="navbar-collapse collapse" id="navbarSupportedContent" style="">
+                            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                                
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Profucts control
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                        <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Action</a></li>
+                                        <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Another action</a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Something else here</a></li>
+                                    </ul>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Employees Controls
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                        <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Action</a></li>
+                                        <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Another action</a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Something else here</a></li>
+                                    </ul>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Dropdown
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                        <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Action</a></li>
+                                        <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Another action</a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Something else here</a></li>
+                                    </ul>
+                                </li>
+                                
+                            </ul>
+                           
+                        </div>*@
+                        <!-- Search -->
+                        <div class="navbar-nav align-items-center">
+                            <div class="nav-item d-flex align-items-center">
+                                <i class="mdi mdi-magnify mdi-24px lh-0"></i>
+                                <input type="text"
+                                       class="form-control border-0 shadow-none bg-body"
+                                       placeholder="Search..."
+                                       aria-label="Search..." />
+                            </div>
+                        </div>
+                        <!-- /Search -->
+
+                        <ul class="navbar-nav flex-row align-items-center ms-auto">
+                            <!-- Place this tag where you want the button to render. -->
+                            <!-- User -->
+                            <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                                <a class="nav-link dropdown-toggle hide-arrow p-0"
+                                   href="javascript:void(0);"
+                                   data-bs-toggle="dropdown">
+                                    <div class="avatar avatar-online">
+                                        <img src="@Url.Content("~/BizOneAssets/img/avatars/1.png")" alt class="w-px-40 h-auto rounded-circle" />
+                                    </div>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end mt-3 py-2">
+                                    <li>
+                                        <a class="dropdown-item pb-2 mb-1" href="#">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-shrink-0 me-2 pe-1">
+                                                    <div class="avatar avatar-online">
+                                                        <img src="@Url.Content("~/BizOneAssets/img/avatars/1.png")" alt class="w-px-40 h-auto rounded-circle" />
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-0">@username</h6>
+                                                    <small class="text-muted">@role</small>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-divider my-1"></div>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="mdi mdi-account-outline me-1 mdi-20px"></i>
+                                            <span class="align-middle">My Profile</span>
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <div class="dropdown-divider my-1"></div>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("Logout", "Authentication", new { area = "BizOneUsers" })">
+                                            <i class="mdi mdi-power me-1 mdi-20px"></i>
+                                            <span class="align-middle">Log Out</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <!--/ User -->
+                        </ul>
+                    </div>
+                </nav>
+                @*<nav class="navbar navbar-expand-lg navbar-light bg-lighter mb-5">
+                    <div class="container-fluid">
+                        <a class="navbar-brand" href="javascript:void(0)">Navbar</a>
+                        <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="navbar-collapse collapse" id="navbarSupportedContent" style="">
+                            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                                <li class="nav-item">
+                                    <a class="nav-link active" aria-current="page" href="javascript:void(0)">Home</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="javascript:void(0)">Link</a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Dropdown
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                        <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Action</a></li>
+                                        <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Another action</a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Something else here</a></li>
+                                    </ul>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link disabled" href="javascript:void(0)" tabindex="-1">Disabled</a>
+                                </li>
+                            </ul>
+                            <form class="d-flex" onsubmit="return false">
+                                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                                <button class="btn btn-outline-primary waves-effect" type="submit">Search</button>
+                            </form>
+                        </div>
+                    </div>
+                </nav>*@
+
+                <!-- / Navbar -->
+                <!-- Content wrapper -->
+                <div class="content-wrapper">
+                    <!-- Content -->
+                    @RenderBody()
+                    <!-- / Content -->
+                    <!-- Footer -->
+                    <footer class="content-footer footer bg-footer-theme">
+                        <div class="container-xxl">
+                            <div class="footer-container d-flex align-items-center justify-content-between py-3 flex-md-row flex-column">
+                                <div class="text-body mb-2 mb-md-0">
+                                    ©
+                                    <script>document.write(new Date().getFullYear());</script>
+                                    , made with <span class="text-danger"><i class="tf-icons mdi mdi-heart"></i></span> by
+                                    <a href="https://themeselection.com" target="_blank" class="footer-link fw-medium">ThemeSelection</a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </footer>
+                    <!-- / Footer -->
+
+                    <div class="content-backdrop fade"></div>
+                </div>
+                <!-- Content wrapper -->
+            </div>
+            <!-- / Layout page -->
+        </div>
+
+        <!-- Overlay -->
+        <div class="layout-overlay layout-menu-toggle"></div>
+    </div>
+    <!-- / Layout wrapper -->
+    <!-- Core JS -->
+    <!-- build:js assets/vendor/js/core.js -->
+    <script src="@Url.Content("~/BizOneAssets/vendor/libs/jquery/jquery.js")"></script>
+    <script src="@Url.Content("~/BizOneAssets/vendor/libs/popper/popper.js")"></script>
+    <script src="@Url.Content("~/BizOneAssets/vendor/js/bootstrap.js")"></script>
+    <script src="@Url.Content("~/BizOneAssets/vendor/libs/node-waves/node-waves.js")"></script>
+    <script src="@Url.Content("~/BizOneAssets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js")"></script>
+    <script src="@Url.Content("~/BizOneAssets/vendor/js/menu.js")"></script>
+
+    <!-- endbuild -->
+    <!-- Vendors JS -->
+    <script src="@Url.Content("~/BizOneAssets/vendor/libs/apex-charts/apexcharts.js")"></script>
+
+    <!-- Main JS -->
+    <script src="@Url.Content("~/BizOneAssets/js/main.js")"></script>
+
+    <!-- Page JS -->
+    <script src="@Url.Content("~/BizOneAssets/js/dashboards-analytics.js")"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <script>
+        $(document).ready(function () {
+            let username = $("#username").val();
+            if (username == "") {
+    alert("Session has been expired!");
+    window.location.href = '@Url.Action("Login", "Authentication", new { area = "BizOneUsers" })';
+}
+            // Handle menu clicks
+            $(".menu-inner .menu-item > .menu-link").on("click", function (e) {
+                var href = $(this).attr("href");
+
+                // Only prevent default if dummy link
+                if (href === "#" || href === "") {
+                    e.preventDefault();
+
+                    // If it's dummy → still mark as active
+                    $(".menu-inner .menu-item").removeClass("active");
+                    $(".menu-inner .menu-item .menu-icon").css("color", "");
+                    $(this).closest(".menu-item").addClass("active");
+                    $(this).find(".menu-icon").css("color", "#fff");
+                }
+                // ⚠️ If href has a real URL → let browser navigate normally,
+                // no need to touch active state here, next page load will highlight it
+            });
+
+            // On page load → highlight active menu item based on URL
+            var currentPath = window.location.pathname.toLowerCase();
+
+            $(".menu-inner .menu-item > .menu-link").each(function () {
+                var linkPath = $(this).attr("href").toLowerCase();
+
+                if (linkPath !== "#" && linkPath !== "" && currentPath.startsWith(linkPath)) {
+                    $(".menu-inner .menu-item").removeClass("active");
+                    $(".menu-inner .menu-item .menu-icon").css("color", "");
+                    $(this).closest(".menu-item").addClass("active");
+                    $(this).find(".menu-icon").css("color", "#fff");
+                }
+            });
+        });
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>
+

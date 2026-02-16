@@ -1,0 +1,175 @@
+﻿
+@{
+    ViewBag.Title = "AssignRights";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <div class="col-md">
+        <!-- Add Role -->
+        <div class="card mb-4">
+            <h5 class="card-header">Assign Rights to Roles</h5>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-xl-6">
+                        <div class="mb-3">
+                            <label for="rolesList" class="form-label">select Role</label>
+                            <select id="rolesList" class="form-select form-select-lg">
+                                <option>Select Role</option>
+                            </select>
+                        </div>
+
+                    </div>
+                    <div class="col-12" id="Rights">
+
+                    </div>
+                    <div class="col-12 text-end p-4">
+                        <button type="button" class="btn btn-primary waves-effect waves-light" id="btnSaveRightsforRole">
+                            <span class="tf-icons mdi mdi-checkbox-marked-circle-outline me-1"></span>
+                            Save
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+    $(document).ready(function () {
+
+    var $dropdown = $("#rolesList");
+
+    // Initialize Select2
+    $dropdown.select2({
+        placeholder: "-- Select Role --",
+        allowClear: true,
+        width: '100%'
+    });
+
+    // Load roles dropdown
+   $.ajax({
+    url: '@Url.Action("GetRolesDropdown", "Rights", new { area = "Admin" })',
+    type: 'GET',
+    dataType: 'json',
+    success: function (roles) {
+        $dropdown.empty();
+        $.each(roles, function (i, role) {
+            $dropdown.append(`<option value="">Select Role</option><option value="${role.Id}">${role.Name}</option>`);
+        });
+        // Refresh Select2
+        $dropdown.trigger('change');
+    },
+    error: function (xhr, status, error) {
+        console.error("Error loading roles:", error);
+        alert("Failed to load roles.");
+    }
+});
+
+
+    // Load rights pills
+    function loadRights() {
+    $.ajax({
+        url: '@Url.Action("GetRights", "Rights", new { area = "Admin" })',
+        type: 'GET',
+        dataType: 'json',
+        success: function (rights) {
+            if (!rights || rights.length === 0) return;
+
+            // Group rights by Type
+            const grouped = rights.reduce((acc, right) => {
+                if (!acc[right.Type]) acc[right.Type] = [];
+                acc[right.Type].push(right);
+                return acc;
+            }, {});
+
+            let html = '';
+            for (const type in grouped) {
+                html += `<div class="divider text-start divider-primary">
+    <div class="divider-text divider-text-rights fw-bold">${type}</div>
+</div>`; // Make heading bold
+                html += `<div class="d-flex flex-wrap gap-2 mb-3">`;
+
+                grouped[type].forEach(r => {
+                    html += `<span class="badge rounded-pill bg-label-primary selectable-pill text-dark"
+                        data-right-id="${r.Id}" style="cursor:pointer">${r.Name}</span>`;
+                });
+
+                html += `</div>`;
+              
+            }
+
+
+            $("#Rights").html(html);
+
+            // Toggle selection
+            $(".selectable-pill").click(function () {
+                $(this).toggleClass("bg-primary text-white");
+                $(this).toggleClass("bg-label-primary text-dark");
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("Failed to load rights:", error);
+        }
+    });
+}
+
+
+    loadRights();
+
+    // When role changes, auto-select assigned rights
+    $dropdown.on('change', function () {
+        const roleId = $(this).val();
+        if (!roleId) return;
+
+        loadAssignedRights(roleId)
+    });
+
+
+    function loadAssignedRights(roleId) {
+    $.ajax({
+        url: '@Url.Action("GetAssignedRights", "Rights", new { area = "Admin" })',
+        type: 'GET',
+        dataType: 'json',
+        data: { roleId: roleId },
+        success: function (assigned) {
+            $(".selectable-pill").each(function () {
+                const rightId = parseInt($(this).data("right-id"));
+                const isActive = assigned.some(a => a.RightId === rightId && a.IsActive);
+
+                if (isActive) {
+                    $(this).removeClass("bg-label-primary text-dark").addClass("bg-primary text-white");
+                } else {
+                    $(this).removeClass("bg-primary text-white").addClass("bg-label-primary text-dark");
+                }
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("Failed to load assigned rights:", error);
+        }
+    });
+}
+
+    // Save assigned rights
+    $("#btnSaveRightsforRole").click(function () {
+        const roleId = $dropdown.val();
+        if (!roleId) { alert("Select a role"); return; }
+
+        const selectedRightIds = [];
+        $(".selectable-pill.bg-primary").each(function () {
+            selectedRightIds.push(parseInt($(this).data("right-id")));
+        });
+
+        $.post('@Url.Action("SaveAssignedRights", "Rights", new { area = "Admin" })',
+            { roleId: roleId, selectedRightIds: selectedRightIds },
+            function (res) {
+                if (res.success) alert("Rights saved successfully!");
+            });
+    });
+
+});
+
+    </script>
+}

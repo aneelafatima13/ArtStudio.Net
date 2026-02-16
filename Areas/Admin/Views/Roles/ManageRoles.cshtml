@@ -1,0 +1,219 @@
+﻿@{
+    ViewBag.Title = "ManageRoles";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <div class="col-md">
+        <!-- Add Role -->
+        <div class="card mb-4">
+            <h5 class="card-header">Add Role</h5>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-xl-6">
+                        <label for="roleName" class="form-label">Name</label>
+                        <input type="hidden" id="roleId" />   <!-- hidden role id for edit -->
+                        <input type="text" class="form-control" id="roleName" placeholder="Admin" />
+                    </div>
+                    <div class="col-12 text-end p-4">
+                        <button type="button" class="btn btn-primary waves-effect waves-light" id="btnAddRole">
+                            <span class="tf-icons mdi mdi-checkbox-marked-circle-outline me-1"></span>
+                            Add
+                        </button>
+                        <button type="button" class="btn btn-success waves-effect waves-light d-none" id="btnUpdateRole">
+                            <span class="tf-icons mdi mdi-checkbox-marked-circle-outline me-1"></span>
+                            Update
+                        </button>
+                        <button type="button" class="btn btn-secondary waves-effect waves-light d-none" id="btnCancelEdit">
+                            Cancel
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- Roles List -->
+        <div class="card mb-4">
+            <h5 class="card-header">Roles List</h5>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <table id="rolesTable" class="table table-hover display" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Name</th>
+                                    <th>Created Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+    $(document).ready(function () {
+    // Add Role
+    $("#btnAddRole").click(function () {
+        var roleName = $("#roleName").val();
+        if (!roleName) {
+            alert("Please enter role name");
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("SaveRole", "Roles", new { area = "Admin" })',
+            type: "POST",
+            data: JSON.stringify({ mode: 1, name: roleName }),
+            contentType: "application/json; charset=utf-8",
+            success: function (response) {
+                if (response.success) {
+                    alert("Role added successfully!");
+                    resetForm();
+                    rolesTable.ajax.reload();
+                } else {
+                    alert("Role already exists!");
+
+                }
+
+            },
+            error: function () {
+                alert("Error saving role.");
+            }
+        });
+    });
+
+    // Edit Role
+    $('#rolesTable').on('click', '.edit-role', function () {
+        var id = $(this).data("id");
+
+        $.get('@Url.Action("GetRoleById", "Roles", new { area = "Admin" })', { id: id }, function (res) {
+            $("#roleId").val(res.Id);
+            $("#roleName").val(res.Name);
+
+            // toggle buttons
+            $("#btnAddRole").addClass("d-none");
+            $("#btnUpdateRole, #btnCancelEdit").removeClass("d-none");
+
+            // scroll to top
+            $('html, body').animate({ scrollTop: 0 }, 'fast');
+        });
+    });
+
+    // Update Role
+    $("#btnUpdateRole").click(function () {
+        var id = $("#roleId").val();
+        var name = $("#roleName").val();
+
+        if (!name) {
+            alert("Please enter role name");
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("SaveRole", "Roles", new { area = "Admin" })',
+            type: "POST",
+            data: JSON.stringify({ mode: 2, id: id, name: name }),
+            contentType: "application/json; charset=utf-8",
+            success: function (response) {
+                if (response.success) {
+                    alert("Role updated successfully!");
+                    resetForm();
+                    rolesTable.ajax.reload();
+                } else {
+                    alert("Role already exists!");
+
+                }
+
+            },
+            error: function () {
+                alert("Error updating role.");
+            }
+        });
+    });
+
+    // Cancel Edit
+    $("#btnCancelEdit").click(function () {
+        resetForm();
+    });
+
+    // Reset form function
+    function resetForm() {
+        $("#roleId").val("");
+        $("#roleName").val("");
+        $("#btnAddRole").removeClass("d-none");
+        $("#btnUpdateRole, #btnCancelEdit").addClass("d-none");
+    }
+
+
+
+    var rolesTable;
+
+
+        $('#rolesTable').on('click', '.delete-role', function () {
+            var id = $(this).data("id");
+            if (confirm("Are you sure you want to delete this role?")) {
+                $.ajax({
+                    url: '@Url.Action("SaveRole", "Roles", new { area = "Admin" })',
+                    type: "POST",
+                    data: JSON.stringify({ mode: 4, id: id }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function () {
+                        alert("Role deleted successfully!");
+                        rolesTable.ajax.reload();
+                    },
+                    error: function () {
+                        alert("Error deleting role.");
+                    }
+                });
+            }
+        });
+
+        rolesTable = $('#rolesTable').DataTable({
+    processing: true,
+    serverSide: true,
+    ajax: {
+        url: '@Url.Action("GetRoles", "Roles", new { area = "Admin" })',
+        type: "POST"
+    },
+    columns: [
+        { data: "Id" },
+        {
+            data: "Name",
+            render: function (data, type, row) {
+                return `<span class="fw-medium">${data}</span>`;
+            }
+        },
+        {
+            data: "CreatedDatestring",
+            render: function (data, type, row) {
+                return `<span class="fw-medium">${data}</span>`;
+            }
+        },
+
+        {
+            data: "Id",
+            render: function (data, type, row) {
+                return `
+                <button type="button" class="btn btn-icon btn-primary waves-effect waves-light edit-role" data-id="${data}">
+                            <span class="tf-icons mdi mdi-pencil-outline"></span>
+                          </button>
+                          <button type="button" class="btn btn-icon btn-primary waves-effect waves-light delete-role" data-id="${data}">
+                            <span class="tf-icons mdi mdi mdi-delete-outline"></span>
+                          </button>
+                    `;
+            },
+            orderable: false
+        }
+    ]
+});
+
+    });
+    </script>
+    }

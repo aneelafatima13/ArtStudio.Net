@@ -1,0 +1,420 @@
+﻿
+@{
+    ViewBag.Title = "ManageRights";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <h5 class="card-header">Add Rights</h5>
+
+                <hr class="m-0" />
+                <div class="row row-bordered g-0">
+                    <div class="col-md p-4">
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkallRights" name="chkallRights" value="Select All" />
+                            <label class="form-check-label" for="chkallRights">Select All</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-bordered g-0">
+                    <div class="col-md p-4">
+                        <small class="text-light fw-medium d-block">Credentials Rights</small>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkaddroles" name="CredentialsRights" value="Manage Roles Rights" />
+                            <label class="form-check-label" for="chkaddroles">Manage Roles Rights</label>
+                        </div>
+
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkassignrights" name="CredentialsRights" value="Assign Rights" />
+                            <label class="form-check-label" for="chkassignrights">Assign Rights</label>
+                        </div>
+
+                        
+
+
+
+                    </div>
+                </div>
+                <hr class="m-0" />
+                <div class="row row-bordered g-0">
+                    <div class="col-md p-4">
+                        <small class="text-light fw-medium d-block">Employees Rights</small>
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkdepartmentRights" name="EmployeeRights" value="Delete Employee" />
+                            <label class="form-check-label" for="chkdepartmentRights">Manage Departments Rights</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkAddEmployee" name="EmployeeRights" value="Add Employee" />
+                            <label class="form-check-label" for="chkAddEmployee">Add Employee</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkUpdateEmployee" name="EmployeeRights" value="Update Employee" />
+                            <label class="form-check-label" for="chkUpdateEmployee">Update Employee</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkViewEmployee" name="EmployeeRights" value="View Employee" />
+                            <label class="form-check-label" for="chkViewEmployee">View Employee</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkDeleteEmployee" name="EmployeeRights" value="Delete Employee" />
+                            <label class="form-check-label" for="chkDeleteEmployee">Delete Employee</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkAttendance" name="EmployeeRights" value="Attendance" />
+                            <label class="form-check-label" for="chkAttendance">Attendance</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkLeaveForm" name="EmployeeRights" value="Leave Form" />
+                            <label class="form-check-label" for="chkLeaveForm">Leave Form</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkLeavesforApproval" name="EmployeeRights" value="Approve Leaves" />
+                            <label class="form-check-label" for="chkLeavesforApproval">Approve Leaves</label>
+                        </div>
+                    </div>
+                </div>
+                <hr class="m-0" />
+
+                <div class="row row-bordered g-0">
+                    <div class="col-md p-4">
+                        <small class="text-light fw-medium d-block">Documents Rights</small>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkUploadDocument" name="DocumentRights" value="Upload Document" />
+                            <label class="form-check-label" for="chkUploadDocument">Upload Document</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkDeleteDocument" name="DocumentRights" value="Delete Document" />
+                            <label class="form-check-label" for="chkDeleteDocument">Delete Document</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkShareDocument" name="DocumentRights" value="Share Document" />
+                            <label class="form-check-label" for="chkShareDocument">Share Document</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkDownloadDocument" name="DocumentRights" value="Download Document" />
+                            <label class="form-check-label" for="chkDownloadDocument">Download Document</label>
+                        </div>
+                    </div>
+                </div>
+                <hr class="m-0" />
+
+                <div class="row row-bordered g-0">
+                    <div class="col-md p-4">
+                        <small class="text-light fw-medium d-block">Products Rights</small>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkAddProduct" name="ProductRights" value="Add Product" />
+                            <label class="form-check-label" for="chkAddProduct">Add Product</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkUpdateProduct" name="ProductRights" value="Update Product" />
+                            <label class="form-check-label" for="chkUpdateProduct">Update Product</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkViewProduct" name="ProductRights" value="View Product" />
+                            <label class="form-check-label" for="chkViewProduct">View Product</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkDeleteProduct" name="ProductRights" value="Delete Product" />
+                            <label class="form-check-label" for="chkDeleteProduct">Delete Product</label>
+                        </div>
+                    </div>
+                </div>
+                <hr class="m-0" />
+
+                <div class="row row-bordered g-0">
+                    <div class="col-md p-4">
+                        <small class="text-light fw-medium d-block">Category Rights</small>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkAddCategory" name="CategoryRights" value="Add Category" />
+                            <label class="form-check-label" for="chkAddCategory">Add Category</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkUpdateCategory" name="CategoryRights" value="Update Category" />
+                            <label class="form-check-label" for="chkUpdateCategory">Update Category</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkViewCategory" name="CategoryRights" value="View Category" />
+                            <label class="form-check-label" for="chkViewCategory">View Category</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkDeleteCategory" name="CategoryRights" value="Delete Category" />
+                            <label class="form-check-label" for="chkDeleteCategory">Delete Category</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkAddSubCategory" name="CategoryRights" value="Add Sub Category" />
+                            <label class="form-check-label" for="chkAddSubCategory">Add Sub Category</label>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="m-0" />
+
+                <div class="row row-bordered g-0">
+                    <div class="col-md p-4">
+                        <small class="text-light fw-medium d-block">Orders Rights</small>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkViewOrders" name="OrderRights" value="View Orders" />
+                            <label class="form-check-label" for="chkViewOrders">View Orders</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkAssignOrders" name="OrderRights" value="Assign Orders" />
+                            <label class="form-check-label" for="chkAssignOrders">Assign Orders</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkViewAssignedOrder" name="OrderRights" value="View Assigned Order" />
+                            <label class="form-check-label" for="chkViewAssignedOrder">View Assigned Order</label>
+                        </div>
+                    </div>
+                </div>
+                <hr class="m-0" />
+
+                <div class="row row-bordered g-0">
+                    <div class="col-md p-4">
+                        <small class="text-light fw-medium d-block">Leads Rights</small>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkAddLead" name="LeadRights" value="Add Lead" />
+                            <label class="form-check-label" for="chkAddLead">Add Lead</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkUpdateLead" name="LeadRights" value="Update Lead" />
+                            <label class="form-check-label" for="chkUpdateLead">Update Lead</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkViewLead" name="LeadRights" value="View Lead" />
+                            <label class="form-check-label" for="chkViewLead">View Lead</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkDeleteLead" name="LeadRights" value="Delete Lead" />
+                            <label class="form-check-label" for="chkDeleteLead">Delete Lead</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkGenerateQuotations" name="LeadRights" value="Generate Quotations" />
+                            <label class="form-check-label" for="chkGenerateQuotations">Generate Quotations</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkViewQuotationsList" name="LeadRights" value="View Quotations List" />
+                            <label class="form-check-label" for="chkViewQuotationsList">View Quotations List</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkUploadPO" name="LeadRights" value="Upload PO" />
+                            <label class="form-check-label" for="chkUploadPO">Upload PO</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkViewPOsList" name="LeadRights" value="View POs List" />
+                            <label class="form-check-label" for="chkViewPOsList">View POs List</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkGenerateInvoice" name="LeadRights" value="Generate Invoice" />
+                            <label class="form-check-label" for="chkGenerateInvoice">Generate Invoice</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkViewInvoicesList" name="LeadRights" value="View Invoices List" />
+                            <label class="form-check-label" for="chkViewInvoicesList">View Invoices List</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkGenerateReceipts" name="LeadRights" value="Generate Receipts" />
+                            <label class="form-check-label" for="chkGenerateReceipts">Generate Receipts</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkViewReceiptsList" name="LeadRights" value="View Receipts List" />
+                            <label class="form-check-label" for="chkViewReceiptsList">View Receipts List</label>
+                        </div>
+                    </div>
+                </div>
+                <hr class="m-0" />
+
+                <div class="row row-bordered g-0">
+                    <div class="col-md p-4">
+                        <small class="text-light fw-medium d-block">Vendors Rights</small>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkAddVendor" name="VendorRights" value="Add Vendor" />
+                            <label class="form-check-label" for="chkAddVendor">Add Vendor</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkUpdateVendor" name="VendorRights" value="Update Vendor" />
+                            <label class="form-check-label" for="chkUpdateVendor">Update Vendor</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkViewVendor" name="VendorRights" value="View Vendor" />
+                            <label class="form-check-label" for="chkViewVendor">View Vendor</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkDeleteVendor" name="VendorRights" value="Delete Vendor" />
+                            <label class="form-check-label" for="chkDeleteVendor">Delete Vendor</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkUploadQuotations" name="VendorRights" value="Upload Quotations" />
+                            <label class="form-check-label" for="chkUploadQuotations">Upload Quotations</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkViewQuotationsListVendor" name="VendorRights" value="View Quotations List" />
+                            <label class="form-check-label" for="chkViewQuotationsListVendor">View Quotations List</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkGeneratePOVendor" name="VendorRights" value="Generate PO" />
+                            <label class="form-check-label" for="chkGeneratePOVendor">Generate PO</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkViewPOsListVendor" name="VendorRights" value="View POs List" />
+                            <label class="form-check-label" for="chkViewPOsListVendor">View POs List</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkUploadInvoiceVendor" name="VendorRights" value="Upload Invoice" />
+                            <label class="form-check-label" for="chkUploadInvoiceVendor">Upload Invoice</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkViewInvoicesListVendor" name="VendorRights" value="View Invoices List" />
+                            <label class="form-check-label" for="chkViewInvoicesListVendor">View Invoices List</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkUploadReceiptsVendor" name="VendorRights" value="Upload Receipts" />
+                            <label class="form-check-label" for="chkUploadReceiptsVendor">Upload Receipts</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkViewReceiptsListVendor" name="VendorRights" value="View Receipts List" />
+                            <label class="form-check-label" for="chkViewReceiptsListVendor">View Receipts List</label>
+                        </div>
+                    </div>
+                </div>
+                <hr class="m-0" />
+
+                <!-- Button aligned right -->
+                <div class="row">
+                    <div class="col-12 text-end p-4">
+                        <button type="button" class="btn btn-primary waves-effect waves-light" id="btnAddRights">
+                            <span class="tf-icons mdi mdi-checkbox-marked-circle-outline me-1"></span>
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+                    <!-- Switches -->
+
+                </div>
+
+            </div>
+</div>
+@section scripts{
+<script>
+    $(document).ready(function () {
+        $("#chkallRights").on("change", function () {
+            var isChecked = $(this).is(":checked");
+
+            // Select/Deselect only checkboxes which are NOT disabled
+            $("input[type=checkbox]").not(this).each(function () {
+                if (!$(this).prop("disabled")) {
+                    $(this).prop("checked", isChecked);
+                }
+            });
+        });
+        $("#btnAddRights").click(function () {
+            var selectedRights = [];
+
+            // get all checked checkboxes
+            $("input[type=checkbox]:checked:not(:disabled)").each(function () {
+                if ($(this).attr("name") !== "chkallRights") { // skip "Select All"
+                    selectedRights.push({
+                        Type: $(this).attr("name"),
+                        Name: $(this).val()
+                    });
+                }
+            });
+
+            if (selectedRights.length === 0) {
+                alert("Please select at least one right.");
+                return;
+            }
+
+            // send to controller via AJAX
+            $.ajax({
+                url: '@Url.Action("SaveRights", "Rights", new { area = "Admin" })', // adjust controller/action
+                type: "POST",
+                data: JSON.stringify({ rights: selectedRights }),
+                contentType: "application/json; charset=utf-8",
+                success: function (res) {
+                    alert("Rights saved successfully!");
+                    location.reload();
+                },
+                error: function (err) {
+                    alert("Error while saving rights.");
+                }
+            });
+        });
+    });
+
+    $(document).ready(function () {
+        // Fetch rights from DB
+        $.ajax({
+            url: '@Url.Action("GetRights", "Rights", new { area = "Admin" })',
+            type: "GET",
+            success: function (rights) {
+                if (rights && rights.length > 0) {
+                    rights.forEach(function (dbRight) {
+                        // Find checkbox with same value
+                        $("input[type=checkbox][value='" + dbRight.Name + "']")
+                            .prop("checked", true)   // check it
+                            .prop("disabled", true); // disable it
+                    });
+                }
+            },
+            error: function () {
+                console.log("Failed to load rights from DB.");
+            }
+        });
+    });
+</script>
+    }
+

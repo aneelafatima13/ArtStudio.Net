@@ -1,0 +1,421 @@
+﻿
+@{
+    ViewBag.Title = "ManageCategories";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="card mb-4 shadow-sm">
+
+        <h5 class="card-header">Add Root Categories</h5>
+        <div class="card-body">
+            <form id="form">
+                <input type="hidden" id="Id" value="0" />
+                <input type="hidden" id="ParentId" value="" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label">Category Name</label>
+                        <input type="text" class="form-control" id="categoryName" placeholder="Enter Category Name">
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-header">Categories List</h5>
+            <input type="search" class="form-control me-4 mt-2" placeholder="Search Category" id="search" style="width:30%"/>
+        </div>
+        <div class="card-body">
+           
+            <ul id="categoriesContainer" class="category-list list-unstyled"></ul>
+
+            <div class="text-center mt-3">
+                <button id="prevPage" class="btn btn-secondary btn-sm">Prev</button>
+                <span id="pageInfo"></span>
+                <button id="nextPage" class="btn btn-secondary btn-sm">Next</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .category-item {
+        padding: 6px 8px;
+    }
+
+        .category-item:hover {
+            background: #f9f9f9;
+        }
+
+    .category-name {
+        display: block;
+    }
+
+    .actions button {
+        margin-right: 4px;
+    }
+
+    ul {
+        margin-left: 20px;
+    }
+</style>
+@section scripts{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        });
+        $(document).ready(function () {
+            var currentPage = 1;
+            var pageSize = 10;
+            $("#search").on("keyup", function () {
+                var search = $(this).val().trim();
+                currentPage = 1; // reset to first page on search
+                loadCategories(search);
+            });
+
+          // Load Categories
+           function loadCategories(search = "") {
+    $.ajax({
+        url: '@Url.Action("GetCategories", "Categories")',
+        type: "GET",
+        data: { page: currentPage, pageSize: pageSize, search: search },
+        success: function (res) {
+            if (!res.success) {
+                alert("Error: " + (res.message || "Something went wrong"));
+                return;
+            }
+
+            let parents = res.data.filter(x => !x.ParentCategoryId);
+            let children = res.data.filter(x => x.ParentCategoryId);
+
+            function renderCategory(cat, level = 0) {
+                let bulletTypes = ["disc", "circle", "square", "decimal", "lower-alpha", "lower-roman"];
+                let bulletStyle = bulletTypes[level % bulletTypes.length];
+
+                let html = `
+                    <li style="list-style-type:${bulletStyle}">
+                        <div class="d-flex mb-2 gap-4">
+                            <span class="fw-bold category-name">${cat.Name}</span>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <!-- Edit -->
+                                <button type="button"
+                                        class="btn btn-outline-secondary btn-edit"
+                                        data-id="${cat.Id}"
+                                        data-name="${cat.Name}"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Edit Category">
+                                    <i class="mdi mdi-pencil"></i>
+                                </button>
+
+                                <!-- Add Sub Category -->
+                                <button type="button"
+                                        class="btn btn-outline-secondary btn-add-sub"
+                                        data-id="${cat.Id}"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Add Sub Category">
+                                    <i class="mdi mdi-plus-circle-outline"></i>
+                                </button>
+
+                                <!-- Delete -->
+                                <button type="button"
+                                        class="btn btn-outline-secondary btn-delete"
+                                        data-id="${cat.Id}"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Delete only this category; its subcategories will move one level up">
+                                    <i class="mdi mdi-delete-outline"></i>
+                                </button>
+
+                                <!-- Delete with Subcategories -->
+                                <button type="button"
+                                        class="btn btn-outline-secondary btn-delete-with-subcategories"
+                                        data-id="${cat.Id}"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Delete with Sub Categories">
+                                    <i class="mdi mdi-delete-forever"></i>
+                                </button>
+                            </div>
+                        </div>
+                `;
+
+                let subcats = children.filter(c => c.ParentCategoryId === cat.Id);
+                if (subcats.length > 0) {
+                    html += `<ul class="ms-4">`;
+                    subcats.forEach(c => {
+                        html += renderCategory(c, level + 1);
+                    });
+                    html += `</ul>`;
+                }
+
+                html += `</li>`;
+                return html;
+            }
+
+            let html = "";
+            parents.forEach(p => {
+                html += `
+                    <div class="card mb-3 shadow-lg">
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                ${renderCategory(p)}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            });
+
+            $("#categoriesContainer").html(html);
+            $("#pageInfo").text(`Page ${currentPage} of ${Math.ceil(res.total / pageSize)}`);
+        },
+        error: function (xhr, status, error) {
+            console.error("AJAX Error:", status, error);
+            console.error("Response:", xhr.responseText);
+            alert("Failed to load categories. Please try again.\n\nError: " + error);
+        }
+    });
+}
+
+            // Pagination
+            $("#prevPage").click(function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadCategories();
+                }
+            });
+            $("#nextPage").click(function () {
+                currentPage++;
+                loadCategories();
+            });
+
+            loadCategories();
+
+
+
+   // ==================== CATEGORY ACTIONS ====================
+
+// 🔹 Edit
+$("#categoriesContainer").on("click", ".btn-edit", function () {
+    var li = $(this).closest("li"); // <li> jisme category hai
+    var oldName = li.find(".category-name").first().text();
+    var id = $(this).data("id");
+
+    // Replace category name with input
+    li.find(".category-name").first().replaceWith(`
+        <input type="text" class="form-control form-control-sm category-input d-inline-block w-auto" value="${oldName}" />
+    `);
+
+    // Replace buttons with Update + Cancel
+    li.find(".btn-group").first().html(`
+        <button class="btn btn-sm btn-success btn-update" data-id="${id}">Update</button>
+        <button class="btn btn-sm btn-secondary btn-cancel-edit" data-id="${id}" data-old="${oldName}">Cancel</button>
+    `);
+});
+
+// 🔹 Cancel Edit
+$("#categoriesContainer").on("click", ".btn-cancel-edit", function () {
+    var li = $(this).closest("li");
+    var oldName = $(this).data("old");
+    var id = $(this).data("id");
+
+    // Restore old text
+    li.find(".category-input").replaceWith(`<span class="fw-bold category-name">${oldName}</span>`);
+
+    // Restore original buttons
+    li.find(".btn-group").first().html(`
+
+    <!-- Edit -->
+    <button type="button"
+            class="btn btn-outline-secondary btn-edit"
+            data-id="${id}"
+            data-name="${oldName}"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="Edit Category">
+        <i class="mdi mdi-pencil"></i>
+    </button>
+
+    <!-- Add Sub Category -->
+    <button type="button"
+            class="btn btn-outline-secondary btn-add-sub"
+            data-id="${id}"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="Add Sub Category">
+        <i class="mdi mdi-plus-circle-outline"></i>
+    </button>
+
+    <!-- Delete -->
+    <button type="button"
+            class="btn btn-outline-secondary btn-delete"
+            data-id="${id}"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="Delete only this category; its subcategories will move one level up">
+        <i class="mdi mdi-delete-outline"></i>
+    </button>
+
+    <!-- Delete with Subcategories -->
+    <button type="button"
+            class="btn btn-outline-secondary btn-delete-with-subcategories"
+            data-id="${id}"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="Delete with Sub Categories">
+        <i class="mdi mdi-delete-forever"></i>
+    </button>
+
+    `);
+});
+
+// 🔹 Update
+$("#categoriesContainer").on("click", ".btn-update", function () {
+    var li = $(this).closest("li");
+    var newName = li.find(".category-input").val();
+    var id = $(this).data("id");
+
+    $.ajax({
+        url: '@Url.Action("UpdateCategory", "Categories")',
+        type: "POST",
+        data: { Id: id, Name: newName },
+        success: function (res) {
+            if (res.success) {
+                loadCategories();
+            } else {
+                alert(res.message);
+            }
+        }
+    });
+});
+
+
+            $("#categoriesContainer").on("click", ".btn-add-sub", function () {
+                var li = $(this).closest("li");
+                var parentId = $(this).data("id");
+
+                // Prevent multiple sub-inputs
+                if (li.children(".sub-cat-form").length > 0) return;
+
+                var newRow = `
+        <div class="sub-cat-form ms-4 mt-2 mb-2">
+            <input type="text" class="form-control form-control-sm d-inline-block w-auto sub-cat-input" placeholder="Enter Sub Category" />
+            <div class="btn-group btn-group-sm ms-2">
+                <button class="btn btn-success btn-save-sub" data-parent="${parentId}">Add</button>
+                <button class="btn btn-secondary btn-cancel-sub">Cancel</button>
+            </div>
+        </div>
+    `;
+
+                // 🔹 Insert at the top (index 0)
+                li.children("div.d-flex").after(newRow);
+            });
+
+// 🔹 Cancel Add Sub
+$("#categoriesContainer").on("click", ".btn-cancel-sub", function () {
+    $(this).closest(".sub-cat-form").remove();
+});
+
+// 🔹 Save Sub Category
+$("#categoriesContainer").on("click", ".btn-save-sub", function () {
+    var parentId = $(this).data("parent");
+    var newName = $(this).closest(".sub-cat-form").find(".sub-cat-input").val();
+
+    $.ajax({
+        url: '@Url.Action("AddCategory", "Categories")',
+        type: "POST",
+        data: { Name: newName, ParentCategoryId: parentId },
+        success: function (res) {
+            if (res.success) {
+                loadCategories();
+            } else {
+                alert(res.message);
+            }
+        }
+    });
+});
+
+// 🔹 Delete Category
+$("#categoriesContainer").on("click", ".btn-delete", function () {
+    var id = $(this).data("id");
+
+
+        if (confirm("Are you sure you want to delete this category (without subcategories)?")) {
+            sendDeleteRequest(id, 0);
+        }
+
+});
+
+            // 🔹 Delete Category
+            $("#categoriesContainer").on("click", ".btn-delete-with-subcategories", function () {
+                var id = $(this).data("id");
+
+                if (confirm("Are you sure you want to delete its subcategories as well?")) {
+                    // Delete with subcategories
+                    sendDeleteRequest(id, 1);
+                }
+            });
+
+// 🔹 Common delete function
+function sendDeleteRequest(id, type) {
+    $.ajax({
+        url: '@Url.Action("DeleteCategory", "Categories")',
+        type: "POST",
+        data: { Id: id, type: type },
+        success: function (res) {
+            if (res.success) {
+                loadCategories();
+            } else {
+                alert(res.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            alert("Error: " + error);
+        }
+    });
+}
+
+
+    // 🔹 Add Category (top form)
+    $("#form").on("submit", function (e) {
+        e.preventDefault();
+
+        var model = {
+            Id: $("#Id").val(),
+            Name: $("#categoryName").val(),
+            ParentCategoryId: $("#ParentId").val()
+        };
+
+        $.ajax({
+            url: '@Url.Action("AddCategory", "Categories")',
+            type: "POST",
+            data: model,
+            success: function (res) {
+                if (res.success) {
+                    alert("Category added successfully!");
+                    $("#form")[0].reset();
+                    $("#Id").val(0);
+                    $("#ParentId").val("");
+                    loadCategories();
+                } else {
+                    alert(res.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                alert("Error: " + error);
+            }
+        });
+    });
+
+});
+
+    </script>
+}

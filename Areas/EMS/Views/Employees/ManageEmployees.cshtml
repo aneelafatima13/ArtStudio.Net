@@ -1,0 +1,2142 @@
+﻿@{
+    ViewBag.Title = "ManageEmployees";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-pills mb-3" role="tablist" id="tabsbuttons">
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="nav-link waves-effect waves-light active" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-top-list" aria-controls="navs-pills-top-list" aria-selected="true">
+                        Employees List
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="nav-link waves-effect waves-light" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-top-form" aria-controls="navs-pills-top-form" aria-selected="false" tabindex="-1">
+                        Employee Form
+                    </button>
+                </li>
+
+            </ul>
+            <div class="tab-content">
+
+                <div class="tab-pane fade active show" id="navs-pills-top-list" role="tabpanel">
+                    <div class="card mb-4">
+                        <h5 class="card-header">Employees List</h5>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="search" class="form-control" placeholder="Search.." id="search" />
+                                </div>
+                            </div>
+                            <br />
+                            <table id="empTable"
+                                   class="table table-hover align-middle shadow-sm rounded">
+                                <thead style="background-color: #3b5d50">
+                                    <tr>
+                                        <th scope="col" style="color: white!important">Full Name</th>
+                                        <th scope="col" style="color: white!important">Department</th>
+                                        <th scope="col" style="color: white!important" class="text-center"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Rows will be loaded dynamically -->
+                                </tbody>
+
+                            </table>
+
+
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="navs-pills-top-form" role="tabpanel">
+                    <div class="card mb-4">
+                        <h5 class="card-header">Add Employee Info</h5>
+                        <div class="card-body">
+                            <form id="formAuthentication" enctype="multipart/form-data">
+
+                                <div class="divider text-start-center divider-primary">
+                                    <div class="divider-text fw-bold">Personal Info</div>
+                                </div>
+                                @*<h6 class="mb-3 fw-bold">Personal Info</h6>*@
+                                <div class="row g-3 mb-5">
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">First Name</label>
+                                        <input type="text" class="form-control" placeholder="John" id="firstName">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" placeholder="Doe" id="lastName">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" placeholder="John Doe" id="fullName">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Father Name</label>
+                                        <input type="text" class="form-control" placeholder="Doe Josph" id="fatherName">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">CNIC</label>
+                                        <input type="text" class="form-control" placeholder="12345-1234567-1" id="cnic">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Date of Birth</label>
+                                        <input type="date" class="form-control" placeholder="10 May 1990" id="dob">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Age</label>
+                                        <input type="number" class="form-control" placeholder="40" id="age">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Religion</label>
+                                        <input type="text" class="form-control" placeholder="Islam" id="religion">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Nationality</label>
+                                        <input type="text" class="form-control" placeholder="Pakistani" id="nationality">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Gender</label>
+                                        <br />
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="gender" id="inlineRadio1" value="Male">
+                                            <label class="form-check-label" for="inlineRadio1">Male</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="gender" id="inlineRadio2" value="Female">
+                                            <label class="form-check-label" for="inlineRadio2">Female</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Marital Status</label>
+                                        <br />
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="maritalStatus" id="inlineRadio3" value="Male">
+                                            <label class="form-check-label" for="inlineRadio3">Single</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="maritalStatus" id="inlineRadio4" value="Female">
+                                            <label class="form-check-label" for="inlineRadio4">Married</label>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <div class="mb-3">
+                                            <label for="uploadImage" class="form-label">Upload Image</label>
+                                            <input class="form-control" type="file" id="uploadImage" name="files" data-title="EmpImage">
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                                <div class="divider text-start-center divider-primary">
+                                    <div class="divider-text fw-bold">Contact Info</div>
+                                </div>
+
+                                <div class="row g-3 mb-5">
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Phone No</label>
+                                        <input type="text" class="form-control" placeholder="+92 300 1234567" id="phone1">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Phone No (Alternate)</label>
+                                        <input type="text" class="form-control" placeholder="+92 300 7654321" id="phone2">
+                                    </div>
+
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control" placeholder="john@example.com" id="email1">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Email (Alternate)</label>
+                                        <input type="email" class="form-control" placeholder="john@example.com" id="email2">
+                                    </div>
+
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Address</label>
+                                        <input type="text" class="form-control" placeholder="Street Address" id="address">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Provence</label>
+                                        <input type="text" class="form-control" placeholder="Punjab" id="provence">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">City</label>
+                                        <input type="text" class="form-control" placeholder="Karachi" id="city">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Country</label>
+                                        <input type="text" class="form-control" placeholder="Pakistan" id="country">
+                                    </div>
+                                </div>
+                                <div class="divider text-start-center divider-primary">
+                                    <div class="divider-text fw-bold">Credentials Info</div>
+                                </div>
+
+                                <div class="row g-3 mb-5">
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Username</label>
+                                        <input type="text" class="form-control" placeholder="john.doe" id="username">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Password</label>
+                                        <input type="password" class="form-control" placeholder="password" id="password">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">My Role</label>
+                                        <select id="myrolesList" class="form-select form-select-lg">
+                                        </select>
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Roles Under Me</label>
+                                        <select id="rolesListunderme" class="form-select form-select-lg" multiple>
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                                <div class="divider text-start-center divider-primary">
+                                    <div class="divider-text fw-bold">Job Info</div>
+                                </div>
+                                <div class="row g-3 mb-5">
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Department</label>
+                                        <select id="departmentsList" class="form-select form-select-lg">
+                                        </select>
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Designation</label>
+                                        <input type="text" class="form-control" placeholder="Manager" id="designation">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Joining Date</label>
+                                        <input type="date" class="form-control" placeholder="10 May 2024" id="joiningDate">
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Salary</label>
+                                        <input type="text" class="form-control" placeholder="50,000" id="salary">
+                                    </div>
+
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Shift</label>
+                                        <br />
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="shift" id="inlineRadio9" value="Male">
+                                            <label class="form-check-label" for="inlineRadio9">Day</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="shift" id="inlineRadio10" value="Female">
+                                            <label class="form-check-label" for="inlineRadio10">Night</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Shift Timming</label>
+                                        <select id="shiftTimmingsList" class="form-select form-select-lg">
+                                        </select>
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <div class="mb-3">
+                                            <label for="formFileCV" class="form-label">Upload CV</label>
+                                            <input class="form-control" type="file" id="formFileCV" name="files" data-title="EmpCV">
+                                        </div>
+
+                                    </div>
+                                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                                        <label class="form-label">Is Active</label>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="isactive">
+                                        </div>
+                                    </div>
+                                    <div class="col-xxl-12 col-xl-12 col-lg-12 col-md-12">
+                                        <label class="form-label">Status</label>
+                                        <br />
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="status" id="inlineRadio5" value="Male">
+                                            <label class="form-check-label" for="inlineRadio5">Permanent</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="status" id="inlineRadio6" value="Female">
+                                            <label class="form-check-label" for="inlineRadio6">Temporary</label>
+                                        </div>
+
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="status" id="inlineRadio7" value="Male">
+                                            <label class="form-check-label" for="inlineRadio7">Part time</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="status" id="inlineRadio8" value="Female">
+                                            <label class="form-check-label" for="inlineRadio8">Contract</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="divider text-start-center divider-primary">
+                                    <div class="divider-text fw-bold">Personal Documents Info</div>
+                                </div>
+                                <div class="row g-3 mb-5">
+                                    <div class="mb-3">
+                                        <label for="personaldocs" class="form-label">Upload Personal Documents</label>
+                                        <input class="form-control" type="file" id="personaldocs" multiple="" name="files" data-title="EmpPersonalDocs">
+                                    </div>
+                                </div>
+                                <div class="row">
+
+                                    <div class="col-12 text-end p-4">
+                                        <button type="submit" class="btn btn-primary waves-effect waves-light" id="btnAddEmployee">
+                                            <span class="tf-icons mdi mdi-checkbox-marked-circle-outline me-1"></span>
+                                            Add
+                                        </button>
+                                        <button type="button" class="btn btn-success waves-effect waves-light d-none" id="btnUpdateEmployee">
+                                            <span class="tf-icons mdi mdi-checkbox-marked-circle-outline me-1"></span>
+                                            Update
+                                        </button>
+                                        <button type="button" class="btn btn-secondary waves-effect waves-light d-none" id="btnCancelEdit">
+                                            Cancel
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<input type="hidden" id="usernametoedit" />
+<input type="hidden" id="hiddenempId" />
+
+<div class="modal fade" id="addContactInfo" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Contact Info</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3 mb-5">
+                    <div class="col-md-6">
+                        <label class="form-label">Phone No</label>
+                        <input type="text" class="form-control" placeholder="+92 300 1234567" id="phone1addmore">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Phone No (Alternate)</label>
+                        <input type="text" class="form-control" placeholder="+92 300 7654321" id="phone2addmore">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" placeholder="john@example.com" id="email1addmore">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email (Alternate)</label>
+                        <input type="email" class="form-control" placeholder="john@example.com" id="email2addmore">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Address</label>
+                        <input type="text" class="form-control" placeholder="Street Address" id="addressaddmore">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Province</label>
+                        <input type="text" class="form-control" placeholder="Punjab" id="provenceaddmore">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">City</label>
+                        <input type="text" class="form-control" placeholder="Karachi" id="cityaddmore">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Country</label>
+                        <input type="text" class="form-control" placeholder="Pakistan" id="countryaddmore">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Is Active</label>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="isactiveaddMore">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary waves-effect" data-bs-dismiss="modal">
+                    Close
+                </button>
+                <button type="button" class="btn btn-primary waves-effect waves-light" onclick="addContactInfo()">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addJobInfo" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Job Info</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3 mb-5">
+                    <div class="col-md-6">
+                        <label class="form-label">Department</label>
+                        <select id="departmentsListaddmore" class="form-select form-select-lg"></select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Designation</label>
+                        <input type="text" class="form-control" placeholder="Manager" id="designationaddmore">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Joining Date</label>
+                        <input type="date" class="form-control" id="joiningDateaddmore">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Salary</label>
+                        <input type="text" class="form-control" placeholder="50,000" id="salaryaddmore">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Shift</label><br />
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="shiftaddmore" value="Day">
+                            <label class="form-check-label">Day</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="shiftaddmore" value="Night">
+                            <label class="form-check-label">Night</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Shift Timings</label>
+                        <input type="text" class="form-control" placeholder="9:00am to 5:00pm" id="shifttimmingsaddmore">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="formFileCVaddmore" class="form-label">Upload CV</label>
+                        <input class="form-control" type="file" id="formFileCVaddmore" name="files" data-title="EmpCV">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Is Active</label>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="isactiveaddmore">
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">Status</label><br />
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="statusaddmore" value="Permanent">
+                            <label class="form-check-label">Permanent</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="statusaddmore" value="Temporary">
+                            <label class="form-check-label">Temporary</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="statusaddmore" value="PartTime">
+                            <label class="form-check-label">Part Time</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="statusaddmore" value="Contract">
+                            <label class="form-check-label">Contract</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary waves-effect" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary waves-effect waves-light" onclick="addJobInfo()">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addCredentialsInfo" tabindex="-1" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="exampleModalLabel3">Add Credentials Info</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3 mb-5">
+                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" placeholder="john.doe" id="usernameaddmore">
+                    </div>
+                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" placeholder="password" id="passwordaddmore">
+                    </div>
+                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                        <label class="form-label">My Role</label>
+                        <select id="myrolesListaddmore" class="form-select form-select-lg"></select>
+                    </div>
+                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                        <label class="form-label">Roles Under Me</label>
+                        <select id="rolesListundermeaddmore" class="form-select form-select-lg" multiple></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary waves-effect" data-bs-dismiss="modal">
+                    Close
+                </button>
+                <button type="button" class="btn btn-primary waves-effect waves-light" onclick="addCredentialsInfo()">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="addFilesInfo" tabindex="-1" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="exampleModalLabel3">Upload Files</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3 mb-5">
+                    <div class="col-md-6 mb-3">
+                        <label for="personaldocs" class="form-label">Upload Files</label>
+                        <input class="form-control" type="file" id="personaldocsaddmore" multiple="" name="files">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="personaldocs" class="form-label">Type</label>
+                        <select class="form-control" id="titleaddmore">
+                            <option value="EmpPersonalDocs">Employee Personal Docs</option>
+                            <option value="EmpCV">Employee CV</option>
+                            
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary waves-effect" data-bs-dismiss="modal">
+                    Close
+                </button>
+                <button type="button" class="btn btn-primary waves-effect waves-light" onclick="addFiles()">Upload</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+    $(document).ready(function () {
+        $("#formAuthentication").on("submit", function (e) {
+    e.preventDefault(); // prevent default form submit
+            debugger;
+            let model = {
+        FirstName: $("#firstName").val(),
+        LastName: $("#lastName").val(),
+        FullName: $("#fullName").val(),
+        FatherName: $("#fatherName").val(),
+        CNIC: $("#cnic").val(),
+        DateOfBirth: $("#dob").val(),
+        Age: $("#age").val(),
+        Religion: $("#religion").val(),
+        Nationality: $("#nationality").val(),
+        Gender: $("input[name='gender']:checked").val(),
+        MaritalStatus: $("input[name='maritalStatus']:checked").val(),
+        PhoneNo: $("#phone1").val(),
+        PhoneNo2: $("#phone2").val(),
+        Email: $("#email1").val(),
+        Email2: $("#email2").val(),
+        Address: $("#address").val(),
+        Provence: $("#provence").val(),
+        City: $("#city").val(),
+        Country: $("#country").val(),
+        Username: $("#username").val(),
+        Password: $("#password").val(),
+        RoleId: $("#myrolesList").val(),
+        RoleName: $("#myrolesList option:selected").text(),
+        RoleIdsUnderMe: ($("#rolesListunderme").val() || []).join(","),
+        DepartmentId: $("#departmentsList").val(),
+        DepartmentName: $("#departmentsList option:selected").text(),
+        Designation: $("#designation").val(),
+        JoiningDate: $("#joiningDate").val(),
+        Salary: $("#salary").val(),
+        Status: $("input[name='status']:checked").next('label').text(),
+                Shift: $("input[name='shift']:checked").next('label').text(),
+                ShiftTimmingsId: $("#shiftTimmingsList").val(),
+                ShiftTimmings: $("#shiftTimmingsList option:selected").val(),
+        IsActive: $("#isactive").is(":checked"),
+        Files: []
+    };
+
+    let filePromises = [];
+
+            $("input[type=file][name=files]").each(function () {
+                debugger;
+        let title = $(this).data("title");
+        let files = $(this)[0].files;
+
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+
+            let promise = new Promise((resolve) => {
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    let base64String = e.target.result.split(',')[1];
+                    model.Files.push({
+                        FileName: file.name,
+                        FileTitle: title,
+                        FileType: file.type,
+                        FileBytes: base64String
+                    });
+                    resolve();
+                };
+                reader.readAsDataURL(file);
+            });
+
+            filePromises.push(promise);
+        }
+    });
+            debugger;
+    // Wait until all files are read
+    Promise.all(filePromises).then(function () {
+        $.ajax({
+            url: '@Url.Action("ManageEmployee", "Employees", new { area = "EMS" })',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(
+            ),
+            success: function (res) {
+                if (res.success) {
+                    alert("Employee saved with ID: " + res.EmployeeId);
+                    location.reload();
+                } else {
+                    alert("Error: " + res.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+                alert("Error while adding employee.");
+            }
+        });
+    });
+});
+
+      var $mydropdown = $("#myrolesList");
+var $rolesListunderme = $("#rolesListunderme");
+var $depdropdown = $("#departmentsList");
+        var $stdropdown = $("#shiftTimmingsList");
+        initDepartmentsDropdown($depdropdown);
+        initshiftTimmingsDropdown($stdropdown);
+        initRolesDropdown($mydropdown, $rolesListunderme)
+
+
+
+
+    });
+
+    function initRolesDropdown($roledropdown = null,$rolesundermedropdown = null, selectedRoleId = null, selectedRolesUnderMe = null) {
+    $.ajax({
+        url: '@Url.Action("GetRolesDropdown", "Rights", new { area = "Admin" })',
+        type: 'GET',
+        dataType: 'json',
+        success: function (roles) {
+            $roledropdown.empty().append(`<option value="">Select Role</option>`);
+            $rolesundermedropdown.empty().append(`<option value="">Select Roles Under Me</option>`);;
+
+            $.each(roles, function (i, role) {
+                $roledropdown.append(`<option value="${role.Id}">${role.Name}</option>`);
+                $rolesundermedropdown.append(`<option value="${role.Id}">${role.Name}</option>`);
+            });
+
+            // Pre-select values if editing
+            if (selectedRoleId) {
+                $roledropdown.val(selectedRoleId).trigger('change');
+            }
+            if (selectedRolesUnderMe && selectedRolesUnderMe.length > 0) {
+                $rolesundermedropdown.val(selectedRolesUnderMe).trigger('change');
+            }
+
+            $roledropdown.select2({
+                placeholder: "-- Select Role --",
+                allowClear: true,
+                width: '100%'
+            });
+
+            $rolesundermedropdown.select2({
+                placeholder: "-- Select Roles Under Me --",
+                allowClear: true,
+                width: '100%'
+            });
+
+
+            if ($roledropdown.is($("#myrolesListaddmore"))) {
+                $roledropdown.select2({
+                    placeholder: "-- Select Role --",
+                    allowClear: true,
+                    width: '100%',
+                    dropdownParent: $("#addCredentialsInfo")
+                });
+            }
+
+            if ($rolesundermedropdown.is($("#rolesListundermeaddmore"))) {
+                $rolesundermedropdown.select2({
+                    placeholder: "-- Select Roles Under Me--",
+                    allowClear: true,
+                    width: '100%',
+                    dropdownParent: $("#addCredentialsInfo")
+                });
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error loading roles:", error);
+            alert("Failed to load roles.");
+        }
+    });
+}
+
+
+         function initDepartmentsDropdown($dropdown, selectedId = null) {
+    $.ajax({
+        url: '@Url.Action("GetDepartmentsDropdown", "Departments", new { area = "Admin" })',
+        type: 'GET',
+        dataType: 'json',
+        success: function (departments) {
+            $dropdown.empty();
+            $dropdown.append(`<option value="">-- Select Department --</option>`);
+
+            $.each(departments, function (i, dept) {
+                $dropdown.append(
+                    `<option value="${dept.Id}" ${selectedId && dept.Id === selectedId ? "selected" : ""}>${dept.Name}</option>`
+                );
+            });
+
+            // Initialize / refresh Select2
+            $dropdown.select2({
+                placeholder: "-- Select Department --",
+                allowClear: true,
+                width: '100%'
+            });
+
+            if ($dropdown.is($("#departmentsListaddmore"))) {
+                $dropdown.select2({
+                    placeholder: "-- Select Department --",
+                    allowClear: true,
+                    width: '100%',
+                    dropdownParent: $("#addJobInfo")
+                });
+            }
+
+        },
+        error: function (xhr, status, error) {
+            console.error("Error loading departments:", error);
+            alert("Failed to load departments.");
+        }
+    });
+}
+
+        function initshiftTimmingsDropdown($dropdown, selectedId = null) {
+    $.ajax({
+        url: '@Url.Action("GetShiftsDropdown", "ShiftTimmings", new { area = "Admin" })',
+        type: 'GET',
+        dataType: 'json',
+        success: function (list) {
+            $dropdown.empty();
+            $dropdown.append(`<option value="">-- Select Shift Timmings --</option>`);
+
+            $.each(list, function (i, l) {
+                $dropdown.append(
+                    `<option value="${l.Id}" ${selectedId && l.Id === selectedId ? "selected" : ""}>${dept.Name}</option>`
+                );
+            });
+
+            // Initialize / refresh Select2
+            $dropdown.select2({
+                placeholder: "-- Select Shift Timmings --",
+                allowClear: true,
+                width: '100%'
+            });
+
+            //if ($dropdown.is($("#departmentsListaddmore"))) {
+            //    $dropdown.select2({
+            //        placeholder: "-- Select Department --",
+            //        allowClear: true,
+            //        width: '100%',
+            //        dropdownParent: $("#addJobInfo")
+            //    });
+            //}
+
+        },
+        error: function (xhr, status, error) {
+            console.error("Error loading departments:", error);
+            alert("Failed to load departments.");
+        }
+    });
+}
+
+$(document).ready(function () {
+    GetEmployeesList();
+    // Handle action button click
+
+});
+        function GetEmployeesList() {
+            var table = $('#empTable').DataTable({
+    processing: true,
+    serverSide: true,
+    lengthChange: false,
+    info: false,
+    searching: false,
+    ajax: {
+        url: '@Url.Action("GetEmployeesList", "Employees", new { area = "EMS" })',
+        type: "POST"
+    },
+    columns: [
+        { data: "FullName" },
+        { data: "DepartmentName" },
+        {
+            data: "Id",
+            orderable: false,
+            className: "text-center",
+            render: function (data, type, row) {
+                debugger;
+                return `
+                    <button type="button" class="btn btn-sm btn-primary action-toggle" data-id="${data}" data-username="${row.Username}">
+                        <i class="mdi mdi-dots-vertical mdi-20px"></i>
+                    </button>
+                `;
+            }
+        }
+    ]
+});
+            $('#empTable tbody').on('click', 'button.action-toggle', function () {
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+
+                // Close any open toolbars before showing a new one
+                $('#empTable tbody tr.shown').each(function () {
+                    var r = table.row(this);
+                    if (r.child.isShown()) {
+                        r.child.hide();
+                        $(this).removeClass('shown');
+                    }
+                });
+
+                if (row.child.isShown()) {
+                    // Close toolbar if already open
+                    row.child.hide();
+                    tr.removeClass('shown');
+                } else {
+                    debugger;
+                    var empId = $(this).data("id");
+                    var username = $(this).data("username");
+                    var toolbar = `
+            <div class="text-center py-2">
+                <div class="btn-group" role="group" aria-label="Employee Actions">
+
+                    <button type="button" class="btn btn-outline-primary waves-effect"
+                            onclick="vieweditempdata(this)" data-type="view" data-id="${empId}" data-username="${username}"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="View Data">
+                        <i class="tf-icons mdi mdi-eye-outline"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-outline-primary waves-effect"
+                            onclick="vieweditempdata(this)" data-type="edit" data-id="${empId}" data-username="${username}"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Data">
+                        <i class="tf-icons mdi mdi-pencil-outline"></i>
+                    </button>
+
+                   <button type="button"
+        class="btn btn-outline-primary waves-effect"
+        onclick="showaddContactInfoModel(${empId}, '${username}')"
+        data-type="contact" data-id="${empId}"
+        data-bs-toggle="tooltip" data-bs-placement="top" title="Add Contact Info">
+    <i class="tf-icons mdi mdi-phone-outline"></i>
+</button>
+
+
+                    <button type="button" class="btn btn-outline-primary waves-effect" onclick="showaddJobInfoModel(${empId}, '${username}')"
+                            data-type="job" data-id="${empId}" data-bs-toggle="tooltip" data-bs-placement="top" title="Add Job Info">
+                        <i class="tf-icons mdi mdi-briefcase-outline"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-outline-primary waves-effect" onclick="showaddCredentialsInfoModel(${empId}, '${username}')"
+                            data-type="credentials" data-id="${empId}" data-bs-toggle="tooltip" data-bs-placement="top" title="Add Credentials Info">
+                        <i class="tf-icons mdi mdi-account-key-outline"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-outline-primary waves-effect" onclick="showaddFilesInfoModel(${empId}, '${username}')"
+                            data-type="documents" data-id="${empId}" data-bs-toggle="tooltip" data-bs-placement="top" title="Add Personal Documents">
+                        <i class="tf-icons mdi mdi-file-document-outline"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-outline-primary waves-effect" onclick="showaddPayRolInfoModel(${empId}, '${username}')"
+                            data-type="payrole" data-id="${empId}" data-bs-toggle="tooltip" data-bs-placement="top" title="Add Pay Role">
+                        <i class="tf-icons mdi mdi-cash-multiple"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-outline-primary waves-effect" onclick="SetInActive(${empId}, '${username}')"
+                            data-type="inactive" data-id="${empId}" data-bs-toggle="tooltip" data-bs-placement="top" title="Mark InActive">
+                        <i class="tf-icons mdi mdi-cancel"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-outline-primary waves-effect" onclick="Delete(${empId}, '${username}')"
+        data-type="delete" data-id="${empId}" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
+   <i class="tf-icons mdi mdi-delete-outline"></i>
+
+</button>
+
+                </div>
+            </div>
+        `;
+
+                    row.child(toolbar).show();
+                    tr.addClass('shown');
+                }
+            });
+
+        }
+        function vieweditempdata(element) {
+            var type = $(element).data("type"); // view / edit
+            var empId = $(element).data("id");  // employee id
+            var username = $(element).data("username");
+            if (type === "view") {
+                appendViewtabwithdata(empId, username);
+            } else if (type === "edit") {
+                appendEdittabwithdata(empId, username);
+            }
+        }
+
+        $('#tabsbuttons button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+            // Get the clicked tab's target
+            let targetId = $(e.target).data('bs-target');
+
+            // Remove all dynamically added tabs and their panes
+            $('#tabsbuttons li.dynamic-tab').remove();
+            $('.tab-content .dynamic-tab-pane').remove();
+
+            // Activate the clicked tab
+            $('#tabsbuttons button').removeClass('active').attr('aria-selected', 'false');
+            $(e.target).addClass('active').attr('aria-selected', 'true');
+
+            // Show the associated tab content
+            $('.tab-content .tab-pane').removeClass('active show');
+            $(targetId).addClass('active show');
+        });
+
+        function appendViewtabwithdata(empId, username) {
+    let tabId = "navs-pills-top-view"; // unique id for tab pane
+
+    // Step 1: Deactivate all other tabs and panes
+    $('#tabsbuttons .nav-link').removeClass('active').attr('aria-selected', 'false');
+    $('.tab-pane').removeClass('active show');
+
+    // Step 2: Check if tab already exists
+    if ($("#tabsbuttons button[data-bs-target='#" + tabId + "']").length === 0) {
+        let html = `
+        <li class="nav-item dynamic-tab" role="presentation">
+            <button type="button" class="nav-link waves-effect waves-light dynamic-tab active" role="tab"
+                data-bs-toggle="tab" data-bs-target="#${tabId}"
+                aria-controls="${tabId}" aria-selected="true">
+                View Employee Data
+            </button>
+        </li>`;
+        $('#tabsbuttons').append(html);
+
+        $(".tab-content").append(`
+            <div class="tab-pane dynamic-tab-pane fade active show" id="${tabId}" role="tabpanel">
+                <div class="card mb-4">
+                    <h5 class="card-header">Employee Profile</h5>
+                    <div class="card-body">Loading...</div>
+                </div>
+            </div>
+        `);
+    } else {
+        $("#tabsbuttons button[data-bs-target='#" + tabId + "']").addClass("active").attr("aria-selected", "true");
+        $("#" + tabId).addClass("active show");
+    }
+
+    // Step 3: Load Employee Data
+    $.ajax({
+        url: '@Url.Action("GetEmployeeDatabyId", "Employees", new { area = "EMS" })',
+        type: 'GET',
+        data: { empid: empId },
+        success: function (response) {
+            let data = response.data;
+            let empImage = (data.Files || []).find(f => f.FileTitle === "EmpImage");
+            let empCV = (data.Files || []).find(f => f.FileTitle === "EmpCV");
+            let otherDocs = (data.Files || []).filter(f => f.FileTitle !== "EmpImage" && f.FileTitle !== "EmpCV");
+
+            let html = `
+                <!-- Personal Info -->
+                <div class="divider text-start-center divider-primary">
+                    <div class="divider-text fw-bold">Personal Info</div>
+                </div>
+                <div class="row">
+                <div class="col-md-6">
+                <p><b>First Name:</b> ${data.FirstName || ''}</p>
+                <p><b>Last Name:</b> ${data.LastName || ''}</p>
+                <p><b>Full Name:</b> ${data.FullName || ''}</p>
+                <p><b>Father Name:</b> ${data.FatherName || ''}</p>
+                <p><b>CNIC:</b> ${data.CNIC || ''}</p>
+            </div>
+                        <div class="col-md-6 text-left">
+                ${empImage ? `<img src="@Url.Action("GetEmployeeImage", "Employees", new {area = "EMS"})?filePath=${empImage.FilePath}" class="img-fluid rounded shadow" style="max-height:150px">
+` : ''}
+            </div>
+                    <div class="col-md-6"><p><b>DOB:</b> ${data.DateOfBirthstring || ''}</p></div>
+                    <div class="col-md-6"><p><b>Age:</b> ${data.Age || ''}</p></div>
+                    <div class="col-md-6"><p><b>Religion:</b> ${data.Religion || ''}</p></div>
+                    <div class="col-md-6"><p><b>Nationality:</b> ${data.Nationality || ''}</p></div>
+                    <div class="col-md-6"><p><b>Gender:</b> ${data.Gender || ''}</p></div>
+                    <div class="col-md-6"><p><b>Marital Status:</b> ${data.MaritalStatus || ''}</p></div>
+                    <div class="col-md-6">
+    <p><b>Is Active:</b> ${data.IsActive ? 'Currently Working' : 'Not Working'}</p>
+</div>
+
+                </div>
+
+                <!-- Contact Info -->
+                <div class="divider text-start-center divider-success">
+                    <div class="divider-text fw-bold">Contact Info</div>
+                </div>
+                ${(data.empContactInfoList || []).map(c => `
+                <div class="row mb-3">
+                    <div class="col-md-6"><p><b>Phone:</b> ${c.PhoneNo || ''}</p></div>
+                    <div class="col-md-6"><p><b>Alt Phone:</b> ${c.PhoneNoAlternate || ''}</p></div>
+                    <div class="col-md-6"><p><b>Email:</b> ${c.Email || ''}</p></div>
+                    <div class="col-md-6"><p><b>Alt Email:</b> ${c.EmailAlternate || ''}</p></div>
+                    <div class="col-md-12"><p><b>Address:</b> ${c.Address || ''}, ${c.City || ''}, ${c.Provence || ''}, ${c.Country || ''}</p></div>
+                                        <div class="col-md-6">
+    <p><b>Is Active:</b> ${data.IsActive ? 'Active' : 'Inactive'}</p>
+</div>
+                </div>`).join('')}
+
+                <!-- Job Info -->
+        <div class="divider text-start-center divider-warning">
+            <div class="divider-text fw-bold">Job Info</div>
+        </div>
+        ${(data.empjobinfolist || []).map(j => `
+        <div class="row mb-3">
+            <div class="col-md-6"><p><b>Department:</b> ${j.DepartmentName || ''}</p></div>
+            <div class="col-md-6"><p><b>Designation:</b> ${j.Designation || ''}</p></div>
+            <div class="col-md-6"><p><b>Joining Date:</b> ${j.JoiningDatestring || ''}</p></div>
+            <div class="col-md-6"><p><b>Salary:</b> ${j.Salary || ''}</p></div>
+            <div class="col-md-6"><p><b>Status:</b> ${j.Status || ''}</p></div>
+            <div class="col-md-6"><p><b>Shift:</b> ${j.Shift || ''} (${j.ShiftTiming || ''})</p></div>
+                                                    <div class="col-md-6">
+    <p><b>Is Active:</b> ${data.IsActive ? 'Active' : 'Inactive'}</p>
+</div>
+        </div>`).join('')}
+        ${empCV ? `
+        <div class="row mb-3">
+            <div class="col-md-12">
+    <b>CV:</b> ${empCV.FileName}
+    <button class="btn btn-sm btn-outline-primary ms-2 download-file" data-path="${empCV.FilePath}">
+        Download
+    </button>
+</div>
+        </div>` : ''}
+
+                <!-- Credentials -->
+                <div class="divider text-start-center divider-info">
+                    <div class="divider-text fw-bold">Credentials</div>
+                </div>
+                ${(data.empCredentialslist || []).map(c => `
+                <div class="row mb-3">
+                    <div class="col-md-6"><p><b>Username:</b> ${c.Username || ''}</p></div>
+                    <div class="col-md-6"><p><b>Role:</b> ${c.RoleName || ''}</p></div>
+                     <div class="col-md-6"><p><b>Roles Under Me:</b> ${c.RolesUnderMeNames || ''}</p></div>
+                                                            <div class="col-md-6">
+    <p><b>Is Active:</b> ${data.IsActive ? 'Active' : 'Inactive'}</p>
+</div>
+                </div>`).join('')}
+
+                <!-- Documents -->
+        <div class="divider text-start-center divider-danger">
+            <div class="divider-text fw-bold">Documents</div>
+        </div>
+        ${otherDocs.map(f => `
+        <div class="row mb-3">
+            <div class="col-md-6"><p><b>Title:</b> ${f.FileTitle || ''}</p></div>
+            <div class="col-md-6"><p><b>File Name:</b> ${f.FileName || ''}</p></div>
+            <div class="col-md-6"><p><b>Type:</b> ${f.FileType || ''}</p></div>
+            <div class="col-md-6"><p><b>Size:</b> ${f.FileSize || ''}</p></div>
+            <div class="col-md-12">
+    <button class="btn btn-sm btn-outline-success download-file" data-path="${f.FilePath}">
+        Download
+    </button>
+</div>
+
+        </div>`).join('')}
+            `;
+
+            $("#" + tabId + " .card-body").html(html);
+
+            $("#" + tabId + " .card-body .download-file").off("click").on("click", function () {
+                let filePath = $(this).data("path");
+                if (filePath) {
+                    downloadFile(filePath);
+                } else {
+                    alert("File path is missing!");
+                }
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("Error loading employee:", error);
+            alert("Failed to load employee data.");
+        }
+    });
+}
+
+
+
+        function appendEdittabwithdata(empId, username) {
+    let tabId = "navs-pills-top-edit"; // unique id for tab pane
+            $("#hiddenempId").val(empId);
+            $("#usernametoedit").val(username);
+
+    // Step 1: Deactivate all other tabs and panes
+    $('#tabsbuttons .nav-link').removeClass('active').attr('aria-selected', 'false');
+    $('.tab-pane').removeClass('active show');
+
+    // Step 2: Check if tab already exists
+    if ($("#tabsbuttons button[data-bs-target='#" + tabId + "']").length === 0) {
+        let html = `
+        <li class="nav-item dynamic-tab" role="presentation">
+            <button type="button" class="nav-link waves-effect waves-light dynamic-tab active" role="tab"
+                data-bs-toggle="tab" data-bs-target="#${tabId}"
+                aria-controls="${tabId}" aria-selected="true">
+                Edit Employee Data
+            </button>
+        </li>`;
+        $('#tabsbuttons').append(html);
+
+        $(".tab-content").append(`
+            <div class="tab-pane dynamic-tab-pane fade active show" id="${tabId}" role="tabpanel">
+                <div class="card mb-4">
+                    <h5 class="card-header">Employee Profile</h5>
+                    <div class="card-body">Loading...</div>
+                </div>
+            </div>
+        `);
+    } else {
+        $("#tabsbuttons button[data-bs-target='#" + tabId + "']").addClass("active").attr("aria-selected", "true");
+        $("#" + tabId).addClass("active show");
+    }
+
+    // Step 3: Load Employee Data
+    $.ajax({
+        url: '@Url.Action("GetEmployeeDatabyId", "Employees", new { area = "EMS" })',
+        type: 'GET',
+        data: { empid: empId },
+        success: function (response) {
+            let data = response.data;
+            let empImage = (data.Files || []).find(f => f.FileTitle === "EmpImage");
+            let empCV = (data.Files || []).find(f => f.FileTitle === "EmpCV");
+            let otherDocs = (data.Files || []).filter(f => f.FileTitle !== "EmpImage" && f.FileTitle !== "EmpCV");
+            let formateddateofbirth = formatDateForInput(data.DateOfBirthstring);
+            let activeUser = (data.empCredentialslist || []).find(f => f.IsActive === true);
+            let username = activeUser ? activeUser.Username : "";
+            $("#usernametoedit").val(username);
+            let html = `
+                <!-- Personal Info -->
+                <div class="divider text-start-center divider-primary">
+                    <div class="divider-text fw-bold">Personal Info</div>
+                </div>
+                <div class="row" id="personalinfoSection">
+                <div class="col-md-6">
+                <p><b>First Name:</b> ${data.FirstName || ''}</p>
+                <p><b>Last Name:</b> ${data.LastName || ''}</p>
+                <p><b>Full Name:</b> ${data.FullName || ''}</p>
+                <p><b>Father Name:</b> ${data.FatherName || ''}</p>
+<p><b>CNIC:</b> ${data.CNIC || ''}</p>
+
+
+            </div>
+
+            <div class="col-md-6 text-left">
+                ${empImage ? `<img src="@Url.Action("GetEmployeeImage", "Employees", new {area = "EMS"})?filePath=${empImage.FilePath}" class="img-fluid rounded shadow" style="max-height:150px">
+` : ''}
+            </div>
+                     <div class="col-md-6"><p><b>DOB:</b> ${data.DateOfBirthstring || ''}</p></div>
+                    <div class="col-md-6"><p><b>Age:</b> ${data.Age || ''}</p></div>
+                    <div class="col-md-6"><p><b>Religion:</b> ${data.Religion || ''}</p></div>
+                    <div class="col-md-6"><p><b>Nationality:</b> ${data.Nationality || ''}</p></div>
+                    <div class="col-md-6"><p><b>Gender:</b> ${data.Gender || ''}</p></div>
+                    <div class="col-md-6"><p><b>Marital Status:</b> ${data.MaritalStatus || ''}</p></div>
+                     <div class="col-md-6"> <p><b>Is Active:</b> ${data.IsActive ? 'Currently Working' : 'Not Working'}</p></div>
+                </div>
+                             <div class="row d-none" id="personalinfoeditSection">
+    <!-- Left column -->
+    <div class="col-md-6">
+        <p class="mt-2 mb-1"><b>First Name:</b></p>
+        <input type="text" class="form-control mb-2" id="firstNameedit" value="${data.FirstName || ''}">
+
+        <p class="mt-2 mb-1"><b>Last Name:</b></p>
+        <input type="text" class="form-control mb-2" id="lastNameedit" value="${data.LastName || ''}">
+
+        <p class="mt-2 mb-1"><b>Full Name:</b></p>
+        <input type="text" class="form-control mb-2" id="FullNameedit" value="${data.FullName || ''}">
+
+        <p class="mt-2 mb-1"><b>Father Name:</b></p>
+        <input type="text" class="form-control mb-2" id="FatherNameedit" value="${data.FatherName || ''}">
+
+        <p class="mt-2 mb-1"><b>CNIC:</b></p>
+        <input type="text" class="form-control mb-2" id="CNICedit" value="${data.CNIC || ''}">
+
+        <p class="mt-2 mb-1"><b>Date of Birth:</b></p>
+        <input type="date" class="form-control mb-2" id="DOBedit" value="${formateddateofbirth}">
+
+        <p class="mt-2 mb-1"><b>Age:</b></p>
+        <input type="number" class="form-control mb-2" id="Ageedit" value="${data.Age || ''}">
+
+        <p class="mt-2 mb-1"><b>Religion:</b></p>
+        <input type="text" class="form-control mb-2" id="Religionedit" value="${data.Religion || ''}">
+    </div>
+
+    <div class="col-md-6 text-left">
+        ${empImage ? `
+            <img src="@Url.Action("GetEmployeeImage", "Employees", new {area = "EMS"})?filePath=${empImage.FilePath}" data-id=${empImage.FileId}
+                 class="img-fluid rounded shadow mb-3" style="max-height:150px">
+        ` : ''}
+
+        <p class="mt-2 mb-1"><b>Upload New Image:</b></p>
+        <input class="form-control mb-2" type="file" id="uploadImageedit" name="files" data-title="EmpImage">
+
+        <p class="mt-2 mb-1"><b>Nationality:</b></p>
+        <input type="text" class="form-control mb-2" id="Nationalityedit" value="${data.Nationality || ''}">
+
+        <p class="mt-2 mb-1"><b>Gender:</b></p>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="Genderedit" value="Male" ${data.Gender === 'Male' ? 'checked' : ''}>
+            <label class="form-check-label">Male</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="Genderedit" value="Female" ${data.Gender === 'Female' ? 'checked' : ''}>
+            <label class="form-check-label">Female</label>
+        </div>
+
+        <p class="mt-3 mb-1"><b>Marital Status:</b></p>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="MaritalStatusedit" value="Single" ${data.MaritalStatus === 'Single' ? 'checked' : ''}>
+            <label class="form-check-label">Single</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="MaritalStatusedit" value="Married" ${data.MaritalStatus === 'Married' ? 'checked' : ''}>
+            <label class="form-check-label">Married</label>
+        </div>
+
+        <p class="mt-3 mb-1"><b>Is Active:</b></p>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="IsActiveedit" value="true" ${data.IsActive ? 'checked' : ''}>
+            <label class="form-check-label">Currently Working</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="IsActiveedit" value="false" ${!data.IsActive ? 'checked' : ''}>
+            <label class="form-check-label">Not Working</label>
+        </div>
+    </div>
+</div>
+
+               <div class="row mb-3">
+  <div class="col-md-12 d-flex flex-wrap gap-2 justify-content-end">
+    <button class="btn btn-sm btn-primary edit-section" id="personalInfoeditbtn" data-id=${data.Id}>Edit</button>
+    <button class="btn btn-sm btn-primary delete-section" id="personalInfodeletebtn" data-id=${data.Id}>Delete</button>
+    <button class="btn btn-sm btn-success update-section d-none" id="personalInfoupdatebtn" data-id=${data.Id}>Update</button>
+    <button class="btn btn-sm btn-secondary cancel-section d-none" id="personalInfocancelbtn" data-id=${data.Id}>Cancel</button>
+  </div>
+</div>
+
+                <!-- Contact Info -->
+                <div class="divider text-start-center divider-success">
+                    <div class="divider-text fw-bold">Contact Info</div>
+                </div>
+                ${(data.empContactInfoList || []).map(c => `
+                <div class="contact-info-wrapper mb-3" data-id="${c.ContactId}">
+                <div class="row mb-3" id="contactinfoSection">
+                    <div class="col-md-6"><p><b>Phone:</b> ${c.PhoneNo || ''}</p></div>
+                    <div class="col-md-6"><p><b>Alt Phone:</b> ${c.PhoneNoAlternate || ''}</p></div>
+                    <div class="col-md-6"><p><b>Email:</b> ${c.Email || ''}</p></div>
+                    <div class="col-md-6"><p><b>Alt Email:</b> ${c.EmailAlternate || ''}</p></div>
+                    <div class="col-md-6"><p><b>Address:</b> ${c.Address || ''}</p></div>
+                    <div class="col-md-6"><p><b>Provence:</b> ${c.Provence || ''}</p></div>
+                    <div class="col-md-6"><p><b>City:</b> ${c.City || ''}</p></div>
+                    <div class="col-md-12"><p><b>Country:</b>${c.Country || ''}</p></div>
+                                                       <div class="col-md-6">
+    <p><b>Is Active:</b> ${data.IsActive ? 'Active' : 'Inactive'}</p>
+</div>
+    </div>
+                    <div class="row d-none" id="contactinfoeditSection">
+    <!-- Left column -->
+    <div class="col-md-6">
+        <p class="mt-2 mb-1"><b>Phone:</b></p>
+        <input type="text" class="form-control mb-2" id="PhoneNoedit" value="${c.PhoneNo || ''}">
+
+        <p class="mt-2 mb-1"><b>Alt Phone:</b></p>
+        <input type="text" class="form-control mb-2" id="PhoneNoAlternateedit" value="${c.PhoneNoAlternate || ''}">
+
+        <p class="mt-2 mb-1"><b>Email:</b></p>
+        <input type="email" class="form-control mb-2" id="Emailedit" value="${c.Email || ''}">
+
+        <p class="mt-2 mb-1"><b>Alt Email:</b></p>
+        <input type="email" class="form-control mb-2" id="EmailAlternateedit" value="${c.EmailAlternate || ''}">
+    </div>
+
+    <!-- Right column -->
+    <div class="col-md-6">
+
+        <p class="mt-2 mb-1"><b>Provence:</b></p>
+        <input type="text" class="form-control mb-2" id="Provenceedit" value="${c.Provence || ''}">
+
+        <p class="mt-2 mb-1"><b>City:</b></p>
+        <input type="text" class="form-control mb-2" id="Cityedit" value="${c.City || ''}">
+
+        <p class="mt-2 mb-1"><b>Country:</b></p>
+        <input type="text" class="form-control mb-2" id="Countryedit" value="${c.Country || ''}">
+
+        <p class="mt-3 mb-1"><b>Is Active:</b></p>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="ContactIsActiveedit" value="true" ${data.IsActive ? 'checked' : ''}>
+            <label class="form-check-label">Active</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="ContactIsActiveedit" value="false" ${!data.IsActive ? 'checked' : ''}>
+            <label class="form-check-label">Inactive</label>
+        </div>
+    </div>
+        <div class="col-md-12 text-left">
+        <p class="mt-2 mb-1"><b>Address:</b></p>
+<input type="text" class="form-control mb-2" id="Addressedit" value="${c.Address || ''}">
+
+    </div>
+     </div>
+</div>
+
+
+  <div class="mb-3 d-flex flex-wrap gap-2 justify-content-end">
+    <button class="btn btn-sm btn-primary edit-section" id="contactInfoeditbtn" data-id="${c.ContactId}">Edit</button>
+    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addContactInfo" id="contactInfoaddmorebtn">
+                          Add More
+                        </button>
+   <button class="btn btn-sm btn-primary delete-section" id="contactInfodeletebtn" data-id="${c.ContactId}">Delete</button>
+<button class="btn btn-sm btn-success update-section d-none" id="contactInfoupdatebtn" data-id="${c.ContactId}">Update</button>
+<button class="btn btn-sm btn-secondary cancel-section d-none" id="contactInfocancelbtn" data-id="${c.ContactId}">Cancel</button>
+
+</div>`).join('')}
+
+
+                <!-- Job Info -->
+        <div class="divider text-start-center divider-warning">
+            <div class="divider-text fw-bold">Job Info</div>
+        </div>
+                ${empCV ? `
+        <div class="row mb-3">
+            <div class="col-md-12">
+    <b>CV:</b> ${empCV.FileName}
+    <button class="btn btn-sm btn-outline-primary ms-2 download-file" data-path="${empCV.FilePath}" id="downloadcv" data-id="${empCV.FileId}">
+        Download
+    </button>
+</div>
+        </div>` : ''}
+        ${(data.empjobinfolist || []).map(j => `
+        <div class="row mb-3" id="jobinfosection">
+            <div class="col-md-6"><p><b>Department:</b> ${j.DepartmentName || ''}</p></div>
+            <div class="col-md-6"><p><b>Designation:</b> ${j.Designation || ''}</p></div>
+            <div class="col-md-6"><p><b>Joining Date:</b> ${j.JoiningDatestring || ''}</p></div>
+            <div class="col-md-6"><p><b>Salary:</b> ${j.Salary || ''}</p></div>
+            <div class="col-md-6"><p><b>Status:</b> ${j.Status || ''}</p></div>
+            <div class="col-md-6"><p><b>Shift:</b> ${j.Shift || ''} (${j.ShiftTiming || ''})</p></div>
+                                                    <div class="col-md-6">
+    <p><b>Is Active:</b> ${data.IsActive ? 'Active' : 'Inactive'}</p>
+</div>       <div class="row d-none" id="jobinfoeditsection">
+    <!-- Left column -->
+    <div class="col-md-6">
+    <p class="mt-2 mb-1"><b>Upload CV:</b></p>
+<input class="form-control mb-2" type="file" id="uploadCVedit" name="files" data-title="EmpCV" data-id="${empCV.FileId}">
+
+        <p class="mt-2 mb-1"><b>Department:</b></p>
+<select class="form-control mb-2" id="Departmentedit"></select>
+
+<p class="mt-2 mb-1"><b>Designation:</b></p>
+        <input type="text" class="form-control mb-2" id="Designationedit" value="${j.Designation || ''}">
+
+        <p class="mt-2 mb-1"><b>Joining Date:</b></p>
+        <input type="date" class="form-control mb-2" id="JoiningDateedit" value="${j.JoiningDatestring || ''}">
+
+        <p class="mt-2 mb-1"><b>Salary:</b></p>
+        <input type="number" class="form-control mb-2" id="Salaryedit" value="${j.Salary || ''}">
+    </div>
+
+    <!-- Right column -->
+    <div class="col-md-6 text-left">
+        <p class="mt-2 mb-1"><b>Status:</b></p>
+        <input type="text" class="form-control mb-2" id="Statusedit" value="${j.Status || ''}">
+
+        <p class="mt-2 mb-1"><b>Shift:</b></p>
+        <input type="text" class="form-control mb-2" id="Shiftedit" value="${j.Shift || ''}">
+
+        <p class="mt-2 mb-1"><b>Shift Timings:</b></p>
+        <input type="text" class="form-control mb-2" id="ShiftTimingedit" value="${j.ShiftTiming || ''}">
+
+        <p class="mt-3 mb-1"><b>Is Active:</b></p>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="JobIsActiveedit" value="true" ${j.IsActive ? 'checked' : ''}>
+            <label class="form-check-label">Currently Active</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="JobIsActiveedit" value="false" ${!j.IsActive ? 'checked' : ''}>
+            <label class="form-check-label">Inactive</label>
+        </div>
+    </div>
+
+</div>
+
+        <div class="row mb-3">
+  <div class="col-md-12 d-flex flex-wrap gap-2 justify-content-end">
+        <button class="btn btn-sm btn-primary edit-section" id="jobInfoeditbtn" data-id="${j.JobId}" data-departmentid="${j.DepartmentId}">Edit</button>
+    <button class="btn btn-sm btn-primary addmore-section" id="jobInfoaddmorebtn" data-id="${j.JobId}" onclick="showaddJobInfoModel(${empId}, ${username})">Add More</button>
+<button class="btn btn-sm btn-primary delete-section" id="jobInfodeletebtn" data-id="${j.JobId}">Delete</button>
+<button class="btn btn-sm btn-success update-section d-none" id="jobInfoupdatebtn" data-id="${j.JobId}">Update</button>
+<button class="btn btn-sm btn-secondary cancel-section d-none" id="jobInfocancelbtn" data-id="${j.JobId}">Cancel</button>
+ </div>
+</div>`).join('')}
+
+
+
+                <!-- Credentials -->
+                <div class="divider text-start-center divider-info">
+                    <div class="divider-text fw-bold">Credentials</div>
+                </div>
+                ${(data.empCredentialslist || []).map(c => `
+                <div class="row mb-3" id="credentialssection">
+                    <div class="col-md-6"><p><b>Username:</b> ${c.Username || ''}</p></div>
+                    <div class="col-md-6"><p><b>Role:</b> ${c.RoleName || ''}</p></div>
+                    <div class="col-md-6"><p><b>Roles Under Me:</b> ${c.RolesUnderMeNames || ''}</p></div>
+                                                            <div class="col-md-6">
+    <p><b>Is Active:</b> ${data.IsActive ? 'Active' : 'Inactive'}</p>
+</div>
+                </div>
+                               <div class="row d-none" id="credentialseditsection">
+    <div class="col-md-6">
+        <p class="mt-2 mb-1"><b>Username:</b></p>
+        <input type="text" class="form-control mb-2" id="usernameedit" value="${c.Username || ''}">
+    </div>
+
+    <div class="col-md-6">
+        <p class="mt-2 mb-1"><b>Role:</b></p>
+        <select class="form-control mb-2" id="myrolesListedit"></select>
+    </div>
+
+    <div class="col-md-6">
+        <p class="mt-2 mb-1"><b>Roles Under Me:</b></p>
+        <select class="form-control mb-2" id="rolesListundermeedit" multiple="multiple"></select>
+    </div>
+
+    <div class="col-md-6">
+        <p class="mt-2 mb-1"><b>Is Active:</b></p>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="CredentialsIsActiveedit" value="true" ${c.IsActive ? 'checked' : ''}>
+            <label class="form-check-label">Active</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="CredentialsIsActiveedit" value="false" ${!c.IsActive ? 'checked' : ''}>
+            <label class="form-check-label">Inactive</label>
+        </div>
+    </div>
+</div>
+
+
+                                               <div class="row mb-3">
+  <div class="col-md-12 d-flex flex-wrap gap-2 justify-content-end">
+            <button class="btn btn-sm btn-primary edit-section" id="credentialsInfoeditbtn" data-id="${c.CredentialsId}" data-roleid="${c.RoleId}" data-rolesunderme="${c.RoleIdsUnderMe}">Edit</button>
+    <button class="btn btn-sm btn-primary addmore-section" id="credentialsInfoaddmorebtn" data-id="${c.CredentialsId}" onclick="showaddCredentialsInfoModel(${empId}, ${username})">Add More</button>
+<button class="btn btn-sm btn-primary delete-section" id="credentialsInfodeletebtn" data-id="${c.CredentialsId}">Delete</button>
+<button class="btn btn-sm btn-success update-section d-none" id="credentialsInfoupdatebtn" data-id="${c.CredentialsId}">Update</button>
+<button class="btn btn-sm btn-secondary cancel-section d-none" id="credentialsInfocancelbtn" data-id="${c.CredentialsId}">Cancel</button>
+  </div>
+</div>`).join('')}
+
+
+
+                <!-- Documents -->
+        <div class="divider text-start-center divider-danger">
+            <div class="divider-text fw-bold">Documents</div>
+        </div>
+        ${otherDocs.map(f => `
+        <div class="row mb-3" id="personaldocssection">
+            <div class="col-md-6"><p><b>Title:</b> ${f.FileTitle || ''}</p></div>
+            <div class="col-md-6"><p><b>File Name:</b> ${f.FileName || ''}</p></div>
+            <div class="col-md-6"><p><b>Type:</b> ${f.FileType || ''}</p></div>
+            <div class="col-md-6"><p><b>Size:</b> ${f.FileSize || ''}</p></div>
+
+                   <div class="row mb-3">
+  <div class="col-md-12 d-flex flex-wrap gap-2 justify-content-end">
+    <button class="btn btn-sm btn-primary download-file" data-path="${f.FilePath}">
+    Download
+</button>
+    <button class="btn btn-sm btn-primary edit-section">Edit</button>
+    <button class="btn btn-sm btn-primary addmore-section">Add More</button>
+    <button class="btn btn-sm btn-primary delete-section">Delete</button>
+    <button class="btn btn-sm btn-success update-section d-none">Update</button>
+    <button class="btn btn-sm btn-secondary cancel-section d-none">Cancel</button>
+  </div>
+</div>
+        </div>`).join('')}
+            `;
+
+            $("#" + tabId + " .card-body").html(html);
+
+            $("#" + tabId + " .card-body .download-file").off("click").on("click", function () {
+                let filePath = $(this).data("path");
+                if (filePath) {
+                    downloadFile(filePath);
+                } else {
+                    alert("File path is missing!");
+                }
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("Error loading employee:", error);
+            alert("Failed to load employee data.");
+        }
+    });
+}
+
+
+       function downloadFile(filePath) {
+    if (!filePath) {
+        alert("File path is missing!");
+        return;
+    }
+
+    // Encode file path to pass safely
+    let url = '@Url.Action("DownloadFile", "Employees", new { area = "EMS" })' + "?filePath=" + encodeURIComponent(filePath);
+
+    // Trigger download
+    let link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", ""); // server sets filename
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+        }
+
+
+        function formatDateForInput(dateStr) {
+            if (!dateStr) return "";
+            const d = new Date(dateStr);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
+        }
+
+
+        $(document).on("click", "#personalInfoeditbtn", function () {
+            $("#personalinfoSection").addClass("d-none");
+            $("#personalinfoeditSection").removeClass("d-none");
+            $("#personalInfoeditbtn, #personalInfodeletebtn").addClass("d-none");
+            $("#personalInfoupdatebtn, #personalInfocancelbtn").removeClass("d-none");
+        });
+
+        $(document).on("click", "#personalInfocancelbtn", function () {
+            $("#personalinfoSection").removeClass("d-none");
+            $("#personalinfoeditSection").addClass("d-none");
+            $("#personalInfoeditbtn, #personalInfodeletebtn").removeClass("d-none");
+            $("#personalInfoupdatebtn, #personalInfocancelbtn").addClass("d-none");
+        });
+
+
+
+        $(document).on("click", "#personalInfoupdatebtn", function (e) {
+    e.preventDefault(); // prevent default form submit
+    debugger;
+
+    let empId = $(this).data("id"); // employee Id from button
+
+    let model = {
+        Id: empId,
+        FirstName: $("#firstNameedit").val(),
+        LastName: $("#lastNameedit").val(),
+        FullName: $("#FullNameedit").val(),
+        FatherName: $("#FatherNameedit").val(),
+        CNIC: $("#CNICedit").val(),
+        DateOfBirth: $("#DOBedit").val(),
+        Age: $("#Ageedit").val(),
+        Religion: $("#Religionedit").val(),
+        Nationality: $("#Nationalityedit").val(),
+        Gender: $("input[name='Genderedit']:checked").val(),
+        MaritalStatus: $("input[name='MaritalStatusedit']:checked").val(),
+        IsActive: $("input[name='IsActiveedit']:checked").val(),
+        Username: $('#usernametoedit').val(),
+        Files: []
+    };
+
+    let filePromises = [];
+
+    // Handle file upload (if new image selected)
+    $("input[type=file][id=uploadImageedit]").each(function () {
+        let title = $(this).data("title") || "EmpImage";
+        let files = $(this)[0].files;
+        let fileid = $(this).data("id");
+
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+
+            let promise = new Promise((resolve) => {
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    let base64String = e.target.result.split(',')[1];
+                    model.Files.push({
+                        FileId: fileid,
+                        FileName: file.name,
+                        FileTitle: title,
+                        FileType: file.type,
+                        FileBytes: base64String
+                    });
+                    resolve();
+                };
+                reader.readAsDataURL(file);
+            });
+
+            filePromises.push(promise);
+        }
+    });
+
+    // Wait until all files are read
+    Promise.all(filePromises).then(function () {
+        $.ajax({
+            url: '@Url.Action("EmployeePersonalInfoUpdate", "Employees", new { area = "EMS" })',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(model),
+            success: function (res) {
+                if (res.success) {
+                    alert("Employee updated successfully!");
+                    appendEdittabwithdata(empId);
+                } else {
+                    alert("Error: " + res.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+                alert("Error while updating employee.");
+            }
+        });
+    });
+        });
+
+        // ===== Edit =====
+$(document).on("click", ".contactinfo-edit-section", function () {
+    let wrapper = $(this).closest(".contact-info-wrapper");
+    wrapper.find("#contactinfoSection").addClass("d-none");
+    wrapper.find("#contactinfoeditSection").removeClass("d-none");
+    wrapper.find(".edit-section, .delete-section").addClass("d-none");
+    wrapper.find(".update-section, .cancel-section").removeClass("d-none");
+});
+
+// ===== Cancel =====
+        $(document).on("click", ".contactinfo-cancel-section", function () {
+    let wrapper = $(this).closest(".contact-info-wrapper");
+    wrapper.find("#contactinfoSection").removeClass("d-none");
+    wrapper.find("#contactinfoeditSection").addClass("d-none");
+    wrapper.find(".edit-section, .delete-section").removeClass("d-none");
+    wrapper.find(".update-section, .cancel-section").addClass("d-none");
+});
+
+// ===== Update =====
+        $(document).on("click", ".contactinfo-update-section", function () {
+    let wrapper = $(this).closest(".contact-info-wrapper");
+    let contactId = wrapper.data("id");
+
+    let model = {
+        ContactId: contactId,
+        PhoneNo: $("#PhoneNoedit").val(),
+        PhoneNoAlternate: $("#PhoneNoAlternateedit").val(),
+        Email: $("#Emailedit").val(),
+        EmailAlternate: $("#EmailAlternateedit").val(),
+        Address: $("#Addressedit").val(),
+        Provence: $("#Provenceedit").val(),
+        City: $("#Cityedit").val(),
+        Country: $("#Countryedit").val(),
+        IsActive: $("input[name='ContactIsActiveedit']:checked").val(),
+        Username: $('#usernametoedit').val(),
+        Type: "Edit"
+    };
+
+    $.ajax({
+        url: '@Url.Action("EmployeeContactInfoUpdate", "Employees", new { area = "EMS" })',
+        type: 'POST',
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(model),
+        success: function (res) {
+            if (res.success) {
+                alert("Contact info updated successfully!");
+                appendEdittabwithdata(contactId);
+            } else {
+                alert("Error: " + res.message);
+            }
+        }
+    });
+});
+
+// ===== Delete =====
+        $(document).on("click", ".contactinfo-delete-section", function () {
+    let wrapper = $(this).closest(".contact-info-wrapper");
+    let contactId = wrapper.data("id");
+
+    if (!confirm("Are you sure you want to delete this contact info?")) return;
+
+    $.ajax({
+        url: '@Url.Action("EmployeeContactInfoDelete", "Employees", new { area = "EMS" })',
+        type: 'POST',
+        data: { id: contactId },
+        success: function (res) {
+            if (res.success) {
+                alert("Contact info deleted successfully!");
+                wrapper.remove(); // remove only that record
+            } else {
+                alert("Error: " + res.message);
+            }
+        }
+    });
+});
+
+
+$(document).on("click", "#jobInfoeditbtn", function () {
+    let jobId = $(this).data("id");
+    let departmentId = $(this).data("departmentid");
+
+    // Hide view section, show edit section
+    $("#jobinfosection").addClass("d-none");
+    $("#jobinfoeditsection").removeClass("d-none");
+
+    // Toggle buttons
+    $("#jobInfoeditbtn, #jobInfodeletebtn").addClass("d-none");
+    $("#jobInfoupdatebtn, #jobInfocancelbtn").removeClass("d-none");
+
+    // Initialize department dropdown
+    initDepartmentsDropdown($("#Departmentedit"), departmentId);
+});
+
+// --- Cancel Edit ---
+$(document).on("click", "#jobInfocancelbtn", function () {
+    $("#jobinfosection").removeClass("d-none");
+    $("#jobinfoeditsection").addClass("d-none");
+
+    // Toggle buttons
+    $("#jobInfoeditbtn, #jobInfodeletebtn").removeClass("d-none");
+    $("#jobInfoupdatebtn, #jobInfocancelbtn").addClass("d-none");
+});
+
+// --- Update Job Info ---
+$(document).on("click", "#jobInfoupdatebtn", function (e) {
+    e.preventDefault();
+    debugger;
+
+    let jobId = $(this).data("id");
+
+    let model = {
+        JobId: jobId,
+        DepartmentId: $("#Departmentedit").val(),
+        Designation: $("#Designationedit").val(),
+        JoiningDate: $("#JoiningDateedit").val(),
+        Salary: $("#Salaryedit").val(),
+        Status: $("#Statusedit").val(),
+        Shift: $("#Shiftedit").val(),
+        ShiftTiming: $("#ShiftTimingedit").val(),
+        IsActive: $("input[name='JobIsActiveedit']:checked").val(),
+        Username: $('#usernametoedit').val(),
+        Files: []
+    };
+
+    let filePromises = [];
+
+    // Handle CV file upload
+    $("input[type=file][id=uploadCVedit]").each(function () {
+        let title = $(this).data("title") || "EmpCV";
+        let files = $(this)[0].files;
+        let fileid = $(this).data("id");
+
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+
+            let promise = new Promise((resolve) => {
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    let base64String = e.target.result.split(',')[1];
+                    model.Files.push({
+                        FileId: fileid,
+                        FileName: file.name,
+                        FileTitle: title,
+                        FileType: file.type,
+                        FileBytes: base64String
+                    });
+                    resolve();
+                };
+                reader.readAsDataURL(file);
+            });
+
+            filePromises.push(promise);
+        }
+    });
+
+    // After reading files
+    Promise.all(filePromises).then(function () {
+        $.ajax({
+            url: '@Url.Action("EmployeeJobInfoUpdate", "Employees", new { area = "EMS" })',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(model),
+            success: function (res) {
+                if (res.success) {
+                    alert("Job info updated successfully!");
+                    appendEdittabwithdata(jobId); // reload updated data
+                } else {
+                    alert("Error: " + res.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+                alert("Error while updating job info.");
+            }
+        });
+    });
+});
+
+    // Edit
+$(document).on("click", "#credentialsInfoeditbtn", function () {
+    $("#credentialssection").addClass("d-none");
+    $("#credentialseditsection").removeClass("d-none");
+
+    $("#credentialsInfoeditbtn, #credentialsInfodeletebtn").addClass("d-none");
+    $("#credentialsInfoupdatebtn, #credentialsInfocancelbtn").removeClass("d-none");
+
+    let roleId = $(this).data("roleid");
+    let rolesUnderMe = ($(this).data("rolesunderme") || "").toString().split(",").filter(Boolean);
+
+    initRolesDropdown($("#myrolesListedit"), $("#rolesListundermeedit"), roleId, rolesUnderMe);
+
+});
+
+// Cancel
+$(document).on("click", "#credentialsInfocancelbtn", function () {
+    $("#credentialssection").removeClass("d-none");
+    $("#credentialseditsection").addClass("d-none");
+
+    $("#credentialsInfoeditbtn, #credentialsInfodeletebtn").removeClass("d-none");
+    $("#credentialsInfoupdatebtn, #credentialsInfocancelbtn").addClass("d-none");
+});
+
+// Update
+$(document).on("click", "#credentialsInfoupdatebtn", function (e) {
+    e.preventDefault();
+
+    let credId = $(this).data("id");
+    let model = {
+        CredentialsId: credId,
+        Username: $("#usernameedit").val(),
+        RoleId: $("#myrolesList").val(),
+        RolesUnderMe: ($("#rolesListunderme").val() || []).join(","),
+        IsActive: $("input[name='CredentialsIsActiveedit']:checked").val(),
+        Username: $('#usernametoedit').val(),
+        Type: "Edit"
+    };
+
+    $.ajax({
+        url: '@Url.Action("EmployeeCredentialsUpdate", "Employees", new { area = "EMS" })',
+        type: 'POST',
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(model),
+        success: function (res) {
+            if (res.success) {
+                alert("Credentials updated successfully!");
+                appendEdittabwithdata(model.CredentialsId);
+            } else {
+                alert("Error: " + res.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error:", error);
+            alert("Error while updating credentials.");
+        }
+    });
+});
+
+        function showaddContactInfoModel(empId, username) {
+            debugger;
+            $("#hiddenempId").val(empId);
+            $('#usernametoedit').val(username);
+            $("#addContactInfo").modal("show");
+        }
+
+        function showaddJobInfoModel(empId, username) {
+            $("#hiddenempId").val(empId);
+            $('#usernametoedit').val(username);
+            let $dropdownnew = $("#departmentsListaddmore");
+            initDepartmentsDropdown($dropdownnew);
+            $("#addJobInfo").modal("show");
+        }
+
+        function showaddCredentialsInfoModel(empId, username) {
+            $("#hiddenempId").val(empId);
+            $('#usernametoedit').val(username);
+            let $dropdownrole = $("#myrolesListaddmore");
+            let $dropdownrolesunderme = $("#rolesListundermeaddmore");
+            initRolesDropdown($dropdownrole, $dropdownrolesunderme);
+            $("#addCredentialsInfo").modal("show");
+        }
+
+        function showaddFilesInfoModel(empId, username) {
+            $("#hiddenempId").val(empId);
+            $('#usernametoedit').val(username);
+            $("#addFilesInfo").modal("show");
+        }
+
+        function showaddPayRolInfoModel(empId, username) {
+            $("#hiddenempId").val(empId);
+            $('#usernametoedit').val(username);
+            $("#addPayRoleInfo").modal("show");
+        }
+
+    function addContactInfo() {
+    let empId = $("#hiddenempId").val(); // Get employee ID from hidden field
+
+    if (!empId) {
+        alert("Employee ID is missing!");
+        return;
+    }
+
+    let model = {
+        EmpId: empId,
+        Id: empId,
+        PhoneNo: $("#phone1addmore").val(),
+        PhoneNoAlternate: $("#phone2addmore").val(),
+        Email: $("#email1addmore").val(),
+        EmailAlternate: $("#email2addmore").val(),
+        Address: $("#addressaddmore").val(),
+        Provence: $("#provenceaddmore").val(),
+        City: $("#cityaddmore").val(),
+        Country: $("#countryaddmore").val(),
+        IsActive: $("#isactiveaddmore").is(":checked"),
+        Username: $('#usernametoedit').val(),
+        Type: "AddMore"
+    };
+
+    $.ajax({
+        url: '@Url.Action("EmployeeContactInfoUpdate", "Employees", new { area = "EMS" })',
+        type: 'POST',
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(model),
+        success: function (res) {
+            if (res.success) {
+                alert("Contact info added successfully!");
+                $("#addContactInfo").modal("hide");
+                appendEdittabwithdata(model.EmpId, model.Username);
+             } else {
+                alert("Error: " + res.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error:", error);
+            alert("Error while adding contact info.");
+        }
+    });
+}
+
+    function addJobInfo() {
+    let empId = $("#hiddenempId").val(); // Get employee ID from hidden field
+
+    if (!empId) {
+        alert("Employee ID is missing!");
+        return;
+    }
+
+    let model = {
+        EmpId: empId,
+        Id: empId,
+        DepartmentId: $("#departmentsListaddmore").val(),
+        Designation: $("#designationaddmore").val(),
+        JoiningDate: $("#joiningDateaddmore").val(),
+        Salary: $("#salaryaddmore").val(),
+        Shift: $("input[name='shiftaddmore']:checked").val(),
+        ShiftTiming: $("#shifttimmingsaddmore").val(),
+        Status: $("input[name='statusaddmore']:checked").val(),
+        IsActive: $("#isactiveaddmore").is(":checked"),
+        Username: $('#usernametoedit').val(),
+        Files: []
+    };
+
+    let fileInput = $("#formFileCVaddmore")[0].files;
+    if (fileInput.length > 0) {
+        let file = fileInput[0];
+        let reader = new FileReader();
+        reader.onload = function (e) {
+            let base64String = e.target.result.split(',')[1];
+            model.Files.push({
+                FileName: file.name,
+                FileTitle: $("#formFileCVaddmore").data("title"),
+                FileType: file.type,
+                FileBytes: base64String
+            });
+
+            sendJobInfo(model);
+        };
+        reader.readAsDataURL(file);
+    } else {
+        sendJobInfo(model);
+    }
+}
+
+function sendJobInfo(model) {
+    $.ajax({
+        url: '@Url.Action("EmployeeJobInfoUpdate", "Employees", new { area = "EMS" })',
+        type: 'POST',
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(model),
+        success: function (res) {
+            if (res.success) {
+                alert("Job info added successfully!");
+                $("#addJobInfo").modal("hide");
+                appendEdittabwithdata(model.EmpId, model.Username);
+            } else {
+                alert("Error: " + res.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error:", error);
+            alert("Error while adding job info.");
+        }
+    });
+}
+
+    function addCredentialsInfo() {
+    let empId = $("#hiddenempId").val();
+
+    let model = {
+        EmpId: empId,
+        Id: empId,
+        Username: $("#usernameaddmore").val(),
+        Password: $("#passwordaddmore").val(),
+        MyRoleId: $("#myrolesListaddmore").val(),
+        RolesUnderMeIds: $("#rolesListundermeaddmore").val(),
+        Username: $('#usernametoedit').val(),
+        Type: "AddMore"
+    };
+
+    $.ajax({
+        url: '@Url.Action("EmployeeCredentialsUpdate", "Employees", new { area = "EMS" })',
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(model),
+        success: function (res) {
+            if (res.success) {
+                alert("Credentials info added successfully!");
+                appendEdittabwithdata(empId, model.Username);
+                $("#addCredentialsInfo").modal("hide");
+            } else {
+                alert("Error: " + res.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error:", error);
+            alert("Error while adding credentials info.");
+        }
+    });
+}
+
+    function addFiles() {
+    let empId = $("#hiddenempId").val();
+    let files = $("#personaldocsaddmore")[0].files;
+    let title = $("#titleaddmore").val();
+        let Username = $('#usernametoedit').val();
+    if (!files || files.length === 0) {
+        alert("Please select at least one file.");
+        return;
+    }
+
+    let formData = new FormData();
+        formData.append("Id", empId);
+        formData.append("Username", Username);
+    for (let i = 0; i < files.length; i++) {
+        formData.append("Files[" + i + "].FileName", files[i].name);
+        formData.append("Files[" + i + "].FileTitle", title);
+        formData.append("Files[" + i + "].FileBytes", files[i]);
+    }
+
+    $.ajax({
+        url: '@Url.Action("UploadFiles", "Employees", new { area = "EMS" })',
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+            if (res.success) {
+                alert("Files uploaded successfully!");
+                appendEdittabwithdata(empId, Username);
+                $("#addFiles").modal("hide");
+            } else {
+                alert("Error: " + res.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error:", error);
+            alert("Error while uploading files.");
+        }
+    });
+}
+        function handleEmployeeAction(empId, username, actionType) {
+    let confirmMsg = "";
+    if (actionType === "inactive") {
+        confirmMsg = "Are you sure you want to set " + username + " as Inactive?";
+    } else if (actionType === "delete") {
+        confirmMsg = "Are you sure you want to permanently delete " + username + " and all related records?";
+    }
+
+    if (!confirm(confirmMsg)) {
+        return;
+    }
+
+    $.ajax({
+        url: '@Url.Action("HandleEmployeeAction", "Employees", new { area = "EMS" })',
+        type: 'POST',
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({
+            EmpId: empId,
+            ActionType: actionType
+        }),
+        success: function (res) {
+            if (res.success) {
+                alert(username + " " + (actionType === "inactive" ? "set Inactive" : "deleted") + " successfully!");
+                GetEmployeesList();
+            } else {
+                alert("Error: " + res.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error:", error);
+            alert("Something went wrong!");
+        }
+    });
+}
+
+// For backward compatibility
+function SetInActive(empId, username) {
+    handleEmployeeAction(empId, username, "inactive");
+}
+
+function Delete(empId, username) {
+    handleEmployeeAction(empId, username, "delete");
+}
+
+    </script>
+
+}

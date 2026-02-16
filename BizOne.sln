@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BizOne", "BizOne.csproj", "{2F6D94CC-BE52-4A04-A2B1-4D6DA9F6DD86}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BizOne.DAL", "..\BizOne.DAL\BizOne.DAL.csproj", "{54F83283-5316-43B0-BF1C-1F7F91512A3E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BizOne.Common", "..\BizOne.Common\BizOne.Common.csproj", "{657283B6-0AF7-473D-B9A9-8DBEC36F887B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2F6D94CC-BE52-4A04-A2B1-4D6DA9F6DD86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F6D94CC-BE52-4A04-A2B1-4D6DA9F6DD86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F6D94CC-BE52-4A04-A2B1-4D6DA9F6DD86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F6D94CC-BE52-4A04-A2B1-4D6DA9F6DD86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54F83283-5316-43B0-BF1C-1F7F91512A3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54F83283-5316-43B0-BF1C-1F7F91512A3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54F83283-5316-43B0-BF1C-1F7F91512A3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54F83283-5316-43B0-BF1C-1F7F91512A3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{657283B6-0AF7-473D-B9A9-8DBEC36F887B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{657283B6-0AF7-473D-B9A9-8DBEC36F887B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{657283B6-0AF7-473D-B9A9-8DBEC36F887B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{657283B6-0AF7-473D-B9A9-8DBEC36F887B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {652875BB-E887-4C25-945E-80C7FC02D20D}
+	EndGlobalSection
+EndGlobal

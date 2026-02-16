@@ -1,0 +1,445 @@
+﻿
+@{
+    ViewBag.Title = "OffDaysForm";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="card mb-4">
+        <h5 class="card-header">Set Off Days</h5>
+        <div class="card-body">
+            <form id="form">
+                <input type="hidden" id="Id" value="0" />
+
+                <div class="row">
+                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                        <label class="form-label">Date Range</label>
+                        <input type="text" class="form-control" id="dateRange" placeholder="Select date range">
+                    </div>
+
+                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                        <label class="form-label">Days</label>
+                        <input type="text" class="form-control" id="days" readonly>
+                    </div>
+
+                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2">
+                        <label class="form-label">Reason</label>
+                        <textarea class="form-control" rows="4" id="reason"></textarea>
+                    </div>
+
+                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2">
+                        <label class="form-label">Type</label>
+                        <select id="OffType" class="form-control">
+                            <option value="">-- Select Off Type --</option>
+                            <option value="Eid ul Fitar">Eid ul Fitar</option>
+                            <option value="Eid ul Azha">Eid ul Azha</option>
+                            <option value="Eid Milad Un Nabi">Eid Milad Un Nabi</option>
+                            <option value="9 & 10 Muharram">9 & 10 Muharram</option>
+                            <option value="23 March (Resolution Day)">23 March (Resolution Day)</option>
+                            <option value="14 August (Independence Day)">14 August (Independence Day)</option>
+                            <option value="6 September (Defence Day)">6 September (Defence Day)</option>
+                            <option value="1 May (Labor Day)">1 May (Labor Day)</option>
+                            <option value="25 December (Quaid Day)">25 December (Quaid Day)</option>
+                            <option value="5 February (Kashmir Day)">5 February (Kashmir Day)</option>
+                            <option value="28 May (Youm e Takbeer Day)">28 May (Youm e Takbeer Day)</option>
+                            <option value="Official Travel">Official Travel</option>
+                            <option value="Official Holiday">Official Holiday</option>
+                        </select>
+                    </div>
+
+                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2">
+                        <div class="form-check form-check mt-3">
+                            <input class="form-check-input" type="checkbox" id="chkAllRoles" name="EmployeeRights" value="AllRoles" />
+                            <label class="form-check-label" for="chkAllRoles">For All Roles</label>
+                        </div>
+
+                        <div class="form-check form-check mt-1">
+                            <input class="form-check-input" type="checkbox" id="chkSpecificRoles" name="EmployeeRights" value="SpecificRoles" />
+                            <label class="form-check-label" for="chkSpecificRoles">For Specific Roles</label>
+                        </div>
+                    </div>
+
+                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2 d-none" id="roleslist">
+                        <label class="form-label">Roles</label>
+                        <select id="rolesListDropdown" class="form-control" multiple></select>
+                    </div>
+
+                    <div class="col-12 text-end p-4">
+                        <button type="submit" class="btn btn-primary" id="btnAddOffDays">Add</button>
+                            <button type="button" class="btn btn-secondary d-none" id="btnCancelOffDays">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <h5 class="card-header">Off Days List</h5>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+
+                </div>
+                <div class="col-md-4">
+                    <input type="search" class="form-control" placeholder="Search.." id="search" />
+                </div>
+            </div>
+            <br />
+            <table id="offslist" class="table table-hover align-middle shadow-sm rounded">
+                <thead style="background-color: #3b5d50">
+                    <tr>
+                        <th style="color: white">Date Range</th>
+                          <th style="color: white">Off Day Type</th>
+                        <th style="color: white">Is Active</th>
+                        <th style="color: white" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScroll" aria-labelledby="offcanvasScrollLabel" aria-modal="true" role="dialog">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasScrollLabel" class="offcanvas-title">Off Days Data</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body my-auto mx-0 flex-grow-0" id="offdaysdata">
+
+    </div>
+</div>
+@section scripts{
+    <script>
+        $(document).ready(function () {
+    var $dropdown = $("#rolesListDropdown");
+
+    // Initialize Select2
+    $dropdown.select2({
+        placeholder: "-- Select Role --",
+        allowClear: true,
+        width: '100%'
+    });
+
+    // Checkbox change event
+    $("#chkSpecificRoles").change(function () {
+        if ($(this).is(":checked")) {
+            $("#roleslist").removeClass("d-none"); // Show roles dropdown
+
+            // Load roles via AJAX only when shown
+            $.ajax({
+                url: '@Url.Action("GetRolesDropdown", "Rights", new { area = "Admin" })',
+                type: 'GET',
+                dataType: 'json',
+                success: function (roles) {
+                    debugger;
+                    $dropdown.empty().append('<option value="">-- Select Role --</option>');
+                    $.each(roles, function (i, role) {
+                        $dropdown.append(`<option value="${role.Id}">${role.Name}</option>`);
+                    });
+
+                    if (window.preSelectedRoles && window.preSelectedRoles.length > 0) {
+                        $dropdown.val(window.preSelectedRoles).trigger("change");
+                        window.preSelectedRoles = null; // reset after use
+                    } else {
+                        $dropdown.trigger("change"); // normal refresh
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error loading roles:", error);
+                    alert("Failed to load roles.");
+                }
+            });
+        } else {
+            $("#roleslist").addClass("d-none"); // Hide roles dropdown
+            $dropdown.val(null).trigger('change'); // Reset selection
+        }
+    });
+
+    // If "For All Roles" is checked, uncheck "For Specific Roles"
+    $("#chkAllRoles").change(function () {
+        if ($(this).is(":checked")) {
+            $("#chkSpecificRoles").prop("checked", false).trigger("change");
+        }
+    });
+
+    // If "For Specific Roles" is checked, uncheck "For All Roles"
+    $("#chkSpecificRoles").change(function () {
+        if ($(this).is(":checked")) {
+            $("#chkAllRoles").prop("checked", false);
+        }
+    });
+
+        flatpickr("#dateRange", {
+            mode: "range",
+            dateFormat: "Y-m-d",
+            onClose: function (selectedDates) {
+                if (selectedDates.length === 2) {
+                    const diffTime = Math.abs(selectedDates[1] - selectedDates[0]);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                    $("#days").val(diffDays);
+                }
+            }
+        });
+
+        // 🔹 Load Off Days List
+        var table = $("#offslist").DataTable({
+            lengthChange: false,
+            info: false,
+            searching: false,
+            ajax: {
+                url: '@Url.Action("GetOffDays", "OffDays", new { area = "Admin" })',
+                type: "GET"
+            },
+            columns: [
+                { data: "DateRange" },
+                { data: "OffDaysType" },
+                {
+                    data: "IsActive",
+                    render: function (data) {
+                        return data
+                            ? '<span class="badge bg-success">Active</span>'
+                            : '<span class="badge bg-danger">Inactive</span>';
+                    }
+                },
+                {
+                    data: "Id",
+                    className: "text-center",
+                    render: function (id, type, row) {
+                        let html = '';
+                        html += `
+                                                    <button class="btn btn-icon btn-primary waves-effect waves-light offdaysdata"
+        data-id="${row.Id}"
+        type="button" data-bs-toggle="offcanvas"
+        data-bs-target="#offcanvasScroll" aria-controls="offcanvasScroll"
+        title="View Details">
+   <span class="mdi mdi-information-outline"></span>
+</button>`;
+                        if (!row.IsActive) {
+                            html += `
+        <button type="button" class="btn btn-icon btn-primary active" data-id="${id}" title="Active">
+            <span class="tf-icons mdi mdi-check-circle-outline"></span>
+        </button>`;
+                        } else {
+                            html += `
+        <button type="button" class="btn btn-icon btn-primary inactive" data-id="${id}" title="Inactive">
+            <span class="tf-icons mdi mdi-close-circle-outline"></span>
+        </button>`;
+                        }
+
+                        html +=  `
+<button type="button" class="btn btn-icon btn-primary editOffDay" data-id="${id}" title="Edit Data">
+   <span class="tf-icons mdi mdi-pencil-outline"></span>
+</button>
+<button type="button" class="btn btn-icon btn-primary deleteOffDay" data-id="${id}" title="delete Data">
+   <span class="tf-icons mdi mdi-delete-outline"></span>
+</button>`;
+
+                        return html;
+                    }
+                }
+            ]
+        });
+
+        // Enable bootstrap popovers after draw
+        $('#offslist').on('draw.dt', function () {
+            $('[data-bs-toggle="popover"]').popover({
+                placement: 'top',
+                sanitize: false,
+                html: true,
+                trigger: 'hover'
+            });
+        });
+
+        // Close popover when × clicked
+        $(document).on("click", ".close-popover", function () {
+            $(this).closest(".popover").popover('hide');
+        });
+
+            $("#offslist").on("click", ".offdaysdata", function () {
+    var id = $(this).data("id");
+    $.ajax({
+        url: '@Url.Action("GetOffDayById", "OffDays", new { area = "Admin" })',
+        type: "GET",
+        data: { id: id },
+        success: function (offDay) {
+            let html = `
+                       <div class="mb-2"><b>Added By:</b> ${offDay.FullName}</div>
+<div class="mb-2"><b>Department:</b> ${offDay.DepartmentName}</div>
+                <div class="mb-2"><b>Date Range:</b> ${offDay.DateRange}</div>
+                <div class="mb-2"><b>Days:</b> ${offDay.Days}</div>
+                <div class="mb-2"><b>Reason:</b> ${offDay.Reason}</div>
+                <div class="mb-2"><b>Is for all Roles:</b> ${offDay.IsforAllRoles ? "For All Roles" : "For Specific Roles"}</div>
+                <div class="mb-2"><b>Specific Roles Names:</b> ${offDay.RoleNames}</div>
+                <div class="mb-2"><b>Type:</b> ${offDay.OffDaysType}</div>
+                <div class="mb-2"><b>Added Date:</b> ${offDay.AddedDateString}</div>
+                <div class="mb-2"><b>Active:</b> ${offDay.IsActive ? "Active" : "InActive"}</div>
+                <div class="mb-2"><b>Last Modified Date:</b> ${offDay.ModifiedDateString}</div>
+
+            `;
+
+            $("#offdaysdata").html(html);
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching leave:", error);
+            $("#leavedata").html("<p class='text-danger'>Unable to load leave details.</p>");
+        }
+    });
+});
+
+
+$("#form").on("submit", function (e) {
+    e.preventDefault();
+
+    var isForAllRoles = $("#chkAllRoles").is(":checked");
+    var roleIds = "";
+
+    if ($("#chkSpecificRoles").is(":checked")) {
+        var selected = $("#rolesListDropdown").val(); // array
+        if (selected && selected.length > 0) {
+            roleIds = selected.join(","); // convert to comma string
+        }
+    }
+
+    var model = {
+        Id: $("#Id").val(),
+        DateRange: $("#dateRange").val(),
+        Days: $("#days").val(),
+        Reason: $("#reason").val(),
+        OffDaysType: $("#OffType").val(),
+        IsForAllRoles: isForAllRoles,
+        RolesIds: roleIds // string like "1,3,5"
+    };
+
+    $.ajax({
+        url: '@Url.Action("SaveOffDay", "OffDays", new { area = "Admin" })',
+        type: "POST",
+        data: model,
+        success: function (res) {
+            if (res.success) {
+                alert("Saved successfully!");
+                table.ajax.reload();
+                $("#form")[0].reset();
+                $("#Id").val(0);
+                $("#btnAddOffDays").text("Add");
+                $("#btnCancelOffDays").addClass("d-none");
+                $("#roleslist").addClass("d-none");
+                $dropdown.val(null).trigger('change');
+            } else {
+                alert(res.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            alert("Error: " + error);
+        }
+    });
+});
+
+      // 🔹 Edit
+$("#offslist").on("click", ".editOffDay", function () {
+    var id = $(this).data("id");
+    $.ajax({
+        url: '@Url.Action("GetOffDayById", "OffDays", new { area = "Admin" })',
+        type: "GET",
+        data: { id: id },
+        success: function (offDay) {
+            $("#Id").val(offDay.Id);
+            $("#dateRange").val(offDay.DateRange);
+            $("#days").val(offDay.Days);
+            $("#reason").val(offDay.Reason);
+            $("#OffType").val(offDay.OffDaysType);
+
+            if (offDay.IsForAllRoles) {
+                $("#chkAllRoles").prop("checked", true);
+                $("#chkSpecificRoles").prop("checked", false).trigger("change");
+            } else {
+                $("#chkAllRoles").prop("checked", false);
+                $("#chkSpecificRoles").prop("checked", true);
+                debugger;
+                if (offDay.RolesIds) {
+                    debugger;
+                    window.preSelectedRoles = offDay.RolesIds.split(",");
+                    $("#chkSpecificRoles").trigger("change"); // 🔹 load roles & apply preselection
+                }
+            }
+
+
+            $("#btnAddOffDays").text("Update");
+            $("#btnCancelOffDays").removeClass("d-none");
+            $('html, body').animate({ scrollTop: $("#form").offset().top - 50 }, 500);
+        }
+    });
+});
+
+        $("#btnCancelOffDays").on("click", function () {
+            $("#form")[0].reset();
+            $("#Id").val(0);
+            $("#rolesListDropdown").val("").trigger("change");
+            $("#btnAddOffDays").text("Add");
+            $("#btnCancelOffDays").addClass("d-none");
+        });
+
+        // 🔹 Delete
+        $("#offslist").on("click", ".deleteOffDay", function () {
+            var id = $(this).data("id");
+           
+            if (confirm("Are you sure you want to delete this off day?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteOffDay", "OffDays", new { area = "Admin" })',
+                    type: "POST",
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            alert("Deleted!");
+                            table.ajax.reload();
+                        } else {
+                            alert(res.message);
+                        }
+                    }
+                });
+            }
+        });
+
+            $("#offslist").on("click", ".inactive", function () {
+                var id = $(this).data("id");
+                let Type = "InActive";
+    if (confirm("Are you sure you want to InActive this off day?")) {
+        $.ajax({
+            url: '@Url.Action("ActiveorInActiveOffDays", "OffDays", new { area = "Admin" })',
+            type: "POST",
+            data: { id: id, Type: Type },
+            success: function (res) {
+                debugger;
+                if (res.success) {
+                    alert("Inactivated!");
+                    table.ajax.reload();
+                } else {
+                    alert(res.message);
+                }
+            }
+        });
+    }
+            });
+
+                        $("#offslist").on("click", ".active", function () {
+                            var id = $(this).data("id");
+                            let Type = "Active";
+    if (confirm("Are you sure you want to Active this off day?")) {
+        $.ajax({
+            url: '@Url.Action("ActiveorInActiveOffDays", "OffDays", new { area = "Admin" })',
+            type: "POST",
+            data: { id: id, Type: Type },
+            success: function (res) {
+                debugger;
+                if (res.success) {
+                    alert("Activated!");
+                    table.ajax.reload();
+                } else {
+                    alert(res.message);
+                }
+            }
+        });
+    }
+});
+
+    });
+    </script>
+}

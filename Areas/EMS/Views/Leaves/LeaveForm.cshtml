@@ -1,0 +1,279 @@
+﻿@{
+    ViewBag.Title = "LeaveForm";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+    var empId = Session["EmpId"]; // Get logged-in EmployeeId
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="card mb-4">
+        <h5 class="card-header">Apply for Leave</h5>
+        <div class="card-body">
+            <form id="leaveform">
+                <input type="hidden" id="LeaveId" value="0" />
+                <input type="hidden" id="EmpId" value="@empId" />
+
+                <div class="row">
+                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                        <label class="form-label">Date Range</label>
+                        <input type="text" class="form-control" id="dateRange" placeholder="Select date range">
+                    </div>
+
+                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                        <label class="form-label">Days</label>
+                        <input type="text" class="form-control" id="days" readonly>
+                    </div>
+                   
+                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2">
+                        <label class="form-label">Reason</label>
+                        <textarea class="form-control" rows="4" id="reason"></textarea>
+                    </div>
+                    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2">
+                        <label class="form-label">Type</label>
+                        <select id="leaveType" class="form-control">
+                            <option value="">-- Select Leave Type --</option>
+                            <option value="Sick Leave">Sick Leave</option>
+                            <option value="Urgent Leave">Urgent Leave</option>
+                            <option value="Casual Leave">Casual Leave</option>
+                            <option value="Annual Leave">Annual Leave</option>
+                            <option value="Unpaid Leave">Unpaid Leave</option>
+                            <option value="Maternity Leave">Maternity Leave</option>
+                            <option value="Half Day Leave">Half Day Leave</option>
+                            <option value="Early Out Leave">Early Out Leave</option>
+                            <option value="Work from Home">Work from Home</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 text-end p-4">
+                        <button type="submit" class="btn btn-primary" id="btnAddLeave">Add</button>
+                        <button type="button" class="btn btn-secondary d-none" id="btnCancelLeave">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <h5 class="card-header">Leaves List</h5>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+
+                </div>
+                <div class="col-md-4">
+                    <input type="search" class="form-control" placeholder="Search.." id="search" />
+                </div>
+            </div>
+            <br />
+            <table id="leaveslist" class="table table-hover align-middle shadow-sm rounded">
+                <thead style="background-color: #3b5d50">
+                    <tr>
+                        <th style="color: white">Date Range</th>
+                        <th style="color: white">Total Days</th>
+                        <th style="color: white">Reason</th>
+                        <th style="color: white">Leave Type</th>
+                        <th style="color: white">Is Approved</th>
+                        <th style="color: white" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    
+    <script>
+        $(document).ready(function () {
+            // 🔹 Flatpickr Init
+            flatpickr("#dateRange", {
+                mode: "range",
+                dateFormat: "Y-m-d",
+                onClose: function (selectedDates) {
+                    if (selectedDates.length === 2) {
+                        const diffTime = Math.abs(selectedDates[1] - selectedDates[0]);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                        $("#days").val(diffDays);
+                    }
+                }
+            });
+
+            // 🔹 Load Leaves List
+            var table = $("#leaveslist").DataTable({
+                lengthChange: false,
+                info: false,
+                searching: false,
+                ajax: {
+                    url: '@Url.Action("GetLeavesByEmployee",  "Leaves", new { area = "EMS" })',
+                    type: "GET",
+                    data: { empId: $("#EmpId").val() }
+                },
+                columns: [
+                    { data: "DateRange" },
+                    { data: "Days" },
+                    {
+                        data: "Reason",
+                        render: function (data, type, row) {
+                            if (!data) return "";
+
+                            // Truncate for display
+                            let shortText = data.length > 30 ? data.substring(0, 30) + "..." : data;
+
+                            // Return link with hover popover
+                            return `
+<a href="javascript:void(0);" 
+   class="reason-popover text-primary"
+   data-bs-toggle="popover" 
+   data-bs-html="true" 
+   data-bs-trigger="hover" 
+   title="Leave Reason <button type='button' class='btn-close float-end close-popover'></button>"
+   data-bs-content="<div class='popover-body-text'>${data.replace(/"/g, '&quot;')}</div>">
+   ${shortText}
+</a>`;
+                        }
+                    },
+                    { data: "LeaveType" },
+                    {
+                        data: "IsApproved",
+                        render: function (data) {
+                            return data ? '<span class="badge bg-success">Approved</span>'
+                                        : '<span class="badge bg-warning">Pending</span>';
+                        }
+                    },
+                    {
+                        data: null,
+                        className: "text-center",
+                        render: function (data, type, row) {
+                            let actions = "";
+                            if (!row.IsApproved) {
+                                actions += `
+                                <button type="button" class="btn btn-icon btn-primary waves-effect waves-light editLeave" data-id="${data}">
+            <span class="tf-icons mdi mdi-pencil-outline"></span>
+          </button>
+          <button type="button" class="btn btn-icon btn-primary waves-effect waves-light deleteLeave" data-id="${data}">
+            <span class="tf-icons mdi mdi mdi-delete-outline"></span>
+          </button>
+                               `;
+                            }
+                            return actions;
+                        }
+                    }
+                ]
+            });
+            $('#leaveslist').on('draw.dt', function () {
+                $('[data-bs-toggle="popover"]').popover({
+                    placement: 'top',
+                    sanitize: false,   // allow HTML inside
+                    html: true,
+                    trigger: 'hover'   // open on hover
+                });
+            });
+
+            // Close popover when × is clicked
+            $(document).on("click", ".close-popover", function () {
+                $(this).closest(".popover").popover('hide');
+            });
+
+            // 🔹 Add Leave
+            $("#leaveform").on("submit", function (e) {
+    e.preventDefault();
+
+    var leave = {
+        Id: $("#LeaveId").val(),
+        AppliedByEmpId: $("#EmpId").val(),
+        DateRange: $("#dateRange").val(),
+        Days: $("#days").val(),
+        Reason: $("#reason").val(),
+        LeaveType: $("#leaveType").val()
+    };
+
+    $.ajax({
+        url: '@Url.Action("SaveLeave",  "Leaves", new { area = "EMS" })',
+        type: "POST",
+        data: leave,
+        success: function (res) {
+            if (res.success) {
+                alert("Leave saved!");
+                table.ajax.reload();
+                $("#leaveform")[0].reset();
+                $("#LeaveId").val(0);
+                $("#btnAddLeave").text("Add");
+                $("#btnCancelLeave").addClass("d-none");
+            } else {
+                alert(res.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            alert("Error: " + error);
+        }
+    });
+});
+
+
+            // 🔹 Edit Leave
+            $("#leaveslist").on("click", ".editLeave", function () {
+                var id = $(this).data("id");
+                $.ajax({
+    url: '@Url.Action("GetLeaveById", "Leaves", new { area = "EMS" })',
+    type: "GET",
+    data: { id: id },
+    success: function (leave) {
+        $("#LeaveId").val(leave.Id);
+        $("#dateRange").val(leave.DateRange);
+        $("#days").val(leave.Days);
+        $("#reason").val(leave.Reason);
+        $("#leaveType").val(leave.LeaveType);
+
+        $("#btnAddLeave").text("Update");
+        $("#btnCancelLeave").removeClass("d-none");
+
+        // Smooth scroll to the form
+        $('html, body').animate({
+            scrollTop: $("#leaveform").offset().top - 50
+        }, 500);
+    },
+    error: function (xhr, status, error) {
+        console.error("Error fetching leave:", error);
+        alert("Something went wrong while loading leave details.");
+    }
+});
+
+            });
+
+            
+            // 🔹 Cancel Edit
+            $("#btnCancelLeave").on("click", function () {
+                $("#leaveform")[0].reset();
+                $("#LeaveId").val(0);
+                $("#btnAddLeave").text("Add");
+                $("#btnCancelLeave").addClass("d-none");
+            });
+
+            // 🔹 Delete Leave
+            $("#leaveslist").on("click", ".deleteLeave", function () {
+    var id = $(this).data("id");
+
+    if (confirm("Are you sure you want to delete this leave?")) {
+        $.ajax({
+            url: '@Url.Action("DeleteLeave", "Leaves", new { area = "EMS" })',
+            type: "POST",
+            data: { id: id },
+            success: function (res) {
+                if (res.success) {
+                    alert("Leave deleted");
+                    table.ajax.reload();
+                } else {
+                    alert(res.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error deleting leave:", error);
+                alert("Something went wrong while deleting the leave.");
+            }
+        });
+    }
+});
+
+        });
+    </script>
+}
