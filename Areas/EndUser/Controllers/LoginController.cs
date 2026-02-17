@@ -22,7 +22,6 @@ namespace BizOne.Areas.EndUser.Controllers
         {
             DataTable dt = dal.LoginUser(Username, Password);
 
-            // If Id is greater than 0, login is valid
             if (dt.Rows.Count > 0 && Convert.ToInt64(dt.Rows[0]["Id"]) > 0)
             {
                 var row = dt.Rows[0];

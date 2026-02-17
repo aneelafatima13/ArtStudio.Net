@@ -14,7 +14,12 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link href="@Url.Content("~/FurniAssets/css/tiny-slider.css")" rel="stylesheet">
     <link href="@Url.Content("~/FurniAssets/css/style.css")" rel="stylesheet">
-    <title>Furni Store </title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <title>Arts Studio </title>
 </head>
 
 <body>
@@ -23,7 +28,7 @@
     <nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="Furni navigation bar">
 
         <div class="container">
-            <a class="navbar-brand" href = "@Url.Action("Home", "LocalHome", new { area = "EndUser" })">ArtNest<span>.</span></a>
+            <a class="navbar-brand" href="@Url.Action("Home", "LocalHome", new { area = "EndUser" })">ArtNest<span>.</span></a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni" aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -78,7 +83,7 @@
 
     </nav>
     <!-- End Header/Navigation -->
-   
+
     @RenderBody()
     <footer class="footer-section">
         <div class="container relative">
@@ -190,6 +195,9 @@
     <script src="@Url.Content("~/FurniAssets/js/bootstrap.bundle.min.js")"></script>
     <script src="@Url.Content("~/FurniAssets/js/tiny-slider.js")"></script>
     <script src="@Url.Content("~/FurniAssets/js/custom.js")"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    @RenderSection("scripts", required: false)
 </body>
 
 </html>

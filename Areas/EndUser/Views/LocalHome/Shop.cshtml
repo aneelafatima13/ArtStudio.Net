@@ -25,114 +25,191 @@
 
 <div class="untree_co-section product-section before-footer-section">
     <div class="container">
-        <div class="row">
-
-            <!-- Start Column 1 -->
-            <div class="col-12 col-md-4 col-lg-3 mb-5">
-                <a class="product-item" href="#">
-                    <img src="@Url.Content("~/FurniAssets/images/product-3.png")" class="img-fluid product-thumbnail">
-                    <h3 class="product-title">Nordic Chair</h3>
-                    <strong class="product-price">$50.00</strong>
-
-                    <span class="icon-cross">
-                        <img src="@Url.Content("~/FurniAssets/images/cross.svg")" class="img-fluid">
-                    </span>
-                </a>
-            </div>
-            <!-- End Column 1 -->
-            <!-- Start Column 2 -->
-            <div class="col-12 col-md-4 col-lg-3 mb-5">
-                <a class="product-item" href="#">
-                    <img src="@Url.Content("~/FurniAssets/images/product-1.png")" class="img-fluid product-thumbnail">
-                    <h3 class="product-title">Nordic Chair</h3>
-                    <strong class="product-price">$50.00</strong>
-
-                    <span class="icon-cross">
-                        <img src="@Url.Content("~/FurniAssets/images/cross.svg")" class="img-fluid">
-                    </span>
-                </a>
-            </div>
-            <!-- End Column 2 -->
-            <!-- Start Column 3 -->
-            <div class="col-12 col-md-4 col-lg-3 mb-5">
-                <a class="product-item" href="#">
-                    <img src="@Url.Content("~/FurniAssets/images/product-2.png")" class="img-fluid product-thumbnail">
-                    <h3 class="product-title">Kruzo Aero Chair</h3>
-                    <strong class="product-price">$78.00</strong>
-
-                    <span class="icon-cross">
-                        <img src="@Url.Content("~/FurniAssets/images/cross.svg")" class="img-fluid">
-                    </span>
-                </a>
-            </div>
-            <!-- End Column 3 -->
-            <!-- Start Column 4 -->
-            <div class="col-12 col-md-4 col-lg-3 mb-5">
-                <a class="product-item" href="#">
-                    <img src="@Url.Content("~/FurniAssets/images/product-3.png")" class="img-fluid product-thumbnail">
-                    <h3 class="product-title">Ergonomic Chair</h3>
-                    <strong class="product-price">$43.00</strong>
-
-                    <span class="icon-cross">
-                        <img src="@Url.Content("~/FurniAssets/images/cross.svg")" class="img-fluid">
-                    </span>
-                </a>
-            </div>
-            <!-- End Column 4 -->
-            <!-- Start Column 1 -->
-            <div class="col-12 col-md-4 col-lg-3 mb-5">
-                <a class="product-item" href="#">
-                    <img src="@Url.Content("~/FurniAssets/images/product-3.png")" class="img-fluid product-thumbnail">
-                    <h3 class="product-title">Nordic Chair</h3>
-                    <strong class="product-price">$50.00</strong>
-
-                    <span class="icon-cross">
-                        <img src="@Url.Content("~/FurniAssets/images/cross.svg")" class="img-fluid">
-                    </span>
-                </a>
-            </div>
-            <!-- End Column 1 -->
-            <!-- Start Column 2 -->
-            <div class="col-12 col-md-4 col-lg-3 mb-5">
-                <a class="product-item" href="#">
-                    <img src="@Url.Content("~/FurniAssets/images/product-1.png")" class="img-fluid product-thumbnail">
-                    <h3 class="product-title">Nordic Chair</h3>
-                    <strong class="product-price">$50.00</strong>
-
-                    <span class="icon-cross">
-                        <img src="@Url.Content("~/FurniAssets/images/cross.svg")" class="img-fluid">
-                    </span>
-                </a>
-            </div>
-            <!-- End Column 2 -->
-            <!-- Start Column 3 -->
-            <div class="col-12 col-md-4 col-lg-3 mb-5">
-                <a class="product-item" href="#">
-                    <img src="@Url.Content("~/FurniAssets/images/product-2.png")" class="img-fluid product-thumbnail">
-                    <h3 class="product-title">Kruzo Aero Chair</h3>
-                    <strong class="product-price">$78.00</strong>
-
-                    <span class="icon-cross">
-                        <img src="@Url.Content("~/FurniAssets/images/cross.svg")" class="img-fluid">
-                    </span>
-                </a>
-            </div>
-            <!-- End Column 3 -->
-            <!-- Start Column 4 -->
-            <div class="col-12 col-md-4 col-lg-3 mb-5">
-                <a class="product-item" href="#">
-                    <img src="@Url.Content("~/FurniAssets/images/product-3.png")" class="img-fluid product-thumbnail">
-                    <h3 class="product-title">Ergonomic Chair</h3>
-                    <strong class="product-price">$43.00</strong>
-
-                    <span class="icon-cross">
-                        <img src="@Url.Content("~/FurniAssets/images/cross.svg")" class="img-fluid">
-                    </span>
-                </a>
-            </div>
-            <!-- End Column 4 -->
+        <div class="row" id="ShopProducts">
 
         </div>
     </div>
 </div>
+<div class="offcanvas offcanvas-start" tabindex="-1" id="filterSidebar" style="width: 300px;">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title">Filters</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="mb-3">
+            <label>Search</label>
+            <input type="text" id="txtSearch" class="form-control" placeholder="Search products...">
+        </div>
+        <div class="mb-3">
+            <label class="fw-bold mb-2">Categories</label>
+            <div id="categoryTree" class="ps-2"></div>
+        </div>
+        
+        <div class="mb-3">
+            <label>Price Range</label>
+            <div class="d-flex gap-2">
+                <input type="number" id="minPrice" class="form-control" placeholder="Min">
+                <input type="number" id="maxPrice" class="form-control" placeholder="Max">
+            </div>
+        </div>
+        <button class="btn btn-black w-100" onclick="loadProducts(1)">Apply Filters</button>
+    </div>
+</div>
 
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            loadProducts(1);
+            loadParentCategories(); // Load top-level categories on start
+        });
+
+        // 1. Fetch Top-Level Categories
+        function loadParentCategories() {
+            $.ajax({
+                url: '@Url.Action("GetCategories", "Categories", new { area = "Products" })',
+                type: 'GET',
+                success: function (data) {
+                    const container = $('#categoryTree');
+                    container.empty();
+                    data.forEach(cat => {
+                        container.append(createCategoryHtml(cat));
+                    });
+                }
+            });
+        }
+
+        // 2. Handle Checkbox clicks (Recursive Load)
+        $(document).on('change', '.category-checkbox', function () {
+            const categoryId = $(this).val();
+            const isChecked = $(this).is(':checked');
+            const childContainer = $(`#children-${categoryId}`);
+
+            if (isChecked && childContainer.is(':empty')) {
+                $.ajax({
+                    url: '@Url.Action("GetSubCategories", "Categories", new { area = "Products" })', // Calls Mode 8
+                    data: { id: categoryId },
+                    success: function (data) {
+                        data.forEach(child => {
+                            childContainer.append(createCategoryHtml(child));
+                        });
+                    }
+                });
+            }
+        });
+
+        // 3. Helper to create the HTML string
+        function createCategoryHtml(cat) {
+            return `
+        <div class="form-check" id="cat-container-${cat.Id}">
+            <input class="form-check-input category-checkbox" type="checkbox" value="${cat.Id}" id="cat-${cat.Id}">
+            <label class="form-check-label" for="cat-${cat.Id}">${cat.Name}</label>
+            <div class="child-container ps-3" id="children-${cat.Id}"></div>
+        </div>`;
+        }
+
+        function loadProducts(page) {
+            const filterData = {
+                page: page,
+                pageSize: 20,
+                minPrice: $('#minPrice').val(),
+                maxPrice: $('#maxPrice').val(),
+                search: $('#txtSearch').val()
+            };
+
+            $.ajax({
+                url: '@Url.Action("Index", "Shop", new { area = "Products" })',
+                type: 'GET',
+                data: filterData,
+                success: function (response) {
+        renderProducts(response.data);
+        renderPagination(response.total, response.page);
+    }
+});
+        }
+
+        function renderProducts(products) {
+            const container = $('#ShopProducts');
+            container.empty(); // Clear existing products
+
+            if (!products || products.length === 0) {
+                container.append('<div class="col-12 text-center"><h3>No products found.</h3></div>');
+                return;
+            }
+
+            products.forEach(item => {
+                // Determine Image Path
+                const rawPath = (item.firstVarientproductImages && item.firstVarientproductImages.length > 0)
+                    ? item.firstVarientproductImages[0].ImagePath : '';
+                const imageSource = rawPath ? `/Products/Shop/GetImg?path=${encodeURIComponent(rawPath)}` : '/FurniAssets/images/product-1.png';
+
+                // Badge Logic
+                let badgeHtml = '';
+                if (item.StockQuantity <= 0 || !item.InStock) {
+                    badgeHtml = '<span class="badge bg-danger position-absolute" style="top:10px; left:10px; z-index:2;">Out of Stock</span>';
+                } else if (item.OnSale) {
+                    badgeHtml = `<span class="badge bg-primary position-absolute" style="top:10px; left:10px; z-index:2;">Sale ${item.DiscountRate}% Off</span>`;
+                }
+
+                const productHtml = `
+        <div class="col-12 col-md-4 col-lg-3 mb-5">
+            <div class="product-item position-relative">
+                ${badgeHtml}
+                <div style="width: 100%; height: 250px; overflow: hidden; background: #f9f9f9; display: flex; align-items: center; justify-content: center; border-radius: 10px;">
+                    <img src="${imageSource}"
+                         class="img-fluid product-thumbnail"
+                         style="max-height: 100%; max-width: 100%;">
+                </div>
+
+                <h3 class="product-title mt-3" onclick="viewItem(event,${item.Id})">${item.Name}</h3>
+                <strong class="product-price">
+                    ${item.OnSale ? `<del class="text-muted me-2">$${item.Price.toFixed(2)}</del> $${item.DiscountPrice.toFixed(2)}` : `$${item.Price.toFixed(2)}`}
+                </strong>
+
+                <span class="icon-cross" onclick="addToCart(event,${item.Id})" title="Add to Cart">
+                    <img src="/FurniAssets/images/cross.svg" class="img-fluid">
+                </span>
+            </div>
+        </div>`;
+
+                container.append(productHtml);
+            });
+        }
+
+        function renderPagination(totalCount, currentPage) {
+            const pageSize = 12;
+            const totalPages = Math.ceil(totalCount / pageSize);
+            const container = $('#paginationControls');
+            container.empty();
+
+            for (let i = 1; i <= totalPages; i++) {
+                const activeClass = (i === currentPage) ? 'btn-black' : 'btn-outline-black';
+                const btn = `<button onclick="loadProducts(${i})" class="btn btn-sm ${activeClass} me-1">${i}</button>`;
+                container.append(btn);
+            }
+        }
+
+        function addToCart(event, productId) {
+            // Stop the click from bubbling up to the <a> tag
+            event.preventDefault();
+            event.stopPropagation();
+
+            $.ajax({
+                url: '@Url.Action("AddToCart", "Cart", new { area = "EndUser" })',
+                type: 'POST',
+                data: { id: productId, quantity: 1 },
+                success: function (response) {
+                    if (response.success) {
+                        alert("Product added to cart!");
+                        // Optionally update a cart counter in the header
+                        $('#cart-count').text(response.newCount);
+                    } else {
+                        alert(response.message || "Error adding to cart.");
+                    }
+                },
+                error: function () {
+                    alert("Something went wrong.");
+                }
+            });
+        }
+    </script>
+}

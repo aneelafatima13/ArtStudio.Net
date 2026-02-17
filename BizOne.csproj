@@ -266,11 +266,13 @@
     <Compile Include="Areas\EMS\Controllers\EmployeesController.cs" />
     <Compile Include="Areas\EMS\Controllers\LeavesController.cs" />
     <Compile Include="Areas\EMS\EMSAreaRegistration.cs" />
+    <Compile Include="Areas\EndUser\Controllers\CartController.cs" />
     <Compile Include="Areas\EndUser\Controllers\LocalHomeController.cs" />
     <Compile Include="Areas\EndUser\Controllers\LoginController.cs" />
     <Compile Include="Areas\EndUser\EndUserAreaRegistration.cs" />
     <Compile Include="Areas\Products\Controllers\CategoriesController.cs" />
     <Compile Include="Areas\Products\Controllers\ProductsController.cs" />
+    <Compile Include="Areas\Products\Controllers\ShopController.cs" />
     <Compile Include="Areas\Products\ProductsAreaRegistration.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Global.asax.cs">
@@ -508,9 +510,11 @@
     <Folder Include="Areas\EMS\Data\" />
     <Folder Include="Areas\EMS\Views\Shared\" />
     <Folder Include="Areas\EndUser\Data\" />
+    <Folder Include="Areas\EndUser\Views\Cart\" />
     <Folder Include="Areas\EndUser\Views\Shared\" />
     <Folder Include="Areas\Products\Data\" />
     <Folder Include="Areas\Products\Views\Shared\" />
+    <Folder Include="Areas\Products\Views\Shop\" />
     <Folder Include="Views\Base\" />
   </ItemGroup>
   <ItemGroup>

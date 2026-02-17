@@ -271,121 +271,124 @@
                                 </a>
                             </li>
                         }
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Add Products">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-cube-outline"></i>
-                                <div>Manage Products</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="View Orders">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-cart-outline"></i>
-                                <div>Manage Orders</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Orders List assign to me">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-clipboard-check-outline"></i>
-                                <div>Orders Assigned to Me</div>
-                            </a>
-                        </li>
+                        @if (empRightslist.Contains("Add Category"))
+                        {
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Add Products">
+                                <a href="@Url.Action("ManageProducts", "Products", new { area = "Products" })" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-cube-outline"></i>
+                                    <div>Manage Products</div>
+                                </a>
+                            </li>
+                        }
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="View Orders">
+                                <a href="#" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-cart-outline"></i>
+                                    <div>Manage Orders</div>
+                                </a>
+                            </li>
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Orders List assign to me">
+                                <a href="#" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-clipboard-check-outline"></i>
+                                    <div>Orders Assigned to Me</div>
+                                </a>
+                            </li>
 
-                        <!-- Leads Controls -->
-                        <li class="menu-header fw-medium mt-4">
-                            <span class="menu-header-text">Leads Controls</span>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Leads & Generate Quotations">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-account-search-outline"></i>
-                                <div>Manage Leads</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Quotations & Upload POs">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-file-document-edit-outline"></i>
-                                <div>Manage Quotations</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage POs & Generate Invoices">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-file-sign"></i>
-                                <div>Manage POs</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Invoices & Generate Receipts">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-credit-card-outline"></i>
-                                <div>Manage Invoices</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Receipts">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-receipt-outline"></i>
-                                <div>Manage Receipts</div>
-                            </a>
-                        </li>
+                            <!-- Leads Controls -->
+                            <li class="menu-header fw-medium mt-4">
+                                <span class="menu-header-text">Leads Controls</span>
+                            </li>
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Manage Leads & Generate Quotations">
+                                <a href="#" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-account-search-outline"></i>
+                                    <div>Manage Leads</div>
+                                </a>
+                            </li>
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Manage Quotations & Upload POs">
+                                <a href="#" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-file-document-edit-outline"></i>
+                                    <div>Manage Quotations</div>
+                                </a>
+                            </li>
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Manage POs & Generate Invoices">
+                                <a href="#" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-file-sign"></i>
+                                    <div>Manage POs</div>
+                                </a>
+                            </li>
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Manage Invoices & Generate Receipts">
+                                <a href="#" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-credit-card-outline"></i>
+                                    <div>Manage Invoices</div>
+                                </a>
+                            </li>
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Manage Receipts">
+                                <a href="#" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-receipt-outline"></i>
+                                    <div>Manage Receipts</div>
+                                </a>
+                            </li>
 
-                        <!-- Vendor Controls -->
-                        <li class="menu-header fw-medium mt-4">
-                            <span class="menu-header-text">Vendor Controls</span>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Vendors & Upload Quotations">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-store-outline"></i>
-                                <div>Manage Vendors</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Quotations & Generate POs">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-file-document-multiple-outline"></i>
-                                <div>Manage Quotations</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage POs & Upload Invoices">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-file-send-outline"></i>
-                                <div>Manage POs</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Invoices & Upload Receipts">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-credit-card-outline"></i>
-                                <div>Manage Invoices</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Receipts">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-receipt-text-outline"></i>
-                                <div>Manage Receipts</div>
-                            </a>
-                        </li>
-                    </ul>
+                            <!-- Vendor Controls -->
+                            <li class="menu-header fw-medium mt-4">
+                                <span class="menu-header-text">Vendor Controls</span>
+                            </li>
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Manage Vendors & Upload Quotations">
+                                <a href="#" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-store-outline"></i>
+                                    <div>Manage Vendors</div>
+                                </a>
+                            </li>
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Manage Quotations & Generate POs">
+                                <a href="#" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-file-document-multiple-outline"></i>
+                                    <div>Manage Quotations</div>
+                                </a>
+                            </li>
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Manage POs & Upload Invoices">
+                                <a href="#" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-file-send-outline"></i>
+                                    <div>Manage POs</div>
+                                </a>
+                            </li>
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Manage Invoices & Upload Receipts">
+                                <a href="#" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-credit-card-outline"></i>
+                                    <div>Manage Invoices</div>
+                                </a>
+                            </li>
+                            <li class="menu-item" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Manage Receipts">
+                                <a href="#" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-receipt-text-outline"></i>
+                                    <div>Manage Receipts</div>
+                                </a>
+                            </li>
+                        </ul>
                 }
             </aside>
             <!-- / Menu -->

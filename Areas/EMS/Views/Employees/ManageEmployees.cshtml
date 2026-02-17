@@ -181,7 +181,7 @@
                                 <div class="row g-3 mb-5">
                                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
                                         <label class="form-label">Username</label>
-                                        <input type="text" class="form-control" placeholder="john.doe" id="username">
+                                        <input type="text" class="form-control" placeholder="john.doe" id="newusername">
                                     </div>
                                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
                                         <label class="form-label">Password</label>
@@ -535,14 +535,59 @@
 </div>
 @section scripts{
     <script>
-    $(document).ready(function () {
-        $("#formAuthentication").on("submit", function (e) {
-    e.preventDefault(); // prevent default form submit
-            debugger;
-            let model = {
-        FirstName: $("#firstName").val(),
-        LastName: $("#lastName").val(),
-        FullName: $("#fullName").val(),
+             $("#formAuthentication").on("submit", function (e) {
+    e.preventDefault();
+
+    // ---------- GET VALUES ----------
+    let firstName = $("#firstName").val().trim();
+    let lastName = $("#lastName").val().trim();
+    let fullName = $("#fullName").val().trim();
+    let username = $("#newusername").val().trim();
+    let password = $("#password").val().trim();
+    let roleId = $("#myrolesList").val();
+    let departmentId = $("#departmentsList").val();
+
+    // ---------- VALIDATIONS ----------
+    if (!firstName) {
+        alert("First Name is required");
+        return;
+    }
+
+    if (!lastName) {
+        alert("Last Name is required");
+        return;
+    }
+
+    if (!fullName) {
+        alert("Full Name is required");
+        return;
+    }
+
+    if (!username) {
+        alert("Username is required");
+        return;
+    }
+
+    if (!password) {
+        alert("Password is required");
+        return;
+    }
+
+    if (!roleId) {
+        alert("Please select a Role");
+        return;
+    }
+
+    if (!departmentId) {
+        alert("Please select a Department");
+        return;
+    }
+
+    // ---------- MODEL ----------
+    let model = {
+        FirstName: firstName,
+        LastName: lastName,
+        FullName: fullName,
         FatherName: $("#fatherName").val(),
         CNIC: $("#cnic").val(),
         DateOfBirth: $("#dob").val(),
@@ -559,28 +604,27 @@
         Provence: $("#provence").val(),
         City: $("#city").val(),
         Country: $("#country").val(),
-        Username: $("#username").val(),
-        Password: $("#password").val(),
-        RoleId: $("#myrolesList").val(),
+        Username: username,
+        Password: password,
+        RoleId: roleId,
         RoleName: $("#myrolesList option:selected").text(),
         RoleIdsUnderMe: ($("#rolesListunderme").val() || []).join(","),
-        DepartmentId: $("#departmentsList").val(),
+        DepartmentId: departmentId,
         DepartmentName: $("#departmentsList option:selected").text(),
         Designation: $("#designation").val(),
         JoiningDate: $("#joiningDate").val(),
         Salary: $("#salary").val(),
         Status: $("input[name='status']:checked").next('label').text(),
-                Shift: $("input[name='shift']:checked").next('label').text(),
-                ShiftTimmingsId: $("#shiftTimmingsList").val(),
-                ShiftTimmings: $("#shiftTimmingsList option:selected").val(),
+        Shift: $("input[name='shift']:checked").next('label').text(),
+        ShiftTimmingsId: $("#shiftTimmingsList").val(),
+        ShiftTimmings: $("#shiftTimmingsList option:selected").val(),
         IsActive: $("#isactive").is(":checked"),
         Files: []
     };
 
     let filePromises = [];
 
-            $("input[type=file][name=files]").each(function () {
-                debugger;
+    $("input[type=file][name=files]").each(function () {
         let title = $(this).data("title");
         let files = $(this)[0].files;
 
@@ -591,12 +635,14 @@
                 let reader = new FileReader();
                 reader.onload = function (e) {
                     let base64String = e.target.result.split(',')[1];
+
                     model.Files.push({
                         FileName: file.name,
                         FileTitle: title,
                         FileType: file.type,
                         FileBytes: base64String
                     });
+
                     resolve();
                 };
                 reader.readAsDataURL(file);
@@ -605,15 +651,13 @@
             filePromises.push(promise);
         }
     });
-            debugger;
-    // Wait until all files are read
+
     Promise.all(filePromises).then(function () {
         $.ajax({
             url: '@Url.Action("ManageEmployee", "Employees", new { area = "EMS" })',
             type: 'POST',
             contentType: "application/json; charset=utf-8",
-            data: JSON.stringify(
-            ),
+            data: JSON.stringify(model),
             success: function (res) {
                 if (res.success) {
                     alert("Employee saved with ID: " + res.EmployeeId);
@@ -622,13 +666,15 @@
                     alert("Error: " + res.message);
                 }
             },
-            error: function (xhr, status, error) {
-                console.error("Error:", error);
+            error: function () {
                 alert("Error while adding employee.");
             }
         });
     });
+
 });
+
+    $(document).ready(function () {
 
       var $mydropdown = $("#myrolesList");
 var $rolesListunderme = $("#rolesListunderme");
