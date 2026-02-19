@@ -4,22 +4,6 @@
     Layout = "~/Views/Shared/_FurniLayout.cshtml";
 }
 
-<!-- Start Hero Section -->
-<div class="hero">
-    <div class="container">
-        <div class="row justify-content-between">
-            <div class="col-lg-5">
-                <div class="intro-excerpt">
-                    <h1>Shop</h1>
-                </div>
-            </div>
-            <div class="col-lg-7">
-
-            </div>
-        </div>
-    </div>
-</div>
-<!-- End Hero Section -->
 
 
 
@@ -189,27 +173,33 @@
         }
 
         function addToCart(event, productId) {
-            // Stop the click from bubbling up to the <a> tag
-            event.preventDefault();
-            event.stopPropagation();
+            debugger;
+    event.preventDefault();
+    event.stopPropagation();
 
-            $.ajax({
-                url: '@Url.Action("AddToCart", "Cart", new { area = "EndUser" })',
-                type: 'POST',
-                data: { id: productId, quantity: 1 },
-                success: function (response) {
-                    if (response.success) {
-                        alert("Product added to cart!");
-                        // Optionally update a cart counter in the header
-                        $('#cart-count').text(response.newCount);
-                    } else {
-                        alert(response.message || "Error adding to cart.");
-                    }
-                },
-                error: function () {
-                    alert("Something went wrong.");
+    $.ajax({
+        url: '@Url.Action("AddToCart", "Cart", new { area = "EndUser" })',
+        type: 'POST',
+        data: { id: productId, quantity: 1 },
+        success: function (response) {
+            if (response.success) {
+                // 1. Update the text with the new total count
+                const badge = $('#cart-badge');
+                badge.text(response.newCount);
+
+                // 2. Show the badge if it was hidden
+                if (response.newCount > 0) {
+                    badge.show();
                 }
-            });
+
+                // Optional: A small "pop" animation to notify the user
+                badge.fadeOut(100).fadeIn(100);
+                alert("Item added to cart.");
+            } else {
+                alert(response.message || "Error adding to cart.");
+            }
         }
+    });
+}
     </script>
 }

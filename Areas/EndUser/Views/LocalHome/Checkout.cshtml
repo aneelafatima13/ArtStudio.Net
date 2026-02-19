@@ -225,22 +225,14 @@
                                 <th>Product</th>
                                 <th>Total</th>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Top Up T-Shirt <strong class="mx-2">x</strong> 1</td>
-                                        <td>$250.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Polo Shirt <strong class="mx-2">x</strong>   1</td>
-                                        <td>$100.00</td>
-                                    </tr>
+                                <tbody id="checkoutOrderTable">
                                     <tr>
                                         <td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
-                                        <td class="text-black">$350.00</td>
+                                        <td class="text-black" id="checkoutSubtotal">$0.00</td>
                                     </tr>
                                     <tr>
                                         <td class="text-black font-weight-bold"><strong>Order Total</strong></td>
-                                        <td class="text-black font-weight-bold"><strong>$350.00</strong></td>
+                                        <td class="text-black font-weight-bold"><strong id="checkoutTotal">$0.00</strong></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -288,4 +280,57 @@
         <!-- </form> -->
     </div>
 </div>
+@section scripts{
+    <script>
+        $(document).ready(function () {
+    loadCheckoutDetails();
+});
+
+function loadCheckoutDetails() {
+    $.ajax({
+        url: '@Url.Action("GetCheckoutData", "Checkout", new { area = "EndUser" })',
+        type: 'GET',
+        success: function (response) {
+            if (response.success) {
+                // 1. Render Order Table
+                renderOrderTable(response.cart);
+
+                // 2. Auto-fill User Data if logged in
+                if (response.user) {
+                    const nameParts = response.user.FullName.split(' ');
+                    $('#c_fname').val(nameParts[0]);
+                    $('#c_lname').val(nameParts.length > 1 ? nameParts.slice(1).join(' ') : '');
+                    $('#c_email_address').val(response.user.Email);
+
+                    // Hide the "Returning customer" alert since they are logged in
+                    $('.alert-info').closest('.row').hide();
+                }
+            } else {
+                window.location.href = '@Url.Action("Index", "Cart")'; // Redirect if session expired
+            }
+        }
+    });
+}
+
+function renderOrderTable(cartData) {
+    if (!cartData || !cartData.Items) return;
+
+    const tableBody = $('#checkoutOrderTable');
+    let rows = '';
+
+    cartData.Items.forEach(item => {
+        rows += `
+            <tr>
+                <td>${item.Name} <strong class="mx-2">x</strong> ${item.Quantity}</td>
+                <td>$${item.Total.toFixed(2)}</td>
+            </tr>`;
+    });
+
+    // Prepend the items before the subtotal/total rows
+    tableBody.prepend(rows);
+    $('#checkoutSubtotal').text('$' + cartData.GrandTotal.toFixed(2));
+    $('#checkoutTotal').text('$' + cartData.GrandTotal.toFixed(2));
+}
+    </script>
+    }
 

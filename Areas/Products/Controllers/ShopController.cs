@@ -13,7 +13,7 @@ namespace BizOne.Areas.Products.Controllers
     {
         private readonly ShopDAL dal = new ShopDAL();
 
-        public ActionResult Index(
+        public JsonResult Index(
             int page = 1,
             int pageSize = 12,
             long? categoryId = null,

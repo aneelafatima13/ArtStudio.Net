@@ -36,7 +36,7 @@
 
             <div class="collapse navbar-collapse" id="navbarsFurni">
                 <ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
-                    <li class="nav-item active">
+                    <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("Home", "LocalHome", new { area = "EndUser" })">Home</a>
                     </li>
                     <li><a class="nav-link" href="@Url.Action("Shop", "LocalHome", new { area = "EndUser" })">Shop</a></li>
@@ -72,11 +72,15 @@
                         </li>
                     }
 
-                    <li>
-                        <a class="nav-link" href="@Url.Action("Cart", "LocalHome", new { area = "EndUser" })">
-                            <img src="@Url.Content("~/FurniAssets/images/cart.svg")">
-                        </a>
-                    </li>
+                <li>
+                    <a class="nav-link position-relative" href="@Url.Action("Cart", "LocalHome", new { area = "EndUser" })">
+                        <img src="@Url.Content("~/FurniAssets/images/cart.svg")">
+                        <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                              style="@(Session["CartCount"] == null || (int)Session["CartCount"] == 0 ? "display:none;" : "")">
+                            @(Session["CartCount"] ?? 0)
+                        </span>
+                    </a>
+                </li>
                 </ul>
             </div>
         </div>
@@ -191,7 +195,30 @@
     </footer>
     <!-- End Footer Section -->
 
+    <script>
+        $(document).ready(function () {
+            // 1. Get the current URL path and clean it (remove trailing slashes)
+            var currentPath = window.location.pathname.toLowerCase();
+            if (currentPath.length > 1 && currentPath.endsWith('/')) {
+                currentPath = currentPath.slice(0, -1);
+            }
 
+            // 2. Loop through each link in your navbar
+            $('.custom-navbar-nav .nav-link').each(function () {
+                var linkHref = $(this).attr('href').toLowerCase();
+
+                // 3. Match logic: exact match OR current path starts with this link (for sub-pages)
+                if (currentPath === linkHref || (linkHref !== "/" && currentPath.startsWith(linkHref))) {
+
+                    // Remove 'active' from all siblings
+                    $('.custom-navbar-nav li').removeClass('active');
+
+                    // Add 'active' to the parent <li> of the current <a>
+                    $(this).closest('li').addClass('active');
+                }
+            });
+        });
+    </script>
     <script src="@Url.Content("~/FurniAssets/js/bootstrap.bundle.min.js")"></script>
     <script src="@Url.Content("~/FurniAssets/js/tiny-slider.js")"></script>
     <script src="@Url.Content("~/FurniAssets/js/custom.js")"></script>

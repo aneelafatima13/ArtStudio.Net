@@ -27,7 +27,7 @@
         <div class="row mb-5">
             <form class="col-md-12" method="post">
                 <div class="site-blocks-table">
-                    <table class="table">
+                    <table class="table" id="cartItems">
                         <thead>
                             <tr>
                                 <th class="product-thumbnail">Image</th>
@@ -39,53 +39,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td class="product-thumbnail">
-                                    <img src="@Url.Content("~/FurniAssets/images/product-1.png")" alt="Image" class="img-fluid">
-                                </td>
-                                <td class="product-name">
-                                    <h2 class="h5 text-black">Product 1</h2>
-                                </td>
-                                <td>$49.00</td>
-                                <td>
-                                    <div class="input-group mb-3 d-flex align-items-center quantity-container" style="max-width: 120px;">
-                                        <div class="input-group-prepend">
-                                            <button class="btn btn-outline-black decrease" type="button">&minus;</button>
-                                        </div>
-                                        <input type="text" class="form-control text-center quantity-amount" value="1" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-outline-black increase" type="button">&plus;</button>
-                                        </div>
-                                    </div>
-
-                                </td>
-                                <td>$49.00</td>
-                                <td><a href="#" class="btn btn-black btn-sm">X</a></td>
-                            </tr>
-
-                            <tr>
-                                <td class="product-thumbnail">
-                                    <img src="@Url.Content("~/FurniAssets/images/product-2.png")" alt="Image" class="img-fluid">
-                                </td>
-                                <td class="product-name">
-                                    <h2 class="h5 text-black">Product 2</h2>
-                                </td>
-                                <td>$49.00</td>
-                                <td>
-                                    <div class="input-group mb-3 d-flex align-items-center quantity-container" style="max-width: 120px;">
-                                        <div class="input-group-prepend">
-                                            <button class="btn btn-outline-black decrease" type="button">&minus;</button>
-                                        </div>
-                                        <input type="text" class="form-control text-center quantity-amount" value="1" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-outline-black increase" type="button">&plus;</button>
-                                        </div>
-                                    </div>
-
-                                </td>
-                                <td>$49.00</td>
-                                <td><a href="#" class="btn btn-black btn-sm">X</a></td>
-                            </tr>
+                           
                         </tbody>
                     </table>
                 </div>
@@ -142,8 +96,8 @@
 
                         <div class="row">
                             <div class="col-md-12">
-                                <button class="btn btn-black btn-lg py-3 btn-block" onclick="window.location='checkout.html'">Proceed To Checkout</button>
-                            </div>
+                                <button class="btn btn-black btn-lg py-3 btn-block" onclick="proceedToCheckout()">Proceed To Checkout</button>
+                                    </div>
                         </div>
                     </div>
                 </div>
@@ -151,4 +105,130 @@
         </div>
     </div>
 </div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            loadCart();
+        });
 
+        function loadCart() {
+            $.ajax({
+                url: '@Url.Action("GetCartItems", "Cart", new { area = "EndUser" })',
+                type: 'GET',
+                success: function (response) {
+                    if (response.success) {
+                        renderCartTable(response.data);
+                        updateTotals(response.subtotal);
+                    }
+                }
+            });
+        }
+
+        function renderCartTable(items) {
+            const tbody = $('#cartItems tbody');
+            tbody.empty();
+
+            if (items.length === 0) {
+                tbody.append('<tr><td colspan="6" class="text-center py-5">Your cart is empty.</td></tr>');
+                return;
+            }
+
+            items.forEach(item => {
+                const imageSrc = item.ImagePath
+                    ? `/Products/Shop/GetImg?path=${encodeURIComponent(item.ImagePath)}`
+                    : '/FurniAssets/images/product-1.png';
+
+                const row = `
+                    <tr>
+                        <td class="product-thumbnail">
+                            <img src="${imageSrc}" alt="Image" class="img-fluid" style="max-height: 100px;">
+                        </td>
+                        <td class="product-name">
+                            <h2 class="h5 text-black">${item.Name}</h2>
+                        </td>
+                        <td>$${item.Price.toFixed(2)}</td>
+                        <td>
+                            <div class="input-group mb-3 d-flex align-items-center quantity-container" style="max-width: 120px;">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-outline-black decrease" type="button" onclick="changeQty(${item.ProductId}, -1)">&minus;</button>
+                                </div>
+                               <input type="text" id="qty-${item.ProductId}"
+       class="form-control text-center quantity-amount"
+       value="${item.Quantity}"
+       data-stock="${item.ActualStockQuantity}" readonly>
+       <div class="input-group-append">
+                                    <button class="btn btn-outline-black increase" type="button" onclick="changeQty(${item.ProductId}, 1)">&plus;</button>
+                                </div>
+                            </div>
+                        </td>
+                        <td>$${item.Total.toFixed(2)}</td>
+                        <td><a href="javascript:void(0)" onclick="removeItem(${item.ProductId})" class="btn btn-black btn-sm">X</a></td>
+                    </tr>`;
+                tbody.append(row);
+            });
+        }
+
+        function updateTotals(subtotal) {
+            $('.text-right strong.text-black').text('$' + subtotal.toFixed(2));
+        }
+
+      function changeQty(productId, change) {
+    const input = $(`#qty-${productId}`);
+    const currentQty = parseInt(input.val());
+    const maxStock = parseInt(input.data('stock'));
+
+    // Prevent increase if it exceeds stock
+    if (change > 0 && currentQty >= maxStock) {
+        alert(`Only ${maxStock} items available in stock.`);
+        return;
+    }
+
+    $.ajax({
+        url: '@Url.Action("UpdateQuantity", "Cart", new { area = "EndUser" })',
+        type: 'POST',
+        data: { id: productId, change: change },
+        success: function (response) {
+            if (response.success) {
+                loadCart();
+                updateBadge();
+            }
+        }
+    });
+}
+function removeItem(productId) {
+    if (confirm("Are you sure you want to remove this item?")) {
+        $.ajax({
+            url: '@Url.Action("RemoveFromCart", "Cart", new { area = "EndUser" })',
+            type: 'POST',
+            data: { id: productId },
+            success: function (response) {
+                if (response.success) {
+                    loadCart();
+                    updateBadge();
+                }
+            }
+        });
+    }
+}
+
+function updateBadge() {
+    $.get('@Url.Action("GetCartCount", "Cart", new { area = "EndUser" })', function(data) {
+        const badge = $('#cart-badge');
+        badge.text(data.count);
+        data.count > 0 ? badge.show() : badge.hide();
+    });
+        }
+
+        function proceedToCheckout() {
+    $.ajax({
+        url: '@Url.Action("PrepareCheckout", "Cart", new { area = "EndUser" })',
+        type: 'POST',
+        success: function (response) {
+            if (response.success) {
+                window.location.href = response.redirectUrl;
+            }
+        }
+    });
+}
+    </script>
+}
