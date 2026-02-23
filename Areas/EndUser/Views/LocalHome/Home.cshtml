@@ -10,14 +10,23 @@
         <div class="row justify-content-between">
             <div class="col-lg-5">
                 <div class="intro-excerpt">
-                    <h1>Modern Interior <span clsas="d-block">Design Studio</span></h1>
-                    <p class="mb-4">Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique.</p>
-                    <p><a href="" class="btn btn-secondary me-2">Shop Now</a><a href="#" class="btn btn-white-outline">Explore</a></p>
+                    <h1>Your Vision, Our Masterpiece</h1>
+                    <p class="mb-4">Masterfully blending traditional techniques with modern innovation, we specialize in everything from oil and texture paintings to custom resin art and hand-drawn sketches. Discover unique, handcrafted products like resin clocks and custom frames designed to add an authentic touch of soul to your home or office.</p>
+                    <p>
+                        <a href="@Url.Action("Shop", "LocalHome", new { area = "EndUser" })" class="btn btn-secondary me-2">Shop Now</a>
+                        <a href="@Url.Action("CustomDesigns", "LocalHome", new { area = "EndUser" })" class="btn btn-white-outline">Generate Custome Designes</a>
+                    </p>
                 </div>
             </div>
-            <div class="col-lg-7">
-                <div class="hero-img-wrap">
-                    <img src="@Url.Content("~/FurniAssets/images/couch.png")" class="img-fluid">
+
+            <div class="col-lg-3 mt-5">
+                <div class="hero-img-wrap" style="margin-left: 60px !important">
+                    <img src="@Url.Content("~/FurniAssets/images/13.jpg")" class="img-fluid">
+                </div>
+            </div>
+            <div class="col-lg-4 mt-5">
+                <div class="hero-img-wrap" style="margin-left: 60px !important">
+                    <img src="@Url.Content("~/FurniAssets/images/10.jpg")" class="img-fluid">
                 </div>
             </div>
         </div>
@@ -27,54 +36,14 @@
 
 <div class="product-section">
     <div class="container">
-        <div class="row">
+        <h2 class="mb-1 section-title">Crafted with excellent material.</h2>
+        <p class="mb-4">Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique. </p>
 
-            <!-- Start Column 1 -->
-            <div class="col-md-12 col-lg-3 mb-5 mb-lg-0">
-                <h2 class="mb-4 section-title">Crafted with excellent material.</h2>
-                <p class="mb-4">Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique. </p>
-                <p><a href="shop.html" class="btn">Explore</a></p>
-            </div>
-            <!-- End Column 1 -->
-            <!-- Start Column 2 -->
-            <div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
-                <a class="product-item" href="cart.html">
-                    <img src="@Url.Content("~/FurniAssets/images/product-1.png")" class="img-fluid product-thumbnail">
-                    <h3 class="product-title">Nordic Chair</h3>
-                    <strong class="product-price">$50.00</strong>
+        <div class="row" id="ShopProducts">
 
-                    <span class="icon-cross">
-                        <img src="@Url.Content("~/FurniAssets/images/cross.svg")" class="img-fluid">
-                    </span>
-                </a>
-            </div>
-            <!-- End Column 2 -->
-            <!-- Start Column 3 -->
-            <div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
-                <a class="product-item" href="cart.html">
-                    <img src="@Url.Content("~/FurniAssets/images/product-2.png")" class="img-fluid product-thumbnail">
-                    <h3 class="product-title">Kruzo Aero Chair</h3>
-                    <strong class="product-price">$78.00</strong>
-
-                    <span class="icon-cross">
-                        <img src="@Url.Content("~/FurniAssets/images/cross.svg")" class="img-fluid">
-                    </span>
-                </a>
-            </div>
-            <!-- End Column 3 -->
-            <!-- Start Column 4 -->
-            <div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
-                <a class="product-item" href="cart.html">
-                    <img src="@Url.Content("~/FurniAssets/images/product-3.png")" class="img-fluid product-thumbnail">
-                    <h3 class="product-title">Ergonomic Chair</h3>
-                    <strong class="product-price">$43.00</strong>
-
-                    <span class="icon-cross">
-                        <img src="@Url.Content("~/FurniAssets/images/cross.svg")" class="img-fluid">
-                    </span>
-                </a>
-            </div>
-            <!-- End Column 4 -->
+        </div>
+        <div class="text-center">
+            <p><a href="@Url.Action("Shop", "LocalHome", new { area = "EndUser" })" class="btn">Shop More</a></p>
 
         </div>
     </div>
@@ -134,90 +103,14 @@
 
             <div class="col-lg-5">
                 <div class="img-wrap">
-                    <img src="@Url.Content("~/FurniAssets/images/why-choose-us-img.jpg")" alt="Image" class="img-fluid">
+                    <img src="@Url.Content("~/FurniAssets/images/16.jpg")" alt="Image" class="img-fluid">
                 </div>
             </div>
 
         </div>
     </div>
 </div>
-<!-- End Why Choose Us Section -->
-<!-- Start We Help Section -->
-<div class="we-help-section">
-    <div class="container">
-        <div class="row justify-content-between">
-            <div class="col-lg-7 mb-5 mb-lg-0">
-                <div class="imgs-grid">
-                    <div class="grid grid-1"><img src="@Url.Content("~/FurniAssets/images/img-grid-1.jpg")" alt="Untree.co"></div>
-                    <div class="grid grid-2"><img src="@Url.Content("~/FurniAssets/images/img-grid-2.jpg")" alt="Untree.co"></div>
-                    <div class="grid grid-3"><img src="@Url.Content("~/FurniAssets/images/img-grid-3.jpg")" alt="Untree.co"></div>
-                </div>
-            </div>
-            <div class="col-lg-5 ps-lg-5">
-                <h2 class="section-title mb-4">We Help You Make Modern Interior Design</h2>
-                <p>Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique. Pellentesque habitant morbi tristique senectus et netus et malesuada</p>
 
-                <ul class="list-unstyled custom-list my-4">
-                    <li>Donec vitae odio quis nisl dapibus malesuada</li>
-                    <li>Donec vitae odio quis nisl dapibus malesuada</li>
-                    <li>Donec vitae odio quis nisl dapibus malesuada</li>
-                    <li>Donec vitae odio quis nisl dapibus malesuada</li>
-                </ul>
-                <p><a herf="#" class="btn">Explore</a></p>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- End We Help Section -->
-<!-- Start Popular Product -->
-<div class="popular-product">
-    <div class="container">
-        <div class="row">
-
-            <div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
-                <div class="product-item-sm d-flex">
-                    <div class="thumbnail">
-                        <img src="@Url.Content("~/FurniAssets/images/product-1.png")" alt="Image" class="img-fluid">
-                    </div>
-                    <div class="pt-3">
-                        <h3>Nordic Chair</h3>
-                        <p>Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio </p>
-                        <p><a href="#">Read More</a></p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
-                <div class="product-item-sm d-flex">
-                    <div class="thumbnail">
-                        <img src="@Url.Content("~/FurniAssets/images/product-2.png")" alt="Image" class="img-fluid">
-                    </div>
-                    <div class="pt-3">
-                        <h3>Kruzo Aero Chair</h3>
-                        <p>Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio </p>
-                        <p><a href="#">Read More</a></p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
-                <div class="product-item-sm d-flex">
-                    <div class="thumbnail">
-                        <img src="@Url.Content("~/FurniAssets/images/product-3.png")" alt="Image" class="img-fluid">
-                    </div>
-                    <div class="pt-3">
-                        <h3>Ergonomic Chair</h3>
-                        <p>Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio </p>
-                        <p><a href="#">Read More</a></p>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-<!-- End Popular Product -->
-<!-- Start Testimonial Slider -->
 <div class="testimonial-section">
     <div class="container">
         <div class="row">
@@ -313,58 +206,122 @@
         </div>
     </div>
 </div>
-<!-- End Testimonial Slider -->
-<!-- Start Blog Section -->
-<div class="blog-section">
-    <div class="container">
-        <div class="row mb-5">
-            <div class="col-md-6">
-                <h2 class="section-title">Recent Blog</h2>
-            </div>
-            <div class="col-md-6 text-start text-md-end">
-                <a href="#" class="more">View All Posts</a>
-            </div>
-        </div>
 
-        <div class="row">
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            loadProducts(1);
+        });
 
-            <div class="col-12 col-sm-6 col-md-4 mb-4 mb-md-0">
-                <div class="post-entry">
-                    <a href="#" class="post-thumbnail"><img src="@Url.Content("~/FurniAssets/images/post-1.jpg")" alt="Image" class="img-fluid"></a>
-                    <div class="post-content-entry">
-                        <h3><a href="#">First Time Home Owner Ideas</a></h3>
-                        <div class="meta">
-                            <span>by <a href="#">Kristin Watson</a></span> <span>on <a href="#">Dec 19, 2021</a></span>
-                        </div>
-                    </div>
+                function loadProducts(page) {
+            const filterData = {
+                page: page,
+                pageSize: 4,
+                minPrice: $('#minPrice').val(),
+                maxPrice: $('#maxPrice').val(),
+                search: $('#txtSearch').val()
+            };
+
+            $.ajax({
+                url: '@Url.Action("Index", "Shop", new { area = "Products" })',
+                type: 'GET',
+                data: filterData,
+                success: function (response) {
+        renderProducts(response.data);
+        renderPagination(response.total, response.page);
+    }
+});
+        }
+
+        function renderProducts(products) {
+            const container = $('#ShopProducts');
+            container.empty(); // Clear existing products
+
+            if (!products || products.length === 0) {
+                container.append('<div class="col-12 text-center"><h3>No products found.</h3></div>');
+                return;
+            }
+
+            products.forEach(item => {
+                // Determine Image Path
+                const rawPath = (item.firstVarientproductImages && item.firstVarientproductImages.length > 0)
+                    ? item.firstVarientproductImages[0].ImagePath : '';
+                const imageSource = rawPath ? `/Products/Shop/GetImg?path=${encodeURIComponent(rawPath)}` : '/FurniAssets/images/product-1.png';
+
+                // Badge Logic
+                let badgeHtml = '';
+                if (item.StockQuantity <= 0 || !item.InStock) {
+                    badgeHtml = '<span class="badge bg-danger position-absolute" style="top:10px; left:10px; z-index:2;">Out of Stock</span>';
+                } else if (item.OnSale) {
+                    badgeHtml = `<span class="badge bg-primary position-absolute" style="top:10px; left:10px; z-index:2;">Sale ${item.DiscountRate}% Off</span>`;
+                }
+
+                const productHtml = `
+        <div class="col-12 col-md-4 col-lg-3 mb-5">
+            <div class="product-item position-relative">
+                ${badgeHtml}
+                <div style="width: 100%; height: 250px; overflow: hidden; background: #f9f9f9; display: flex; align-items: center; justify-content: center; border-radius: 10px;">
+                    <img src="${imageSource}"
+                         class="img-fluid product-thumbnail"
+                         style="max-height: 100%; max-width: 100%;">
                 </div>
-            </div>
 
-            <div class="col-12 col-sm-6 col-md-4 mb-4 mb-md-0">
-                <div class="post-entry">
-                    <a href="#" class="post-thumbnail"><img src="@Url.Content("~/FurniAssets/images/post-2.jpg")" alt="Image" class="img-fluid"></a>
-                    <div class="post-content-entry">
-                        <h3><a href="#">How To Keep Your Furniture Clean</a></h3>
-                        <div class="meta">
-                            <span>by <a href="#">Robert Fox</a></span> <span>on <a href="#">Dec 15, 2021</a></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                <h3 class="product-title mt-3" onclick="viewItem(event,${item.Id})">${item.Name}</h3>
+                <strong class="product-price">
+                    ${item.OnSale ? `<del class="text-muted me-2">$${item.Price.toFixed(2)}</del> $${item.DiscountPrice.toFixed(2)}` : `$${item.Price.toFixed(2)}`}
+                </strong>
 
-            <div class="col-12 col-sm-6 col-md-4 mb-4 mb-md-0">
-                <div class="post-entry">
-                    <a href="#" class="post-thumbnail"><img src="@Url.Content("~/FurniAssets/images/post-3.jpg")" alt="Image" class="img-fluid"></a>
-                    <div class="post-content-entry">
-                        <h3><a href="#">Small Space Furniture Apartment Ideas</a></h3>
-                        <div class="meta">
-                            <span>by <a href="#">Kristin Watson</a></span> <span>on <a href="#">Dec 12, 2021</a></span>
-                        </div>
-                    </div>
-                </div>
+                <span class="icon-cross" onclick="addToCart(event,${item.Id})" title="Add to Cart">
+                    <img src="/FurniAssets/images/cross.svg" class="img-fluid">
+                </span>
             </div>
+        </div>`;
 
-        </div>
-    </div>
-</div>
-<!-- End Blog Section -->
+                container.append(productHtml);
+            });
+        }
+
+        function renderPagination(totalCount, currentPage) {
+            const pageSize = 12;
+            const totalPages = Math.ceil(totalCount / pageSize);
+            const container = $('#paginationControls');
+            container.empty();
+
+            for (let i = 1; i <= totalPages; i++) {
+                const activeClass = (i === currentPage) ? 'btn-black' : 'btn-outline-black';
+                const btn = `<button onclick="loadProducts(${i})" class="btn btn-sm ${activeClass} me-1">${i}</button>`;
+                container.append(btn);
+            }
+        }
+
+        function addToCart(event, productId) {
+            debugger;
+    event.preventDefault();
+    event.stopPropagation();
+
+    $.ajax({
+        url: '@Url.Action("AddToCart", "Cart", new { area = "EndUser" })',
+        type: 'POST',
+        data: { id: productId, quantity: 1 },
+        success: function (response) {
+            if (response.success) {
+                // 1. Update the text with the new total count
+                const badge = $('#cart-badge');
+                badge.text(response.newCount);
+
+                // 2. Show the badge if it was hidden
+                if (response.newCount > 0) {
+                    badge.show();
+                }
+
+                // Optional: A small "pop" animation to notify the user
+                badge.fadeOut(100).fadeIn(100);
+                alert("Item added to cart.");
+            } else {
+                alert(response.message || "Error adding to cart.");
+            }
+        }
+    });
+}
+    </script>
+}   

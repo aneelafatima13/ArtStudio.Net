@@ -166,5 +166,7 @@ namespace BizOne.Areas.EndUser.Controllers
                 user = userData
             }, JsonRequestBehavior.AllowGet);
         }
+
+        
     }
 }

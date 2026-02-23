@@ -271,6 +271,7 @@
     <Compile Include="Areas\EndUser\Controllers\LoginController.cs" />
     <Compile Include="Areas\EndUser\EndUserAreaRegistration.cs" />
     <Compile Include="Areas\Products\Controllers\CategoriesController.cs" />
+    <Compile Include="Areas\Products\Controllers\OrdersController.cs" />
     <Compile Include="Areas\Products\Controllers\ProductsController.cs" />
     <Compile Include="Areas\Products\Controllers\ShopController.cs" />
     <Compile Include="Areas\Products\ProductsAreaRegistration.cs" />
@@ -388,6 +389,15 @@
     <Content Include="FurniAssets\css\bootstrap.min.css" />
     <Content Include="FurniAssets\css\style.css" />
     <Content Include="FurniAssets\css\tiny-slider.css" />
+    <Content Include="FurniAssets\images\10.jpg" />
+    <Content Include="FurniAssets\images\11.png" />
+    <Content Include="FurniAssets\images\13.jpg" />
+    <Content Include="FurniAssets\images\14.jpg" />
+    <Content Include="FurniAssets\images\15.jpg" />
+    <Content Include="FurniAssets\images\16.jpg" />
+    <Content Include="FurniAssets\images\5.jpg" />
+    <Content Include="FurniAssets\images\6.jpg" />
+    <Content Include="FurniAssets\images\9.jpg" />
     <Content Include="FurniAssets\images\bag.svg" />
     <Content Include="FurniAssets\images\bowl-2.png" />
     <Content Include="FurniAssets\images\bowl-3.png" />
@@ -471,6 +481,8 @@
     <Content Include="Areas\Products\Views\Products\ProductDetails.cshtml" />
     <Content Include="Areas\EndUser\Views\Login\Login.cshtml" />
     <Content Include="Areas\EndUser\Views\Login\SignUp.cshtml" />
+    <Content Include="Areas\EndUser\Views\LocalHome\Orders.cshtml" />
+    <Content Include="Areas\EndUser\Views\LocalHome\CustomDesigns.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -513,6 +525,7 @@
     <Folder Include="Areas\EndUser\Views\Cart\" />
     <Folder Include="Areas\EndUser\Views\Shared\" />
     <Folder Include="Areas\Products\Data\" />
+    <Folder Include="Areas\Products\Views\Orders\" />
     <Folder Include="Areas\Products\Views\Shared\" />
     <Folder Include="Areas\Products\Views\Shop\" />
     <Folder Include="Views\Base\" />

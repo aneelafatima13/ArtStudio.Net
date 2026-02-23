@@ -1,0 +1,139 @@
+﻿@{
+    ViewBag.Title = "Orders";
+    Layout = "~/Views/Shared/_FurniLayout.cshtml";
+}
+
+@if (ViewBag.ReturnType == 1)
+{
+    <div class="alert alert-success mt-4">
+        Your Order has been placed successfully!
+    </div>
+}
+
+<div class="untree_co-section before-footer-section">
+    <div class="container">
+        <div id="OrdersList">
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <div id="pagination-controls" class="btn-group">
+                    <button class="btn btn-outline-black btn-sm" id="prevPage" onclick="changePage(-1)">Previous</button>
+                    <span class="btn btn-sm" id="currentPageDisplay" style="pointer-events: none;">Page 1</span>
+                    <button class="btn btn-outline-black btn-sm" id="nextPage" onclick="changePage(1)">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Use @ViewBag.CustomerId directly in the hidden field *@
+<input type="hidden" id="c_id" value="@ViewBag.CustomerId" />
+
+@section scripts{
+    <script>
+        var currentPage = 1;
+        var pageSize = 10;
+
+        $(document).ready(function () {
+            loadOrders(currentPage);
+        });
+
+        function changePage(step) {
+            currentPage += step;
+            loadOrders(currentPage);
+        }
+
+        function loadOrders(page) {
+            var customerId = $('#c_id').val();
+            var currentOrderId = 0;
+
+            $.ajax({
+                url: '@Url.Action("GetCustomerOrders", "Orders", new { area = "Products" })',
+                type: 'GET',
+                data: { customerId: customerId, pageNumber: page, pageSize: pageSize },
+                beforeSend: function() {
+                    $('#OrdersList').html('<div class="text-center">Loading...</div>');
+                },
+                success: function (response) {
+                    if (response.data && response.data.length > 0) {
+                        var html = '<table class="table table-bordered">';
+                        html += '<thead class="thead-light"><tr><th>Order Details</th><th>Product</th><th>Item Total</th><th>Item Status</th></tr></thead><tbody>';
+
+                        $.each(response.data, function (key, item) {
+                            // Fix for C# JSON Date format /Date(xxxxxxxx)/
+                            var date = new Date(parseInt(item.OrderDate.substr(6)));
+
+                            html += '<tr>';
+
+                            // --- ORDER HEADER GROUPING LOGIC ---
+                            if (item.OrderId !== currentOrderId) {
+                                html += '<td style="vertical-align: middle; background-color: #f8f9fa;">';
+                                html += '   <strong>Order #' + item.OrderId + '</strong><br>';
+                                html += '   <small>' + date.toLocaleDateString() + '</small><br>';
+                                html += '   <span class="text-success">Total: $' + item.GrandTotal.toFixed(2) + '</span>';
+                                html += '</td>';
+                                currentOrderId = item.OrderId;
+                            } else {
+                                // Hide repeating order info with a blank cell
+                                html += '<td style="border-top: none; background-color: #f8f9fa;"></td>';
+                            }
+                            const imageSrc = item.ImagePath
+                                ? `/Products/Shop/GetImg?path=${encodeURIComponent(item.ProductImage)}`
+                                : '/FurniAssets/images/product-1.png';
+
+                            // Product Cell
+                            html += '<td>';
+                            html += '   <div class="d-flex align-items-center">';
+                            html += '       <img src="' + imageSrc + '" class="img-fluid" style="max-width: 40px; margin-right:10px;">';
+                            html += '       <span class="text-black">' + item.ProductName + ' <strong class="mx-1">x' + item.Quantity + '</strong></span>';
+                            html += '   </div>';
+                            html += '</td>';
+
+                            // Item Price
+                            html += '<td>$' + (item.UnitPrice * item.Quantity).toFixed(2) + '</td>';
+
+                            // Item Status
+                            html += '<td>' + getItemStatusBadge(item.ItemStatus) + '</td>';
+                            html += '</tr>';
+                        });
+
+                        html += '</tbody></table>';
+                        $('#OrdersList').html(html);
+
+                        // Update Pagination State
+                        $('#currentPageDisplay').text("Page " + page);
+                        $('#prevPage').prop('disabled', page === 1);
+
+                        // If current items returned are less than page size, assume no more data
+                        $('#nextPage').prop('disabled', response.data.length < pageSize);
+                        $('#pagination-controls').show();
+
+                    } else {
+                        if (page > 1) {
+                            currentPage--; // Prevent moving to empty page
+                            alert("No more orders found.");
+                        } else {
+                            $('#OrdersList').html('<div class="alert alert-info text-center">You have no order history yet.</div>');
+                            $('#pagination-controls').hide();
+                        }
+                    }
+                },
+                error: function() {
+                    $('#OrdersList').html('<div class="alert alert-danger">Error loading orders.</div>');
+                }
+            });
+        }
+
+        function getItemStatusBadge(status) {
+            switch(status) {
+                case 1: return '<span class="badge bg-warning text-dark">Processing</span>';
+                case 2: return '<span class="badge bg-info">Packed</span>';
+                case 3: return '<span class="badge bg-primary">Shipped</span>';
+                case 4: return '<span class="badge bg-success">Delivered</span>';
+                case 5: return '<span class="badge bg-danger">Cancelled</span>';
+                default: return '<span class="badge bg-secondary">Pending</span>';
+            }
+        }
+    </script>
+}

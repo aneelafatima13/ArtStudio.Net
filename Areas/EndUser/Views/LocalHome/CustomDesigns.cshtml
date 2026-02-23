@@ -1,0 +1,351 @@
+﻿
+@{
+    ViewBag.Title = "CustomDesigns";
+    Layout = "~/Views/Shared/_FurniLayout.cshtml";
+}
+
+<div class="untree_co-section">
+    <div class="container">
+        
+            <div class="row mb-5" id="loginDiv">
+                <div class="col-md-12">
+                    <div class="border p-4 rounded" role="alert">
+                        Returning customer? <a href="@Url.Action("Login", "Login", new { area = "EndUser" })">Click here</a> to login
+                    </div>
+                </div>
+            </div>
+        
+            <div class="row">
+                <div class="col-md-6 mb-5 mb-md-0" id="customeOrderForm">
+                    <h2 class="h3 mb-3 text-black">Order Details</h2>
+                    <div class="p-3 p-lg-5 border bg-white">
+                        <div id="categoriesWrapper">
+                            <div class="col-md-12" id="categoriesDiv">
+                                <label class="form-label" for="Category">Category</label>
+                                <select id="Category" class="form-control category-dropdown">
+                                    <!-- categories populated dynamically -->
+                                </select>
+                            </div>
+
+
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <label for="Description" class="text-black">Description <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="Description" name="Description" placeholder="Add Description" rows="5"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-5">
+                            <div class="col-md-12">
+                                <label for="EstimatedDays" class="text-black">Estimated Days<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="EstimatedDays" name="EstimatedDays">
+                            </div>
+                        </div>
+                        <div class="form-group row mb-5">
+                            <div class="col-md-12">
+                                <label for="refrencefiles" class="text-black">Attach Reference Files<span class="text-danger">*</span></label>
+                                <input type="file" class="form-control" id="refrencefiles" name="refrencefiles" multiple>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+
+
+
+                </div>
+
+                <div class="col-md-6 mb-5 mb-md-0" id="placeOrderForm">
+                    <h2 class="h3 mb-3 text-black">Billing Details</h2>
+                    <div class="p-3 p-lg-5 border bg-white">
+
+                        <div class="form-group row">
+                            <input type="hidden" id="c_id">
+                            <div class="col-md-12">
+                                <label for="c_fullname" class="text-black">Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="c_fullname" name="c_fullname">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <label for="c_address" class="text-black">Address <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="c_address" name="c_address" placeholder="Street address">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <label for="c_city" class="text-black">City <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="c_city" name="c_city">
+                            </div>
+                            <div class="col-md-12">
+                                <label for="c_country" class="text-black">Country <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="c_country" name="c_country">
+                            </div>
+                            <div class="col-md-12">
+                                <label for="c_postal_zip" class="text-black">Posta / Zip <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="c_postal_zip" name="c_postal_zip">
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-5">
+                            <div class="col-md-12">
+                                <label for="c_email_address" class="text-black">Email Address <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="c_email_address" name="c_email_address">
+                            </div>
+                            <div class="col-md-12">
+                                <label for="c_phone" class="text-black">Phone <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="c_phone" name="c_phone" placeholder="Phone Number">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="c_create_account" class="text-black" data-bs-toggle="collapse" href="#create_an_account" role="button" aria-expanded="false" aria-controls="create_an_account">
+                                <input type="checkbox" value="1" id="c_create_account"> Create an account?
+                            </label>
+                            <div class="collapse" id="create_an_account">
+                                <div class="py-2 mb-4">
+                                    <p class="mb-3">Create an account by entering the information below. If you are a returning customer please login at the top of the page.</p>
+                                    <div class="form-group">
+                                        <label for="c_account_username" class="text-black">Account Username</label>
+                                        <input type="text" class="form-control" id="c_account_username" name="c_account_username" placeholder="">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="c_account_password" class="text-black">Account Password</label>
+                                        <input type="password" class="form-control" id="c_account_password" name="c_account_password" placeholder="">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="c_ship_different_address" class="text-black" data-bs-toggle="collapse" href="#ship_different_address" role="button" aria-expanded="false" aria-controls="ship_different_address"><input type="checkbox" value="1" id="c_ship_different_address"> Ship To A Different Address?</label>
+                            <div class="collapse" id="ship_different_address">
+                                <div class="py-2">
+
+                                    <div class="form-group row  mb-3">
+                                        <div class="col-md-12">
+                                            <label for="c_diff_address" class="text-black">Address <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="c_diff_address" name="c_diff_address" placeholder="Street address">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-md-12">
+                                            <label for="c_diff_state_city" class="text-black">City<span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="c_diff_state_city" name="c_diff_state_city">
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label for="c_diff_state_country" class="text-black">State / Country <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="c_diff_state_country" name="c_diff_state_country">
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label for="c_diff_postal_zip" class="text-black">Posta / Zip <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="c_diff_postal_zip" name="c_diff_postal_zip">
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="c_order_notes" class="text-black">Order Notes</label>
+                            <textarea name="c_order_notes" id="c_order_notes" cols="30" rows="5" class="form-control" placeholder="Write your notes here..."></textarea>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+                <div class="form-group text-center mt-3">
+                    <button type="button"
+                            class="btn btn-black btn-lg py-3 btn-block"
+                            onclick="placeOrder()">
+                        Place Order
+                    </button>
+                </div>
+            </div>
+            <!-- </form> -->
+        </div>
+</div>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            loadloginUserDetails();
+            loadCategories()
+});
+
+        function loadloginUserDetails() {
+    $.ajax({
+        url: '@Url.Action("GetLoginUserData", "Login", new { area = "EndUser" })',
+        type: 'GET',
+        success: function (response) {
+            if (response.success) {
+
+                // 2. Auto-fill User Data if logged in
+                if (response.user) {
+                    $('#c_id').val(response.user.UserId);
+                    $('#c_fullname').val(response.user.FullName);
+                    $('#c_email_address').val(response.user.Email);
+                    $('#c_create_account').prop('disabled', true);
+                    // 1. Uncheck the checkbox so the backend knows NOT to create an account
+                    $('#c_create_account').prop('checked', false);
+
+                    // 2. Collapse the password section (if it was open)
+                    $('#create_an_account').collapse('hide');
+
+                    // 3. Hide the entire outer container so the "Create an account?" option disappears
+                    $('#c_create_account').closest('.form-group').hide();
+                    $('#loginDiv').hide();
+                    $('.alert-info').closest('.row').hide();
+                }
+            } else {
+                window.location.href = '@Url.Action("Cart", "LocalHome", new { area = "EndUser" })'; // Redirect if session expired
+            }
+        }
+    });
+}
+        function loadCategories() {
+    $.ajax({
+        url: '@Url.Action("GetCategories", "Categories", new { area = "Products"})',
+        type: 'POST',
+        success: function (res) {
+            let $cat = $("#Category");
+            $cat.empty().append(`<option value="">-- Select Category --</option>`);
+            res.forEach(c => {
+                $cat.append(`<option value="${c.Id}">${c.Name}</option>`);
+            });
+
+            // Assign level 0 to main category
+            $cat.attr("data-level", 0);
+        }
+    });
+}
+
+// Handle category/subcategory change
+            $(document).on("change", ".category-dropdown", function () {
+                debugger;
+    let categoryId = $(this).val();
+    let level = parseInt($(this).data("level"));
+
+    // Remove deeper category divs
+    $(`#categoriesWrapper .category-container`).each(function () {
+        if ($(this).data("level") > level) {
+            $(this).remove();
+        }
+    });
+
+    if (categoryId) {
+        $.ajax({
+            url: '@Url.Action("GetSubCategories", "Categories", new { area = "Products"})',
+            type: 'POST',
+            data: { parentId: categoryId },
+            success: function (res) {
+                debugger;
+                if (res.length > 0) {
+                    let nextLevel = level + 1;
+
+                    // Clone categoriesDiv
+                    let $clone = $("#categoriesDiv").clone();
+                    $clone.attr("id", `categoriesDiv_${nextLevel}`);
+                    $clone.addClass("category-container");
+                    $clone.attr("data-level", nextLevel);
+
+                    // Clear old inner content
+                    $clone.find("label").remove();
+                    $clone.find("select").remove();
+
+                    // Build new dropdown
+                    let subSelectId = `SubCategory_${categoryId}_${nextLevel}`;
+                    let html = `
+                        <label class="form-label" for="${subSelectId}">Select Sub Category</label>
+                        <select id="${subSelectId}" class="form-control category-dropdown" data-level="${nextLevel}">
+                            <option value="">-- Select Sub Category --</option>
+                    `;
+                    res.forEach(sc => {
+                        html += `<option value="${sc.Id}">${sc.Name}</option>`;
+                    });
+                    html += `</select>`;
+
+                    $clone.html(html);
+
+                    // Append clone inside wrapper
+                    $("#categoriesWrapper").append($clone);
+                }
+            }
+        });
+    }
+});
+function placeOrder() {
+    var formData = new FormData();
+
+    // Mapping fields
+    formData.append("FullName", $('#c_fullname').val());
+
+    // Handle potential null for CustomerId
+    var cId = $('#c_id').val();
+    if(cId) { formData.append("CustomerId", cId); }
+
+    formData.append("Address", $('#c_address').val());
+    formData.append("City", $('#c_city').val());
+    formData.append("Country", $('#c_country').val());
+    formData.append("ZipCode", $('#c_postal_zip').val());
+    formData.append("Email", $('#c_email_address').val());
+    formData.append("Phone", $('#c_phone').val());
+    formData.append("OrderNotes", $('#c_order_notes').val());
+    formData.append("Description", $('#Description').val());
+    formData.append("EstimatedDays", $('#EstimatedDays').val());
+
+    // Checkboxes (Important: append as true/false strings)
+    formData.append("CreateAccount", $('#c_create_account').is(':checked'));
+    formData.append("ShipDifferent", $('#c_ship_different_address').is(':checked'));
+
+    // Categories
+    let selectedCats = $(".category-dropdown").map(function() { return $(this).val(); }).get().filter(v => v !== "").join(",");
+    formData.append("CategoryIds", selectedCats);
+
+    // 1. Get the files from the input
+    var fileInput = document.getElementById('refrencefiles');
+    var files = fileInput.files;
+
+    // 2. Loop and append using the indexed object syntax
+    for (var i = 0; i < files.length; i++) {
+        // The key must match your Model property names exactly:
+        // ReferenceFiles -> The List in CustomeOrderModel
+        // [i]            -> The index in that list
+        // File           -> The property inside CustomOrdersRefFiles
+        formData.append("ReferenceFiles[" + i + "].File", files[i]);
+    }
+    debugger;
+    $.ajax({
+        url: '@Url.Action("FinalizeCustomeOrder", "Orders", new { area = "Products" })',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+            if (res.success) {
+                alert("Order Placed Successfully! ID: " + res.orderId);
+                window.location.href = '@Url.Action("Orders", "LocalHome", new { area = "EndUser", returnType = 1 })';
+            } else {
+                alert("Error: " + res.message);
+            }
+        },
+        error: function(xhr) {
+            console.log(xhr.responseText);
+            alert("Critical Error: Check console (F12) Network tab.");
+        }
+    });
+        }
+    </script>
+}
+

@@ -165,7 +165,7 @@ a {
     }
 }
 
-.hero h1 {
+.hero h1{
     font-weight: 700;
     color: #ffffff;
     margin-bottom: 30px;
@@ -174,6 +174,17 @@ a {
 @media (min-width: 1400px) {
     .hero h1 {
         font-size: 54px;
+    }
+}
+.hero h4{
+    font-weight: 300;
+    color: #ffffff;
+    margin-bottom: 30px;
+}
+
+@media (min-width: 1400px) {
+    .hero h4 {
+        font-size: 24px;
     }
 }
 

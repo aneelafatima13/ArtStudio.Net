@@ -1,4 +1,5 @@
-﻿using BizOne.DAL;
+﻿using BizOne.Common;
+using BizOne.DAL;
 using Google.Apis.Auth;
 using System;
 using System.Data;
@@ -114,5 +115,30 @@ namespace BizOne.Areas.EndUser.Controllers
             }
             return RedirectToAction("Home", "LocalHome", new { area = "EndUser" });
         }
+
+        [HttpGet]
+        public JsonResult GetLoginUserData()
+        {
+            // 2. Check for Logged-in User via Cookie
+            var userCookie = Request.Cookies["CustomerAuth"];
+            object userData = null;
+
+            if (userCookie != null)
+            {
+                userData = new
+                {
+                    UserId = userCookie["UserId"],
+                    FullName = userCookie["FullName"],
+                    Email = userCookie["Email"]
+                };
+            }
+
+            return Json(new
+            {
+                success = true,
+                user = userData
+            }, JsonRequestBehavior.AllowGet);
+        }
+
     }
 }
