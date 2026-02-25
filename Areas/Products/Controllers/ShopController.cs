@@ -12,6 +12,41 @@ namespace BizOne.Areas.Products.Controllers
     public class ShopController : Controller
     {
         private readonly ShopDAL dal = new ShopDAL();
+        private readonly ProductsDAL pdal = new ProductsDAL();
+
+        [HttpPost]
+        public JsonResult GetCategories()
+        {
+            try
+            {
+                var categories = pdal.CategoriesList(7);
+
+                if (categories == null)
+                {
+                    return Json(new { success = false, message = "No categories found." });
+                }
+
+                // Return an anonymous object for better control
+                return Json(new
+                {
+                    success = true,
+                    data = categories
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                // Log your exception here
+                return Json(new { success = false, message = "An error occurred." });
+            }
+        }
+
+        // Load child categories
+        [HttpPost]
+        public JsonResult GetSubCategories(long parentId)
+        {
+            var categories = pdal.CategoriesList(8, id: parentId); // Mode 8 = get children
+            return Json(categories, JsonRequestBehavior.AllowGet);
+        }
 
         public JsonResult Index(
             int page = 1,

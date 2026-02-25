@@ -18,7 +18,7 @@ namespace BizOne.Areas.Products.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetCategories(int page = 1, int pageSize = 10, string search = null)
+        public JsonResult GetPaginatedCategories(int page = 1, int pageSize = 10, string search = null)
         {
             try
             {
@@ -103,8 +103,27 @@ namespace BizOne.Areas.Products.Controllers
         [HttpPost]
         public JsonResult GetCategories()
         {
-            var categories = dal.CategoriesList(7); // Mode 7 = get top-level
-            return Json(categories, JsonRequestBehavior.AllowGet);
+            try
+            {
+                var categories = dal.CategoriesList(7);
+
+                if (categories == null)
+                {
+                    return Json(new { success = false, message = "No categories found." });
+                }
+
+                // Return an anonymous object for better control
+                return Json(new
+                {
+                    success = true,
+                    data = categories
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                // Log your exception here
+                return Json(new { success = false, message = "An error occurred." });
+            }
         }
 
         // Load child categories

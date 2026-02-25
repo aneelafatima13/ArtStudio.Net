@@ -65,10 +65,9 @@ namespace BizOne.Areas.Products.Controllers
         private string GetProductFolderPath()
         {
             string username = Session["EmpUsername"] as string;
-            string departmentName = Session["EmpDepartmentName"] as string;
             string basePath = Server.MapPath("~/Uploads/");
 
-            return Path.Combine(basePath, departmentName, username, "ProductsImages");
+            return Path.Combine(basePath, "ProductsImages", username);
         }
 
         private void EnsureFolderExists(string folderPath)
@@ -114,6 +113,7 @@ namespace BizOne.Areas.Products.Controllers
             product.Size = variant.Size;
             product.OnSale = variant.OnSale;
             product.Price = variant.Price;
+            product.StockQuantity = variant.StockQuantity;
             product.DiscountPrice = variant.DiscountPrice;
             product.DiscountRate = variant.DiscountRate;
             product.IsAvailable = variant.IsAvailable;

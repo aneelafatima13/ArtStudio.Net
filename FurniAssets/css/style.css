@@ -723,7 +723,7 @@ a {
         }
 
 .before-footer-section {
-    padding: 7rem 0 12rem 0 !important;
+    padding: 1rem 0 12rem 0 !important;
 }
 
 .blog-section {
@@ -1032,3 +1032,32 @@ textarea {
         border-radius: 50%;
         background: rgba(59, 93, 80, 0.2);
     }
+
+/* Match the theme's colors and spacing */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    padding: 10px 0;
+}
+
+.dropdown-item {
+    font-size: 14px;
+    padding: 8px 20px;
+    transition: all 0.3s ease;
+    background-color: #3b5d50 !important; /* Signature Green */
+    color: #fff !important;
+}
+
+    .dropdown-item:hover {
+        background-color: #3b5d50; /* Signature Green */
+        color: #fff !important;
+    }
+
+/* Ensure dropdown works on hover (optional) */
+@media (min-width: 992px) {
+    .nav-item.dropdown:hover .dropdown-menu {
+        display: block;
+        margin-top: 0;
+    }
+}

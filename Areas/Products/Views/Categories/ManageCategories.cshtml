@@ -83,7 +83,7 @@
           // Load Categories
            function loadCategories(search = "") {
     $.ajax({
-        url: '@Url.Action("GetCategories", "Categories")',
+        url: '@Url.Action("GetPaginatedCategories", "Categories")',
         type: "GET",
         data: { page: currentPage, pageSize: pageSize, search: search },
         success: function (res) {

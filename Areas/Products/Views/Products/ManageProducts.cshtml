@@ -93,8 +93,7 @@
                                 <div class="row" id="categoriesWrapper">
                                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2" id="categoriesDiv">
                                         <label class="form-label" for="Category">Category</label>
-                                        <select id="Category" class="form-control category-dropdown">
-                                            <!-- categories populated dynamically -->
+                                        <select id="Category" class="form-control category-dropdown" data-level="0">
                                         </select>
                                     </div>
 
@@ -129,7 +128,7 @@
 
                                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2">
                                         <label class="form-label">Price</label>
-                                        <input type="text" class="form-control" placeholder="Enter price">
+                                        <input type="text" id="MainPrice" class="form-control" placeholder="Enter price">
                                     </div>
 
                                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2">
@@ -139,26 +138,26 @@
 
                                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-3">
                                         <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input IsActive" type="checkbox">
+                                            <input class="form-check-input IsActive" type="checkbox" checked>
                                             <label class="form-check-label">Is Active</label>
                                         </div>
                                     </div>
 
                                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-3">
                                         <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input OnSale" type="checkbox">
-                                            <label class="form-check-label">On Sale</label>
+                                            <input class="form-check-input OnSale" type="checkbox" id="IsOnSale">
+                                            <label class="form-check-label" for="IsOnSale">On Sale</label>
                                         </div>
                                     </div>
 
                                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2 discountRateDiv" style="display:none">
-                                        <label class="form-label">Discount Rate</label>
-                                        <input type="text" class="form-control DiscountRate" placeholder="Enter discount rate %">
+                                        <label class="form-label">Discount Rate (%)</label>
+                                        <input type="number" id="DiscountRate" class="form-control DiscountRate" placeholder="Enter rate %">
                                     </div>
 
                                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-2 discountPriceDiv" style="display:none">
                                         <label class="form-label">Discount Price</label>
-                                        <input type="text" class="form-control DiscountPrice" placeholder="Enter discount price">
+                                        <input type="number" id="DiscountPrice" class="form-control DiscountPrice">
                                     </div>
 
                                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 mt-4">
@@ -236,16 +235,18 @@ function loadCategories() {
     $.ajax({
         url: '@Url.Action("GetCategories", "Categories", new { area = "Products"})',
         type: 'POST',
-        data: { Mode: 7 },
         success: function (res) {
-            let $cat = $("#Category");
-            $cat.empty().append(`<option value="">-- Select Category --</option>`);
-            res.forEach(c => {
-                $cat.append(`<option value="${c.Id}">${c.Name}</option>`);
-            });
+            if (res.success) {
+                let $cat = $("#Category");
+                $cat.empty().append(`<option value="">-- Select Category --</option>`);
 
-            // Assign level 0 to main category
-            $cat.attr("data-level", 0);
+                // res.data is now guaranteed to be the array
+                res.data.forEach(c => {
+                    $cat.append(`<option value="${c.Id}">${c.Name}</option>`);
+                });
+            } else {
+                console.error(res.message);
+            }
         }
     });
 }
@@ -254,9 +255,8 @@ function loadCategories() {
             $(document).on("change", ".category-dropdown", function () {
                 debugger;
     let categoryId = $(this).val();
-    let level = parseInt($(this).data("level"));
-
-    // Remove deeper category divs
+                let level = parseInt($(this).data("level"));
+               
     $(`#categoriesWrapper .category-container`).each(function () {
         if ($(this).data("level") > level) {
             $(this).remove();
@@ -297,7 +297,6 @@ function loadCategories() {
 
                     $clone.html(html);
 
-                    // Append clone inside wrapper
                     $("#categoriesWrapper").append($clone);
                 }
             }
@@ -308,7 +307,7 @@ function loadCategories() {
             let variantCounter = 1;
 
             function bindVariantEvents($container) {
-                // OnSale toggle for this variant
+                // 1. OnSale toggle for this specific variant row
                 $container.find(".OnSale").off("change").on("change", function () {
                     let $parent = $(this).closest(".variant-row");
                     if ($(this).is(":checked")) {
@@ -319,14 +318,32 @@ function loadCategories() {
                     }
                 });
 
-                // HasMoreVariants toggle
+                // 2. NEW: Calculation logic for this specific variant row
+                // Listens to Price OR Rate changes within this container
+                $container.find(".MainPrice, .DiscountRate").off("input").on("input", function () {
+                    let $parent = $(this).closest(".variant-row");
+
+                    // Only calculate if the 'On Sale' switch for this row is ON
+                    if ($parent.find(".OnSale").is(":checked")) {
+                        let price = parseFloat($parent.find(".MainPrice").val()) || 0;
+                        let rate = parseFloat($parent.find(".DiscountRate").val()) || 0;
+
+                        if (price > 0 && rate > 0) {
+                            let finalPrice = price - (price * (rate / 100));
+                            $parent.find(".DiscountPrice").val(finalPrice.toFixed(2));
+                        } else {
+                            $parent.find(".DiscountPrice").val(price > 0 ? price.toFixed(2) : "");
+                        }
+                    }
+                });
+
+                // 3. HasMoreVariants toggle
                 $container.find(".HasMoreVariants").off("change").on("change", function () {
                     if ($(this).is(":checked")) {
                         if ($("#variantDetails_" + (variantCounter + 1)).length === 0) {
                             cloneVariantRow();
                         }
                     } else {
-                        // Remove last clone if not the base row
                         if (variantCounter > 1) {
                             $("#variantDetails_" + variantCounter).remove();
                             variantCounter--;
@@ -334,7 +351,6 @@ function loadCategories() {
                     }
                 });
             }
-
             function cloneVariantRow() {
                 let $last = $(".variant-row").last();
                 let $clone = $last.clone();
@@ -421,6 +437,7 @@ function loadCategories() {
         contentType: false,
         success: function (res) {
             alert("Product added successfully!");
+            location.reload();
         },
         error: function (err) {
             console.error("Error:", err);
@@ -428,80 +445,6 @@ function loadCategories() {
         }
     });
 });
-
-
-        @*$("#btnAddProduct").on("click", function (e) {
-    e.preventDefault();
-
-    // 1. Collect product-level data
-    let product = {
-        Id: $("#Id").val() || 0,
-        SKU: $("#SKU").val(),
-        Name: $("#Name").val(),
-        Description: $("#Description").val(),
-        ProductSource: $("#ProductSource").val(),
-        Brand: $("#Brand").val(),
-        AddedDate: new Date().toISOString(),
-        categoriesorder: [],
-        varients: []
-    };
-
-    // 2. Collect categories
-    $("#categoriesWrapper select.category-dropdown").each(function () {
-        let catId = $(this).val();
-        if (catId) {
-            product.categoriesorder.push({
-                CategoryId: catId
-            });
-        }
-    });
-
-    // 3. Collect variants (loop over all variant rows)
-    $(".variant-row").each(function (index) {
-        let $row = $(this);
-
-        let variant = {
-            Colour: $row.find("input[placeholder='Enter colour']").val(),
-            Material: $row.find("input[placeholder='Enter material']").val(),
-            Size: parseFloat($row.find("input[placeholder='Enter size']").val()) || null,
-            Price: parseFloat($row.find("input[placeholder='Enter price']").val()) || null,
-            StockQuantity: parseInt($row.find("input[placeholder='Enter stock quantity']").val()) || null,
-            IsAvailable: $row.find(".IsActive").is(":checked"),
-            OnSale: $row.find(".OnSale").is(":checked"),
-            DiscountRate: parseInt($row.find(".DiscountRate").val()) || null,
-            DiscountPrice: parseFloat($row.find(".DiscountPrice").val()) || null,
-            imageslist: []
-        };
-
-        // 4. Collect images for this variant
-        let files = $row.find("input[type=file]")[0].files;
-        for (let i = 0; i < files.length; i++) {
-            variant.imageslist.push({
-                ImagePath: files[i].name, // for demo only, backend should handle saving file
-                IsPrimary: (i === 0) // mark first image as primary
-            });
-        }
-
-        product.varients.push(variant);
-    });
-
-    console.log("Final Product Payload:", product);
-
-    // 5. Send to controller
-    $.ajax({
-        url: '@Url.Action("AddProduct", "Products", new { area = "Products" })',
-        type: "POST",
-        contentType: "application/json",
-        data: JSON.stringify(product),
-        success: function (res) {
-            alert("Product added successfully!");
-        },
-        error: function (err) {
-            console.error("Error:", err);
-            alert("Failed to add product.");
-        }
-    });
-});*@
 
     </script>
     }

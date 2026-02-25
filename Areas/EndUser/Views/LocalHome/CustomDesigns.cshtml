@@ -181,7 +181,7 @@
     <script>
         $(document).ready(function () {
             loadloginUserDetails();
-            loadCategories()
+            loadCategories();
 });
 
         function loadloginUserDetails() {
@@ -216,17 +216,20 @@
 }
         function loadCategories() {
     $.ajax({
-        url: '@Url.Action("GetCategories", "Categories", new { area = "Products"})',
+        url: '@Url.Action("GetCategories", "Shop", new { area = "Products"})',
         type: 'POST',
         success: function (res) {
-            let $cat = $("#Category");
-            $cat.empty().append(`<option value="">-- Select Category --</option>`);
-            res.forEach(c => {
-                $cat.append(`<option value="${c.Id}">${c.Name}</option>`);
-            });
+            if (res.success) {
+                let $cat = $("#Category");
+                $cat.empty().append(`<option value="">-- Select Category --</option>`);
 
-            // Assign level 0 to main category
-            $cat.attr("data-level", 0);
+                // res.data is now guaranteed to be the array
+                res.data.forEach(c => {
+                    $cat.append(`<option value="${c.Id}">${c.Name}</option>`);
+                });
+            } else {
+                console.error(res.message);
+            }
         }
     });
 }
@@ -246,7 +249,7 @@
 
     if (categoryId) {
         $.ajax({
-            url: '@Url.Action("GetSubCategories", "Categories", new { area = "Products"})',
+            url: '@Url.Action("GetSubCategories", "Shop", new { area = "Products"})',
             type: 'POST',
             data: { parentId: categoryId },
             success: function (res) {

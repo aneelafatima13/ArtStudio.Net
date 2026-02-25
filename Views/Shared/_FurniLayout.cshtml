@@ -40,14 +40,30 @@
                         <a class="nav-link" href="@Url.Action("Home", "LocalHome", new { area = "EndUser" })">Home</a>
                     </li>
                     <li><a class="nav-link" href="@Url.Action("Shop", "LocalHome", new { area = "EndUser" })">Shop</a></li>
-                  <li><a class="nav-link" href="@Url.Action("CustomDesigns", "LocalHome", new { area = "EndUser" })">Custom Designs</a></li>
+                    <li><a class="nav-link" href="@Url.Action("CustomDesigns", "LocalHome", new { area = "EndUser" })">Custom Designs</a></li>
                     <li><a class="nav-link" href="@Url.Action("AboutUs", "LocalHome", new { area = "EndUser" })">About us</a></li>
                     @if (Request.Cookies["CustomerAuth"] != null && Request.Cookies["CustomerAuth"]["FullName"] != null)
                     {
-                        <li><a class="nav-link" href="@Url.Action("Orders", "LocalHome", new { area = "EndUser" })">Orders History</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="ordersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Orders History
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="ordersDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="@Url.Action("Orders", "LocalHome", new { area = "EndUser", type = "Ready" })">
+                                        Ready Items Orders
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="@Url.Action("CustomOrders", "LocalHome", new { area = "EndUser" })">
+                                        Custom Orders History
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                     }
                     <li><a class="nav-link" href="@Url.Action("ContactUs", "LocalHome", new { area = "EndUser" })">Contact us</a></li>
-                    </ul>
+                </ul>
 
                 <ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
                     @if (Request.Cookies["CustomerAuth"] != null && Request.Cookies["CustomerAuth"]["FullName"] != null)
@@ -75,15 +91,15 @@
                         </li>
                     }
 
-                <li>
-                    <a class="nav-link position-relative" href="@Url.Action("Cart", "LocalHome", new { area = "EndUser" })">
-                        <img src="@Url.Content("~/FurniAssets/images/cart.svg")">
-                        <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                              style="@(Session["CartCount"] == null || (int)Session["CartCount"] == 0 ? "display:none;" : "")">
-                            @(Session["CartCount"] ?? 0)
-                        </span>
-                    </a>
-                </li>
+                    <li>
+                        <a class="nav-link position-relative" href="@Url.Action("Cart", "LocalHome", new { area = "EndUser" })">
+                            <img src="@Url.Content("~/FurniAssets/images/cart.svg")">
+                            <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                  style="@(Session["CartCount"] == null || (int)Session["CartCount"] == 0 ? "display:none;" : "")">
+                                @(Session["CartCount"] ?? 0)
+                            </span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -133,12 +149,12 @@
                                 <li><a href="#">Knowledge base</a></li>
                                 <li><a href="#">Live chat</a></li>
                                 <li><a href="#">Our team</a></li>
-                                   <li><a href="#">Privacy Policy</a></li>
+                                <li><a href="#">Privacy Policy</a></li>
                             </ul>
                         </div>
 
-                       
-                        
+
+
                     </div>
                 </div>
 
@@ -196,6 +212,8 @@
     <script src="@Url.Content("~/FurniAssets/js/custom.js")"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     @RenderSection("scripts", required: false)
 </body>
 
