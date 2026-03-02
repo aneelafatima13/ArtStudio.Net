@@ -20,6 +20,7 @@
         </div>
     </div>
 </div>
+
 <div class="offcanvas offcanvas-start" tabindex="-1" id="filterSidebar" style="width: 300px;">
     <div class="offcanvas-header border-bottom">
         <h5 class="offcanvas-title">Filters</h5>
@@ -27,14 +28,15 @@
     </div>
     <div class="offcanvas-body">
         <div class="mb-3">
-            <label>Search</label>
+            <label title="Search Products by Name, Colour, size, Description, SKU, Product Sources, Brands">Search</label>
             <input type="text" id="txtSearch" class="form-control" placeholder="Search products...">
+
         </div>
         <div class="mb-3">
             <div id="categoriesWrapper">
                 <div class="col-md-12" id="categoriesDiv">
                     <label class="form-label" for="Category">Category</label>
-                    <select id="Category" class="form-control category-dropdown">
+                    <select id="Category" class="form-control category-dropdown" data-level="0">
                         <!-- categories populated dynamically -->
                     </select>
                 </div>
@@ -50,6 +52,41 @@
                 <input type="number" id="maxPrice" class="form-control" placeholder="Max">
             </div>
         </div>
+        <div class="mb-3">
+            <div class="form-check form-switch mb-2">
+                <input class="form-check-input OnSale" type="checkbox" id="IsOnSale">
+                <label class="form-check-label" for="IsOnSale">On Sale</label>
+            </div>
+        </div>
+
+
+        <div class="mb-3" style="display:none" id="discountRateDiv">
+            <label class="form-label">Discount Rate (%)</label>
+            <input type="number" id="DiscountRate" class="form-control DiscountRate" placeholder="Enter rate %">
+        </div>
+
+        <div class="mb-3" style="display:none" id="discountPriceDiv">
+            <label class="form-label">Discount Price</label>
+            <input type="number" id="DiscountPrice" class="form-control DiscountPrice">
+        </div>
+        <div class="mb-3">
+            <div class="form-check form-switch mb-2">
+                <input class="form-check-input OnSale" type="checkbox" id="newP">
+                <label class="form-check-label" for="newP">New Products</label>
+            </div>
+        </div>
+        <div class="mb-3">
+            <div class="form-check form-switch mb-2">
+                <input class="form-check-input NotOnSale" type="checkbox" id="NotOnSale">
+                <label class="form-check-label" for="NotOnSale">Not On Sale</label>
+            </div>
+        </div>
+        <div class="mb-3">
+            <div class="form-check form-switch mb-2">
+                <input class="form-check-input ost" type="checkbox" id="ost">
+                <label class="form-check-label" for="ost">Out of Stock</label>
+            </div>
+        </div>
         <button class="btn btn-black w-100" onclick="loadProducts(1)">Apply Filters</button>
         <button class="btn btn-black w-100 mt-3" onclick="ClearFilters()">Clear Filters</button>
     </div>
@@ -57,6 +94,16 @@
 
 @section scripts {
     <script>
+        $(document).ready(function () {
+            $('#IsOnSale').on('change', function () {
+                if ($(this).is(':checked')) {
+                    $('#discountRateDiv, #discountPriceDiv').slideDown();
+                } else {
+                    $('#discountRateDiv, #discountPriceDiv').slideUp();
+                    $('#DiscountRate, #DiscountPrice').val('');
+                }
+            });
+        });
         $(document).ready(function () {
             loadProducts(1);
             loadCategories(); // Load top-level categories on start
@@ -140,55 +187,71 @@
        // 1. Updated loadProducts to include categories and close the sidebar
 function loadProducts(page) {
     // Collect all checked category IDs into an array
-    const selectedCategories = [];
-    $('.category-checkbox:checked').each(function() {
-        selectedCategories.push($(this).val());
+    let categoryId = null;
+    $('.category-dropdown').each(function () {
+        if ($(this).val()) {
+            categoryId = $(this).val();
+        }
     });
 
     const filterData = {
         page: page,
-        pageSize: 20,
+        pageSize: 12,
+        categoryId: categoryId,
         minPrice: $('#minPrice').val(),
         maxPrice: $('#maxPrice').val(),
         search: $('#txtSearch').val(),
-        categories: selectedCategories // Ensure your C# Action accepts this parameter
+        drate: $('#DiscountRate').val(),
+        dprice: $('#DiscountPrice').val(),
+        onSale: $('#IsOnSale').is(':checked') ? true : null,
+        notonSale: $('#NotOnSale').is(':checked') ? false : null,
+        newProducts: $('#newP').is(':checked') ? true : null, // Send true/false
+        inStock: $('#ost').is(':checked') ? false : null // If "Out of Stock" checked, we show everything? Usually, this filters for Stock > 0.
     };
-
+    debugger;
     $.ajax({
         url: '@Url.Action("Index", "Shop", new { area = "Products" })',
         type: 'GET',
         data: filterData,
         traditional: true, // Required to send arrays correctly in the URL query string
         success: function (response) {
-            renderProducts(response.data);
-            renderPagination(response.total, response.page);
+            if (response.success) {
+                renderProducts(response.data);
+                renderPagination(response.total, response.page);
 
-            // CLOSE THE MODAL/OFFCANVAS
-            const filterEl = document.getElementById('filterSidebar');
-            const instance = bootstrap.Offcanvas.getInstance(filterEl);
-            if (instance) {
-                instance.hide();
+                // Close the Offcanvas
+                const filterEl = document.getElementById('filterSidebar');
+                const instance = bootstrap.Offcanvas.getInstance(filterEl);
+                if (instance) instance.hide();
+            } else {
+                // Handle logic error (e.g., DB connection failed)
+                alert("Error: " + response.message);
             }
+        },
+        error: function (xhr, status, error) {
+            // Handle HTTP errors (e.g., 404, 500)
+            console.error("AJAX Error: ", error);
+            alert("Something went wrong on the server.");
         }
     });
 }
+        function ClearFilters() {
 
-// 2. Clear Filters Method
-function ClearFilters() {
-    // Reset text and number inputs
-    $('#txtSearch').val('');
-    $('#minPrice').val('');
-    $('#maxPrice').val('');
+            $('#txtSearch, #minPrice, #maxPrice, #DiscountRate, #DiscountPrice').val('');
 
-    // Uncheck all category checkboxes
-    $('.category-checkbox').prop('checked', false);
+            $('#IsOnSale, #ost, #newP, #NotOnSale').prop('checked', false);
 
-    // Optional: Clear nested child categories to keep it tidy
-    $('.child-container').empty();
+            $('.category-dropdown').val('');
 
-    // Reload products with page 1 and no filters
-    loadProducts(1);
-}
+            $('.category-checkbox').prop('checked', false);
+
+            $('.discountRateDiv, .discountPriceDiv').hide();
+
+            $('.child-container').empty();
+
+            loadProducts(1);
+        }
+
         function renderProducts(products) {
             const container = $('#ShopProducts');
             container.empty();
@@ -240,7 +303,7 @@ function ClearFilters() {
                 </div>
 
                 <h3 class="product-title mt-3" style="cursor:pointer" onclick="viewItem(event,${item.Id})">${item.Name}</h3>
-                
+
                 <strong class="product-price">
                     ${hasDiscount
                         ? `<del class="text-muted me-2">$${item.Price.toFixed(2)}</del> <span class="text-danger">$${displayPrice.toFixed(2)}</span>`
@@ -248,7 +311,7 @@ function ClearFilters() {
                     }
                 </strong>
 
-                <span class="icon-cross" onclick="addToCart(event,${item.Id})" title="Add to Cart">
+                <span class="icon-cross" onclick="addToCart(event,${item.Id},${item.VariantId})" title="Add to Cart">
                     <img src="/FurniAssets/images/cross.svg" class="img-fluid">
                 </span>
             </div>
@@ -270,7 +333,7 @@ function ClearFilters() {
             }
         }
 
-        function addToCart(event, productId) {
+        function addToCart(event, productId, VariantId) {
             debugger;
     event.preventDefault();
     event.stopPropagation();
@@ -278,7 +341,7 @@ function ClearFilters() {
     $.ajax({
         url: '@Url.Action("AddToCart", "Cart", new { area = "EndUser" })',
         type: 'POST',
-        data: { id: productId, quantity: 1 },
+        data: { id: productId, quantity: 1, VariantId: VariantId },
         success: function (response) {
             if (response.success) {
                 // 1. Update the text with the new total count
@@ -298,6 +361,14 @@ function ClearFilters() {
             }
         }
     });
+        }
+
+        function viewItem(event, id) {
+    // Prevent default behavior if nested in other clickable elements
+    if (event) event.stopPropagation();
+
+    // Redirect to the ProductDetails Action
+    window.location.href = '@Url.Action("ProductDetails", "Shop", new { area = "Products" })?Id=' + id;
 }
     </script>
 }

@@ -227,9 +227,24 @@
                 type: 'GET',
                 data: filterData,
                 success: function (response) {
-        renderProducts(response.data);
-        renderPagination(response.total, response.page);
-    }
+                    if (response.success) {
+                        renderProducts(response.data);
+                        renderPagination(response.total, response.page);
+
+                        // Close the Offcanvas
+                        const filterEl = document.getElementById('filterSidebar');
+                        const instance = bootstrap.Offcanvas.getInstance(filterEl);
+                        if (instance) instance.hide();
+                    } else {
+                        // Handle logic error (e.g., DB connection failed)
+                        alert("Error: " + response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Handle HTTP errors (e.g., 404, 500)
+                    console.error("AJAX Error: ", error);
+                    alert("Something went wrong on the server.");
+                }
 });
         }
 
@@ -292,7 +307,7 @@
                     }
         </strong>
 
-        <span class="icon-cross" onclick="addToCart(event,${item.Id})" title="Add to Cart">
+        <span class="icon-cross" onclick="addToCart(event,${item.Id},${item.VariantId})" title="Add to Cart">
             <img src="/FurniAssets/images/cross.svg" class="img-fluid">
         </span>
     </div>
@@ -315,7 +330,7 @@
             }
         }
 
-        function addToCart(event, productId) {
+        function addToCart(event, productId, VariantId) {
             debugger;
     event.preventDefault();
     event.stopPropagation();
@@ -323,7 +338,7 @@
     $.ajax({
         url: '@Url.Action("AddToCart", "Cart", new { area = "EndUser" })',
         type: 'POST',
-        data: { id: productId, quantity: 1 },
+        data: { id: productId, quantity: 1, VariantId: VariantId },
         success: function (response) {
             if (response.success) {
                 // 1. Update the text with the new total count

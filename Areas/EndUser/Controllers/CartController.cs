@@ -13,20 +13,20 @@ namespace BizOne.Areas.EndUser.Controllers
         private readonly ProductsDAL productDal = new ProductsDAL();
 
         [HttpPost]
-        public JsonResult AddToCart(long id, int quantity)
+        public JsonResult AddToCart(long id, int quantity, long VariantId)
         {
             // 1. Get current cart from session or create new one
             var cart = Session["Cart"] as List<CartItem> ?? new List<CartItem>();
 
             // 2. Check if product already exists in cart
-            var existingItem = cart.FirstOrDefault(x => x.ProductId == id);
+            var existingItem = cart.FirstOrDefault(x => x.ProductId == id || x.VariantId == VariantId);
             if (existingItem != null)
             {
                 existingItem.Quantity += quantity;
             }
             else
             {
-                cart.Add(new CartItem { ProductId = id, Quantity = quantity });
+                cart.Add(new CartItem { ProductId = id, Quantity = quantity, VariantId = VariantId });
             }
 
             // 3. Save back to session
@@ -43,36 +43,67 @@ namespace BizOne.Areas.EndUser.Controllers
             if (cart.Count == 0)
                 return Json(new { success = true, data = new List<object>(), subtotal = 0 }, JsonRequestBehavior.AllowGet);
 
-            // Assuming you have a ProductDAL or DbContext
-            // We fetch details for only the IDs present in the session
-            var productIds = cart.Select(x => x.ProductId).ToList();
-            var products = productDal.GetProductsByIds(productIds); // Replace with your actual data fetch logic
+            var resultList = new List<object>();
 
-            var result = cart.Select(item => {
-                var p = products.FirstOrDefault(x => x.Id == item.ProductId);
-                // Use DiscountPrice if OnSale is true, otherwise use normal Price
-                decimal unitPrice = (p != null && p.OnSale && p.DiscountPrice > 0)
-                                    ? p.DiscountPrice.Value
-                                    : (p?.Price ?? 0);
+            foreach (var item in cart)
+            {
+                // 1. Fetch the full product object (including all its variants and images)
+                var fullProduct = productDal.GetProductDetailsById(item.ProductId);
+                if (fullProduct == null) continue;
 
-                return new
+                decimal unitPrice = 0;
+                string displayName = fullProduct.Name;
+                string imagePath = "";
+                long? stockQty = 0;
+                string variantInfo = "";
+
+                // 2. Determine if we use Variant data or Base Product data
+                if (item.VariantId.HasValue && item.VariantId.Value > 0)
+                {
+                    // Find the specific variant in the list
+                    var v = fullProduct.varients.FirstOrDefault(x => x.Id == item.VariantId.Value);
+                    if (v != null)
+                    {
+                        // Use Variant Price logic
+                        unitPrice = (v.OnSale && v.DiscountPrice > 0) ? v.DiscountPrice.Value : (v.Price ?? 0);
+                        stockQty = v.StockQuantity;
+                        variantInfo = $"{v.Colour} - {v.Size}";
+
+                        // Get Variant Primary Image or first available variant image
+                        var vImg = v.imageslist.FirstOrDefault(i => i.IsPrimary) ?? v.imageslist.FirstOrDefault();
+                        imagePath = vImg?.ImagePath ?? "";
+                    }
+                }
+                else
+                {
+                    // Use Base Product Price logic
+                    unitPrice = (fullProduct.OnSale && fullProduct.DiscountPrice > 0) ? fullProduct.DiscountPrice.Value : (fullProduct.Price ?? 0);
+                    stockQty = fullProduct.StockQuantity;
+
+                    // Get Base Product Primary Image
+                    var pImg = fullProduct.ProductImages.FirstOrDefault(i => i.IsPrimary) ?? fullProduct.ProductImages.FirstOrDefault();
+                    imagePath = pImg?.ImagePath ?? "";
+                }
+
+                // 3. Build the individual order object
+                resultList.Add(new
                 {
                     ProductId = item.ProductId,
-                    Name = p?.Name ?? "Unknown",
-                    Price = unitPrice, // This is the final price (discounted if on sale)
-                    OriginalPrice = p?.Price ?? 0,
-                    IsOnSale = p?.OnSale ?? false,
-                    ActualStockQuantity = p?.StockQuantity,// Add this flag
+                    VariantId = item.VariantId,
+                    Name = displayName,
+                    VariantDetails = variantInfo, // Extra info for the UI (e.g., "Red - XL")
+                    Price = unitPrice,
+                    ActualStockQuantity = stockQty,
                     Quantity = item.Quantity,
-                    ImagePath = p?.firstVarientproductImages?.FirstOrDefault()?.ImagePath ?? "",
+                    ImagePath = imagePath,
                     Total = unitPrice * item.Quantity
-                };
-            }).ToList();
-            decimal subtotal = result.Sum(x => (decimal)x.Total);
+                });
+            }
 
-            return Json(new { success = true, data = result, subtotal = subtotal }, JsonRequestBehavior.AllowGet);
+            decimal subtotal = resultList.Sum(x => (decimal)((dynamic)x).Total);
+
+            return Json(new { success = true, data = resultList, subtotal = subtotal }, JsonRequestBehavior.AllowGet);
         }
-
         [HttpPost]
         public JsonResult UpdateQuantity(long id, int change)
         {
@@ -110,31 +141,65 @@ namespace BizOne.Areas.EndUser.Controllers
         [HttpPost]
         public JsonResult PrepareCheckout()
         {
-            // Re-run the logic from GetCartItems to get the latest prices/data
             var cart = Session["Cart"] as List<CartItem> ?? new List<CartItem>();
-            var productIds = cart.Select(x => x.ProductId).ToList();
-            var products = productDal.GetProductsByIds(productIds);
+
+            if (cart.Count == 0)
+            {
+                return Json(new { success = false, message = "Your cart is empty." });
+            }
 
             var checkoutData = new CheckoutSessionModel();
-            checkoutData.Items = cart.Select(item => {
-                var p = products.FirstOrDefault(x => x.Id == item.ProductId);
-                decimal unitPrice = (p != null && p.OnSale && p.DiscountPrice > 0) ? p.DiscountPrice.Value : (p?.Price ?? 0);
-                return new CartDetailViewModel
+            checkoutData.Items = new List<CartDetailViewModel>();
+
+            foreach (var item in cart)
+            {
+                // Fetch full product details (includes base product + variants)
+                var fullProduct = productDal.GetProductDetailsById(item.ProductId);
+                if (fullProduct == null) continue;
+
+                decimal unitPrice = 0;
+                string displayName = fullProduct.Name;
+                string variantDescription = "";
+
+                // Check if this cart item is a specific variant
+                if (item.VariantId.HasValue && item.VariantId.Value > 0)
+                {
+                    var v = fullProduct.varients.FirstOrDefault(x => x.Id == item.VariantId.Value);
+                    if (v != null)
+                    {
+                        // Use Variant Price logic
+                        unitPrice = (v.OnSale && v.DiscountPrice > 0) ? v.DiscountPrice.Value : (v.Price ?? 0);
+                        variantDescription = $"({v.Colour} - {v.Size})";
+                    }
+                }
+                else
+                {
+                    // Use Base Product Price logic
+                    unitPrice = (fullProduct.OnSale && fullProduct.DiscountPrice > 0) ? fullProduct.DiscountPrice.Value : (fullProduct.Price ?? 0);
+                }
+
+                checkoutData.Items.Add(new CartDetailViewModel
                 {
                     ProductId = item.ProductId,
-                    Name = p?.Name,
+                    VariantId = item.VariantId, // Ensure your ViewModel has this property
+                    Name = $"{displayName} {variantDescription}".Trim(),
                     Price = unitPrice,
                     Quantity = item.Quantity,
                     Total = unitPrice * item.Quantity
-                };
-            }).ToList();
+                });
+            }
 
+            // Calculate Final Total
             checkoutData.GrandTotal = checkoutData.Items.Sum(x => x.Total);
 
-            // Save this detailed object to Session
+            // Save the fully populated object to Session for the Checkout Page to read
             Session["CheckoutData"] = checkoutData;
 
-            return Json(new { success = true, redirectUrl = Url.Action("Checkout", "LocalHome", new { area = "EndUser"}) });
+            return Json(new
+            {
+                success = true,
+                redirectUrl = Url.Action("Checkout", "LocalHome", new { area = "EndUser" })
+            });
         }
 
         [HttpGet]

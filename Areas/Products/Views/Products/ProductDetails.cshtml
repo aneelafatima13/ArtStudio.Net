@@ -1,6 +1,6 @@
 ﻿
 @{
-    ViewBag.Title = "ManageDeaprtments";
+    ViewBag.Title = "ProductDetails";
     Layout = "~/Views/Shared/_BizoneLayout.cshtml";
 }
 
@@ -9,12 +9,13 @@
     <div class="col-md">
         <!-- Add Role -->
         <div class="card mb-4">
-            <h5 class="card-header">Product Details</h5>
+            <div class="card-header justify-content-between">
+                <h5 class="card-title">Product Details</h5>
+            </div>
+
             <div class="card-body">
                 <div id="mainProductDetails"></div>
-                <div class="divider text-start divider-primary mt-3">
-                    <div class="divider-text divider-text-rights fw-bold variantTitle">Variant Details</div>
-                </div>
+
                 <div id="VarientDetails">
 
                 </div>
@@ -25,112 +26,1229 @@
 </div>
 <input type="hidden" value="@ViewBag.ProductId" id="productId" />
 
+<div class="modal fade" id="genericModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalHeaderTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalBodyContent">
+            </div>
+            <div class="modal-footer" id="modalFooterContent">
+            </div>
+        </div>
+    </div>
+</div>
 @section scripts{
     <script>
     $(document).ready(function () {
-        let productId = $("#productId").val();
+    let productId = $("#productId").val();
 
-        $.ajax({
-            url: '@Url.Action("ProductDetails", "Products", new { area = "Products"})', // your controller action
-            type: 'GET',
-            data: { id: productId },
-            success: function (res) {
-                if (!res) {
-                    $("#mainProductDetails").html("<p class='text-danger'>No product found.</p>");
-                    return;
-                }
+    $.ajax({
+        url: '@Url.Action("GetProductDetails", "Products", new { area = "Products"})',
+        type: 'GET',
+        data: { id: productId },
+        success: function (res) {
+            if (!res || !res.product) {
+                $("#mainProductDetails").html("<div class='alert alert-warning'>Product not found.</div>");
+                return;
+            }
 
-                // ---- Main Product Info ----
-                let productHtml = `
-        <div class="row">
-            <div class="col-md-6">
-                <h5>${res.Name}</h5>
-                <p><strong>SKU:</strong> ${res.SKU ?? ""}</p>
-                <p><strong>Brand:</strong> ${res.Brand ?? ""}</p>
-                <p><strong>Categories:</strong> ${res.Categories ?? ""}</p>
-                <p><strong>Description:</strong> ${res.Description ?? ""}</p>
-                <p><strong>Price:</strong> ${res.Price ?? ""}</p>
-                <p><strong>Stock:</strong> ${res.StockQuantity ?? 0}</p>
-            </div>
-            <div class="col-md-6">
-                ${res.imageslist && res.imageslist.length > 0
-                        ? `
-                        <table class="table table-bordered table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Image</th>
-                                    <th>File Name</th>
-                                    <th>Primary</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${res.imageslist.map(img => `
-                                    <tr>
-                                        <td><img src="@Url.Action("GetProductImage", "Products", new {area = "Products"})?filePath=${img.ImagePath}" class="img-thumbnail" style="max-width:80px;"/></td>
-                                        <td>${img.FileName ?? ""}</td>
-                                        <td>${img.IsPrimary ? "✅" : ""}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                      `
-                        : "<p>No Images</p>"
-                    }
-            </div>
+            let p = res.product;
+
+            // 1. Render Category Breadcrumbs (Mapped from product.categoriesorder)
+            let categoryHtml = "";
+            if (res.categories && res.categories.length > 0) {
+                categoryHtml = `
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mt-2">
+                            ${res.categories.map(c => `<li class="breadcrumb-item"><a href="#">${c.CategoryName}</a></li>`).join('')}
+                        </ol>
+                    </nav>`;
+            }
+            debugger;
+            // 2. Main Product & Gallery
+            let productHtml = `
+
+                <div class="row mt-3">
+                    <div class="col-md-7">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="fw-bold">${p.Name}</h2>
+
+                        </div>
+                         <div style="display: flex; align-items: center; gap: 10px;">
+    <strong>Category Tree:</strong>
+    <span>${categoryHtml}</span>
+</div>
+                        <div class="row g-3">
+
+                            <div class="col-6"><strong>Id:</strong> ${p.Id}</div>
+                            <div class="col-6"><strong>SKU:</strong> ${p.SKU}</div>
+                            <div class="col-6"><strong>Brand:</strong> ${p.Brand}</div>
+                            <div class="col-6"><strong>Colour:</strong> ${p.Colour}</div>
+                            <div class="col-6"><strong>Size:</strong> ${p.Size}</div>
+                            <div class="col-6"><strong>ProductSource:</strong> ${p.ProductSource}</div>
+
+                            <div class="col-6"><strong>Base Price:</strong> <span class="fs-5 text-primary">${p.Price}</span></div>
+                            <div class="col-6"><strong>Stock:</strong> ${p.StockQuantity}</div>
+                            <div class="col-6"><strong>Discount Rate:</strong> ${p.DiscountRate}</div>
+                            <div class="col-6"><strong>Discount Price:</strong> ${p.DiscountPrice}</div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h5>Description</h5>
+                            <p>${p.Description}</p>
+                        </div>
+
+                        <div class="mt-4 p-2 bg-light rounded shadow-sm small">
+                            <strong>System Info:</strong><br>
+                            Created by ${p.AddedbyString} on ${p.AddedDates}<br>
+                   Modified by ${p.ModifiedbyString} on ${p.ModifiedDates}
+                        </div>
+<div class="mt-4 d-flex align-items-center justify-content-between">
+    <div>
+        <span class="badge ${p.IsAvailable ? 'bg-success' : 'bg-danger'}">${p.IsAvailable ? 'Available' : 'Unavailable'}</span>
+        <span class="badge ${p.InStock ? 'bg-success' : 'bg-danger'}">${p.InStock ? 'In Stock' : 'Out of Stock'}</span>
+        <span class="badge ${p.OnSale ? 'bg-success' : 'bg-danger'}">${p.OnSale ? 'On Sale' : 'Not on Sale'}</span>
+    </div>
+
+   <div class="btn-group shadow-sm" role="group">
+    <button type="button" class="btn btn-outline-primary btn-sm" onclick="editProduct(${p.Id})" data-bs-toggle="tooltip" title="Edit Product">
+        <i class="fa-solid fa-pen-to-square"></i>
+    </button>
+    <button type="button" class="btn btn-outline-dark btn-sm" onclick="editCategory(${p.Id})" data-bs-toggle="tooltip" title="Edit Product">
+        <i class="fa-solid fa-pencil"></i>
+    </button>
+    <button type="button" class="btn ${p.IsAvailable ? 'btn-outline-warning' : 'btn-outline-success'} btn-sm"
+            onclick="toggleAvailability(${p.Id}, ${p.IsAvailable})"
+            data-bs-toggle="tooltip"
+            title="${p.IsAvailable ? 'Make Unavailable' : 'Make Available'}">
+        <i class="fa-solid ${p.IsAvailable ? 'fa-eye-slash' : 'fa-eye'}"></i>
+    </button>
+    <button type="button" class="btn btn-outline-info btn-sm" onclick="manageImages(${p.Id})" data-bs-toggle="tooltip" title="Add/Update Images">
+        <i class="fas fa-images"></i>
+    </button>
+    <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteProduct(${p.Id})" data-bs-toggle="tooltip" title="Delete Product">
+        <i class="fas fa-trash-alt"></i>
+    </button>
+</div>
+</div>
+                    </div>
+
+                    <div class="col-md-5">
+                        <h6 class="fw-bold text-uppercase small">Main Images</h6>
+                        <div class="row g-2">
+
+                            ${res.imageslist.map(img => `
+                                <div class="col-4">
+                                    <img src="@Url.Action("GetProductImage", "Products", new { area = "Products"})?path=${encodeURIComponent(img.ImagePath)}"
+                                         class="img-fluid rounded border ${img.IsPrimary ? 'border-primary border-2' : ''}"
+                                         style="aspect-ratio: 1/1; object-fit: cover;" />
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>`;
+
+            $("#mainProductDetails").html(productHtml);
+            let vcount = (p.varients && p.varients.length) ? p.varients.length : 0;
+
+            // 2. Set button title based on count
+            let btitle = vcount > 0 ? "Add more Variants" : "Add Variants";
+
+            let variantsHtml = `
+<div class="divider text-start divider-primary mt-5">
+    <div class="divider-text fw-bold variantTitle" style="font-size: 1.25rem;">
+        <i class="bi bi-box-seam me-2"></i>Variant Details
+    </div>
+</div>
+    <div class="text-end mb-4"> <button type="button" onclick="OpenAddVarientModal()" class="btn btn-primary">${btitle}</button></div>
+   `;
+
+if (p.varients && p.varients.length > 0) {
+    p.varients.forEach(v => {
+        variantsHtml += `
+            <div class="card mb-5 shadow-sm border-start border-primary border-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 text-primary">${p.Name} - ${v.Colour} ${v.Size ? '(' + v.Size + ')' : ''}</h5>
+
+                    </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="row g-3">
+                                <div class="col-6"><strong>Variant ID:</strong> ${v.Id}</div>
+                                <div class="col-6"><strong>SKU:</strong> ${p.SKU}</div> <div class="col-6"><strong>Colour:</strong> <span class="badge bg-secondary">${v.Colour}</span></div>
+                                <div class="col-6"><strong>Size:</strong> ${v.Size || 'N/A'}</div>
+                                <div class="col-6"><strong>Material:</strong> ${v.Material || 'N/A'}</div>
+                                <div class="col-6"><strong>Stock:</strong> ${v.StockQuantity}</div>
+
+                                <div class="col-6">
+                                    <strong>Price:</strong>
+                                    <span class="fs-5">
+                                        ${v.Price}
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Discount Rate:</strong>
+                                    <span class="fs-5 text-success">${v.DiscountRate > 0 ? v.DiscountRate : 'N/A'}</span>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Discount Price:</strong>
+                                    <span class="fs-5 text-success">${v.DiscountPrice > 0 ? v.DiscountPrice : 'N/A'}</span>
+                                </div>
+                            </div>
+                          <div class="d-flex flex-row justify-content-between align-items-center w-100">
+
+    <div class="d-flex flex-wrap gap-1">
+        <span class="badge ${v.IsAvailable ? 'bg-success' : 'bg-danger'}">
+            ${v.IsAvailable ? 'Available' : 'Unavailable'}
+        </span>
+        <span class="badge ${v.InStock ? 'bg-success' : 'bg-danger'}">
+            ${v.InStock ? 'In Stock' : 'Out of Stock'}
+        </span>
+        <span class="badge ${v.OnSale ? 'bg-success' : 'bg-light text-muted'}">
+            ${v.OnSale ? 'On Sale' : 'Not on Sale'}
+        </span>
+    </div>
+
+    <div>
+        <div class="btn-group shadow-sm" role="group">
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="editVarient(${v.Id})" data-bs-toggle="tooltip" title="Edit Product">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button type="button" class="btn ${v.IsAvailable ? 'btn-outline-warning' : 'btn-outline-success'} btn-sm"
+                    onclick="toggleVAvailability(${v.Id}, ${v.IsAvailable})"
+                    data-bs-toggle="tooltip"
+                    title="${v.IsAvailable ? 'Make Unavailable' : 'Make Available'}">
+                <i class="fa-solid ${v.IsAvailable ? 'fa-eye-slash' : 'fa-eye'}"></i>
+            </button>
+            <button type="button" class="btn btn-outline-info btn-sm" onclick="manageVImages(${v.Id})" data-bs-toggle="tooltip" title="Add/Update Images">
+                <i class="fas fa-images"></i>
+            </button>
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteVProduct(${v.Id})" data-bs-toggle="tooltip" title="Delete Product">
+                <i class="fas fa-trash-alt"></i>
+            </button>
         </div>
-    `;
-                $("#mainProductDetails").html(productHtml);
+    </div>
 
-                // ---- Variants ----
-                let variantsHtml = "";
-                if (res.varients && res.varients.length > 0) {
-                    res.varients.forEach(v => {
-                        variantsHtml += `
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-body">
-                        <p><strong>Colour:</strong> ${v.Colour ?? ""}</p>
-                        <p><strong>Material:</strong> ${v.Material ?? ""}</p>
-                        <p><strong>Size:</strong> ${v.Size ?? ""}</p>
-                        <p><strong>Price:</strong> ${v.Price ?? ""}</p>
-                        <p><strong>Stock:</strong> ${v.StockQuantity ?? 0}</p>
+</div>
+                            <div class="mt-3 p-2 bg-light rounded shadow-sm xtra-small" style="font-size: 0.75rem;">
+                                <strong>System Info:</strong><br>
+                                Added by ${v.AddedbyString} on ${v.AddedDates || 'N/A'}<br>
+                                Modified by ${v.ModifiedbyString} on ${v.ModifiedDates || 'N/A'}
+                            </div>
+                        </div>
 
-                        ${v.imageslist && v.imageslist.length > 0
-                                ? `
-                                <table class="table table-bordered table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Image</th>
-                                            <th>File Name</th>
-                                            <th>Primary</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${v.imageslist.map(img => `
-                                            <tr>
-                                                <td><img src="@Url.Action("GetProductImage", "Products", new {area = "Products"})?filePath=${img.ImagePath}" class="img-thumbnail" style="max-width:70px;"/></td>
-                                                <td>${img.FileName ?? ""}</td>
-                                                <td>${img.IsPrimary ? "✅" : ""}</td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                              `
-                                : "<p>No Variant Images</p>"
-                            }
+                        <div class="col-md-5">
+                            <h6 class="fw-bold text-uppercase small">Variant Gallery</h6>
+                            <div class="row g-2">
+                                ${v.imageslist && v.imageslist.length > 0
+                                    ? v.imageslist.map(img => `
+                                        <div class="col-4">
+                                            <img src="@Url.Action("GetProductImage", "Products", new { area = "Products"})?path=${encodeURIComponent(img.ImagePath)}"
+                                                 class="img-fluid rounded border ${img.IsPrimary ? 'border-primary border-2' : ''}"
+                                                 style="aspect-ratio: 1/1; object-fit: cover;" />
+                                        </div>`).join('')
+                                    : '<p class="text-muted small ps-2">No images for this variant.</p>'
+                                }
+                            </div>
+                        </div>
                     </div>
                 </div>
-            `;
-                    });
-                } else {
-                    variantsHtml = "<p>No variants available.</p>";
-                }
+            </div>`;
+    });
+} else {
+    variantsHtml += "<div class='alert alert-light text-center border'>No variants available for this product.</div>";
+}
 
-                $("#VarientDetails").html(variantsHtml);
-            },
-            error: function () {
-                $("#mainProductDetails").html("<p class='text-danger'>Error loading product details.</p>");
+$("#VarientDetails").html(variantsHtml);
+        },
+        error: function(err) {
+            console.error("AJAX Error:", err);
+            $("#mainProductDetails").html("<p class='text-danger'>Failed to load data.</p>");
+        }
+    });
+    });
+
+
+// 1. Function to open Edit Modal
+function editProduct(productId) {
+    $.ajax({
+        url: '@Url.Action("ReadProductDetailsfromSession", "Products", new { area = "Products"})',
+        type: 'GET',
+        success: function (res) {
+            if (res && res.product) {
+                let p = res.product;
+                let mappingIds = res.categories.map(c => c.ProductCategoryId).join(',');
+                // Set Header
+                $("#modalHeaderTitle").text("Edit Product: " + p.Name);
+
+                let bodyHtml = `
+                    <form id="editProductForm">
+                        <input type="hidden" name="Id" value="${p.Id}" />
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Product Name</label>
+                                <input type="text" name="Name" class="form-control" value="${p.Name}" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">SKU</label>
+                                <input type="text" name="SKU" class="form-control" value="${p.SKU}" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Price</label>
+                                <input type="number" name="Price" class="form-control" value="${p.Price}" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Stock Quantity</label>
+                                <input type="number" name="StockQuantity" class="form-control" value="${p.StockQuantity}" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Discount Rate (%)</label>
+                                <input type="number" name="DiscountRate" class="form-control" value="${p.DiscountRate}" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea name="Description" class="form-control" rows="3">${p.Description}</textarea>
+                            </div>
+
+                            <div class="col-12 mt-3">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" name="IsAvailable" id="editIsAvailable" ${p.IsAvailable ? 'checked' : ''}>
+                                    <label class="form-check-label" for="editIsAvailable">Available</label>
+                                </div>
+
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" name="OnSale" id="editOnSale" ${p.OnSale ? 'checked' : ''}>
+                                    <label class="form-check-label" for="editOnSale">On Sale</label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                `;
+
+                $("#modalBodyContent").html(bodyHtml);
+
+                let footerHtml = `
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark me-1"></i> Close
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="updateProduct()">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
+                    </button>`;
+                $("#modalFooterContent").html(footerHtml);
+                $("#genericModal").modal('show');
+            }
+        }
+    });
+}
+        function editCategory(productId) {
+    $.ajax({
+        url: '@Url.Action("ReadProductDetailsfromSession", "Products", new { area = "Products"})',
+        type: 'GET',
+        success: function (res) {
+            if (res && res.product) {
+                let p = res.product;
+                let mappingIds = res.categories.map(c => c.Id).join(',');
+                // Set Header
+                $("#modalHeaderTitle").text("Edit Category: " + p.Name);
+
+                // Build Body (Inputs and Checkboxes)
+                let bodyHtml = `
+                    <form id="editCategory">
+                        <input type="hidden" name="Id" value="${p.Id}" />
+                        <input type="hidden" id="existingMappingIds" value="${mappingIds}" />
+
+                           <div class="row g-3">
+                            <div class="col-12 mt-2">
+                                <label class="fw-bold mb-2">Category Hierarchy</label>
+                                <div id="categoriesWrapper">
+                                    <div class="category-container mb-2" id="categoriesDiv" data-level="0">
+                                        <select id="Category" class="form-control category-dropdown" data-level="0">
+                                            <option value="">Loading Categories...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            </div>
+                    </form>
+                `;
+
+                $("#modalBodyContent").html(bodyHtml);
+
+                let footerHtml = `
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark me-1"></i> Close
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="updateCategory()">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
+                    </button>`;
+                $("#modalFooterContent").html(footerHtml);
+                initializeCategoryTree(res.categories);
+                $("#genericModal").modal('show');
+            }
+        }
+    });
+}
+
+// 2. Function to Update through AJAX
+        function updateProduct() {
+
+    // Collect data using FormData or serialize
+    let formData = {
+        Id: $("#editProductForm input[name='Id']").val(),
+        Name: $("#editProductForm input[name='Name']").val(),
+        SKU: $("#editProductForm input[name='SKU']").val(),
+        Price: $("#editProductForm input[name='Price']").val(),
+        StockQuantity: $("#editProductForm input[name='StockQuantity']").val(),
+        DiscountRate: $("#editProductForm input[name='DiscountRate']").val(),
+        Description: $("#editProductForm textarea[name='Description']").val(),
+        IsAvailable: $("#editIsAvailable").is(':checked'),
+        OnSale: $("#editOnSale").is(':checked')
+    };
+
+            // 2. Validation
+            if (!formData.Price || formData.Price.trim() === '') {
+                alert("Price is required");
+                return;
+            }
+            if (!formData.StockQuantity || formData.StockQuantity.trim() === '') {
+                alert("Stock Quantity is required");
+                return;
+            }
+    $.ajax({
+        url: '@Url.Action("UpdateProduct", "Products", new { area = "Products"})',
+        type: 'POST',
+        data: formData,
+        beforeSend: function () {
+            $(".btn-primary").prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Updating...');
+        },
+        success: function (res) {
+            if (res.success) {
+                $("#genericModal").modal('hide');
+                location.reload(); // Refresh the data view
+            } else {
+                alert("Error: " + res.message);
+            }
+        },
+        error: function () {
+            alert("Connection error.");
+        }
+    });
+        }
+        function updateCategory() {
+            let productId = $("#productId").val();
+            let selectedCategoryIds = [];
+
+            $("#categoriesWrapper select").each(function () {
+                let val = $(this).val();
+                if (val) {
+                    selectedCategoryIds.push(val); // Use push for arrays
+                }
+            });
+    // Collect data using FormData or serialize
+    let formData = {
+        productId: productId,
+        CategoryId: selectedCategoryIds.join(','),
+        ExistingMappingIds: $("#existingMappingIds").val(),
+    };
+
+    $.ajax({
+        url: '@Url.Action("UpdateCategory", "Products", new { area = "Products"})',
+        type: 'POST',
+        data: formData,
+        beforeSend: function () {
+            $(".btn-primary").prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Updating...');
+        },
+        success: function (res) {
+            if (res.success) {
+                $("#genericModal").modal('hide');
+                location.reload(); // Refresh the data view
+            } else {
+                alert("Error: " + res.message);
+            }
+        },
+        error: function () {
+            alert("Connection error.");
+        }
+    });
+        }
+
+                    $(document).on("change", ".category-dropdown", function () {
+                debugger;
+    let categoryId = $(this).val();
+                let level = parseInt($(this).data("level"));
+
+    $(`#categoriesWrapper .category-container`).each(function () {
+        if ($(this).data("level") > level) {
+            $(this).remove();
+        }
+    });
+
+    if (categoryId) {
+        $.ajax({
+            url: '@Url.Action("GetSubCategories", "Categories", new { area = "Products"})',
+            type: 'POST',
+            data: { parentId: categoryId },
+            success: function (res) {
+                debugger;
+                if (res.length > 0) {
+                    let nextLevel = level + 1;
+
+                    // Clone categoriesDiv
+                    let $clone = $("#categoriesDiv").clone();
+                    $clone.attr("id", `categoriesDiv_${nextLevel}`);
+                    $clone.addClass("category-container");
+                    $clone.attr("data-level", nextLevel);
+
+                    // Clear old inner content
+                    $clone.find("label").remove();
+                    $clone.find("select").remove();
+
+                    // Build new dropdown
+                    let subSelectId = `SubCategory_${categoryId}_${nextLevel}`;
+                    let html = `
+                        <label class="form-label" for="${subSelectId}">Select Sub Category</label>
+                        <select id="${subSelectId}" class="form-control category-dropdown" data-level="${nextLevel}">
+                            <option value="">-- Select Sub Category --</option>
+                    `;
+                    res.forEach(sc => {
+                        html += `<option value="${sc.Id}">${sc.Name}</option>`;
+                    });
+                    html += `</select>`;
+
+                    $clone.html(html);
+
+                    $("#categoriesWrapper").append($clone);
+                }
+            }
+        });
+    }
+});
+
+    function loadCategories() {
+    $.ajax({
+        url: '@Url.Action("GetCategories", "Categories", new { area = "Products"})',
+        type: 'POST',
+        success: function (res) {
+            if (res.success) {
+                let $cat = $("#Category");
+                $cat.empty().append(`<option value="">-- Select Category --</option>`);
+
+                // res.data is now guaranteed to be the array
+                res.data.forEach(c => {
+                    $cat.append(`<option value="${c.Id}">${c.Name}</option>`);
+                });
+            } else {
+                console.error(res.message);
+            }
+        }
+    });
+}
+
+
+        async function initializeCategoryTree(categoryBreadcrumbs) {
+    if (!categoryBreadcrumbs || categoryBreadcrumbs.length === 0) {
+        loadCategories(); // Just load top level if empty
+        return;
+    }
+
+    // 1. Load the Top Level first
+    await new Promise((resolve) => {
+        $.ajax({
+            url: '@Url.Action("GetCategories", "Categories", new { area = "Products"})',
+            type: 'POST',
+            success: function (res) {
+                if (res.success) {
+                    let $cat = $("#Category");
+                    $cat.empty().append(`<option value="">-- Select Category --</option>`);
+                    res.data.forEach(c => {
+                        let selected = (c.Id == categoryBreadcrumbs[0].CategoryId) ? "selected" : "";
+                        $cat.append(`<option value="${c.Id}" ${selected}>${c.Name}</option>`);
+                    });
+                    resolve();
+                }
             }
         });
     });
+
+    // 2. Loop through the breadcrumbs to build sub-dropdowns
+    // We start from index 0 and build the child for index 1, and so on.
+    for (let i = 0; i < categoryBreadcrumbs.length; i++) {
+        let currentId = categoryBreadcrumbs[i].CategoryId;
+        let nextCategory = categoryBreadcrumbs[i + 1]; // This is what we want to select in the NEXT box
+
+        if (nextCategory) {
+            await loadAndSelectSubCategory(currentId, i, nextCategory.CategoryId);
+        }
+    }
+}
+
+function loadAndSelectSubCategory(parentId, currentLevel, nextSelectedId) {
+    return new Promise((resolve) => {
+        $.ajax({
+            url: '@Url.Action("GetSubCategories", "Categories", new { area = "Products"})',
+            type: 'POST',
+            data: { parentId: parentId },
+            success: function (res) {
+                if (res.length > 0) {
+                    let nextLevel = currentLevel + 1;
+                    let subSelectId = `SubCategory_${parentId}_${nextLevel}`;
+
+                    let html = `
+                        <div class="category-container mb-2" data-level="${nextLevel}">
+                            <label class="form-label small">Sub Category</label>
+                            <select id="${subSelectId}" class="form-control category-dropdown" data-level="${nextLevel}">
+                                <option value="">-- Select Sub Category --</option>
+                                ${res.map(sc => `<option value="${sc.Id}" ${sc.Id == nextSelectedId ? 'selected' : ''}>${sc.Name}</option>`).join('')}
+                            </select>
+                        </div>`;
+
+                    $("#categoriesWrapper").append(html);
+                }
+                resolve();
+            }
+        });
+    });
+        }
+
+        function manageImages(productId) {
+    $.ajax({
+        url: '@Url.Action("ReadProductDetailsfromSession", "Products", new { area = "Products"})',
+        type: 'GET',
+        success: function (res) {
+            if (res && res.product) {
+                let images = res.imageslist || [];
+
+                $("#modalHeaderTitle").text("Manage Images: " + res.product.Name);
+
+                let bodyHtml = `
+                    <div class="mb-4 p-3 border rounded bg-light">
+                        <label class="form-label fw-bold">Upload New Images</label>
+                        <div class="input-group">
+                            <input type="file" id="newProductImages" class="form-control" multiple accept="image/*">
+                            <button class="btn btn-primary" type="button" onclick="uploadImages(${productId})">
+                                <i class="fa-solid fa-upload me-1"></i> Upload
+                            </button>
+                        </div>
+                        <small class="text-muted">You can select multiple files at once.</small>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Preview</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="imageTableBody">
+                                ${images.map(img => `
+                                    <tr id="img_row_${img.Id}">
+                                        <td>
+                                            <img src="@Url.Action("GetProductImage", "Products", new { area = "Products"})?path=${encodeURIComponent(img.ImagePath)}"
+                                                 class="rounded border shadow-sm" style="width: 60px; height: 60px; object-fit: cover;" />
+                                        </td>
+                                        <td>
+                                            ${img.IsPrimary ? '<span class="badge bg-primary">Primary</span>' : '<span class="badge bg-secondary">Secondary</span>'}
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-outline-primary" onclick="setPrimaryImage(${img.Id}, ${productId})" ${img.IsPrimary ? 'disabled' : ''} title="Set as Primary">
+                                                    <i class="fa-solid fa-star"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteImage(${img.Id}, ${productId}, '${img.ImagePath}')" title="Delete Image">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                                ${images.length === 0 ? '<tr><td colspan="3" class="text-center text-muted">No images found.</td></tr>' : ''}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                $("#modalBodyContent").html(bodyHtml);
+                $("#modalFooterContent").html(`
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                `);
+                $("#genericModal").modal('show');
+            }
+        }
+    });
+        }
+
+        // Function to upload new images
+function uploadImages(productId) {
+    let files = $("#newProductImages")[0].files;
+    if (files.length === 0) return alert("Please select images first.");
+
+    let formData = new FormData();
+    formData.append("productId", productId);
+    for (let i = 0; i < files.length; i++) {
+        formData.append("images", files[i]);
+    }
+
+    $.ajax({
+        url: '@Url.Action("UploadProductImages", "Products", new { area = "Products"})',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        beforeSend: function () {
+            $(".btn-primary").prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Uploading...');
+        },
+        success: function (res) {
+            if (res.success) {
+                // Refresh modal data by calling manageImages again or reloading page
+                alert("Images uploaded successfully!");
+                location.reload();
+            }
+        }
+    });
+}
+
+// Function to set an image as Primary
+function setPrimaryImage(imageId, productId) {
+    $.ajax({
+        url: '@Url.Action("SetPrimaryImage", "Products", new { area = "Products"})',
+        type: 'POST',
+        data: {
+            imageId: imageId,
+            productId: productId
+        },
+        beforeSend: function () {
+            $(".btn-primary").prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Updating...');
+        },
+        success: function (res) {
+            if (res.success) {
+                alert("Primary image updated successfully!");
+                location.reload();
+            } else {
+                alert("Error: " + res.message);
+            }
+        },
+        error: function () {
+            alert("Failed to update primary image.");
+        }
+    });
+}
+
+// Function to delete an image
+        function deleteImage(imageId, productId, imgPath) {
+            debugger;
+    if (!confirm("Are you sure you want to delete this image?")) return;
+
+    $.ajax({
+        url: '@Url.Action("DeleteProductImage", "Products", new { area = "Products"})',
+        type: 'POST',
+        data: { imageId: imageId, pId: productId, imgPath: imgPath },
+        success: function (res) {
+            if (res.success) {
+                alert("Image deleted Successfully!");
+                location.reload();
+            } else {
+                alert("Error: " + res.message);
+            }
+        },
+        error: function () {
+            alert("Connection error while deleting image.");
+        }
+    });
+        }
+
+        function toggleAvailability(productId, isAvailability) {
+    $.ajax({
+        url: '@Url.Action("ToggleAvailability", "Products", new { area = "Products"})',
+        type: 'POST',
+        data: { id: productId, isAvailability: isAvailability },
+        success: function (res) {
+            if (res.success) {
+                // Refresh the page or the specific detail container
+                location.reload();
+            } else {
+                alert("Update failed: " + res.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            // This catches Network errors (404, 500, etc.) if the server crashes entirely
+            alert("Network Error: Could not reach the server. " + error);
+        }
+    });
+}
+
+function deleteProduct(productId) {
+    if (confirm("⚠️ WARNING: This will permanently delete this product, all its variants, images, and category mappings. Are you sure?")) {
+        $.ajax({
+            url: '@Url.Action("DeleteFullProduct", "Products", new { area = "Products"})',
+            type: 'POST',
+            data: { id: productId },
+            success: function (res) {
+                if (res.success) {
+                    alert("Product deleted successfully.");
+                    // Redirect to the main product list after deletion
+                    window.location.href = '@Url.Action("ManageProducts", "Products", new { area = "Products"})';
+                } else {
+                    alert("Delete failed: " + res.message);
+                }
+            }
+        });
+    }
+}
+    function toggleVAvailability(variantId, currentStatus) {
+    $.ajax({
+        url: '@Url.Action("ToggleVariantAvailability", "Products", new { area = "Products"})',
+        type: 'POST',
+        data: {
+            variantId: variantId,
+            currentStatus: currentStatus // Passed from the button template
+        },
+        success: function (res) {
+            if (res.success) {
+                location.reload(); // Refresh to see updated badges
+            } else {
+                alert("Error: " + res.message);
+            }
+        }
+    });
+}
+
+function deleteVProduct(variantId) {
+    if (confirm("Are you sure you want to delete this variant and all its images?")) {
+        $.ajax({
+            url: '@Url.Action("DeleteVariant", "Products", new { area = "Products"})',
+            type: 'POST',
+            data: { variantId: variantId },
+            success: function (res) {
+                if (res.success) {
+                    alert("Variant deleted successfully.");
+                    location.reload();
+                } else {
+                    alert("Delete failed: " + res.message);
+                }
+            },
+            error: function () {
+                alert("Connection error.");
+            }
+        });
+    }
+        }
+
+     function manageVImages(variantId) {
+    // 1. Fetch latest product data from Session via Ajax
+    $.ajax({
+        url: '@Url.Action("ReadProductDetailsfromSession", "Products", new { area = "Products"})',
+        type: 'GET',
+        // Note: Using the global product.Id or passing it from the caller
+        data: { id: variantId },
+        success: function (res) {
+            if (res && res.product) {
+                // Update the global product object with fresh session data
+                product = res.product;
+
+                // 2. Find the specific variant within the fresh data
+                let variant = product.varients.find(v => v.Id == variantId);
+                if (!variant) return alert("Variant not found.");
+                debugger;
+                // 3. Set Modal UI
+                $("#modalHeaderTitle").text(`Manage Images: ${variant.Colour} | ${variant.Size}`);
+
+                let uploadHtml = `
+                    <div class="row mb-3">
+                        <div class="col-8">
+                            <input type="file" id="variantFiles" class="form-control" multiple accept="image/*" />
+                        </div>
+                        <div class="col-4">
+                            <button class="btn btn-primary w-100" onclick="uploadVImages(${variantId}, ${product.Id})">
+                                <i class="fas fa-upload"></i> Upload
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Preview</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="variantImageTableBody"></tbody>
+                        </table>
+                    </div>`;
+
+                $("#modalBodyContent").html(uploadHtml);
+
+                // 4. Populate rows
+                let rows = "";
+                if (variant.imageslist && variant.imageslist.length > 0) {
+                    variant.imageslist.forEach(img => {
+                        debugger;
+                        rows += `
+                            <tr id="vimg_row_${img.Id}">
+                                <td>
+                                    <img src="@Url.Action("GetProductImage", "Products", new { area = "Products"})?path=${encodeURIComponent(img.ImagePath)}" class="rounded border shadow-sm"
+                                         style="width:60px; height:60px; object-fit:cover;" />
+                                </td>
+                                <td>
+                                    ${img.IsPrimary
+                                        ? '<span class="badge bg-success"><i class="fas fa-check-circle"></i> Primary</span>'
+                                        : '<span class="badge bg-secondary">Secondary</span>'}
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-warning" title="Set as Primary"
+                                                onclick="setVPrimary(${img.Id}, ${variantId})"
+                                                ${img.IsPrimary ? 'disabled' : ''}>
+                                            <i class="fas fa-star"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" title="Delete Image"
+                                                onclick="deleteVImage(${img.Id}, ${variantId}, '${img.ImagePath}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>`;
+                    });
+                } else {
+                    rows = '<tr><td colspan="3" class="text-center text-muted py-3">No images found for this variant.</td></tr>';
+                }
+
+                $("#variantImageTableBody").html(rows);
+                $("#genericModal").modal('show');
+            }
+        },
+        error: function() {
+            alert("Failed to sync session data.");
+        }
+    });
+        }
+
+function uploadVImages(variantId, productId) {
+    let files = $("#variantFiles")[0].files;
+    if (files.length === 0) return alert("Select images.");
+
+    let formData = new FormData();
+    formData.append("variantId", variantId);
+    formData.append("productId", productId);
+    for (let i = 0; i < files.length; i++) {
+        formData.append("images", files[i]);
+    }
+
+    $.ajax({
+        url: '@Url.Action("UploadVariantImages", "Products")',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        beforeSend: function () {
+            $(".btn-primary").prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Uploading...');
+        },
+        success: function (res) {
+            if (res.success) {
+                location.reload(); // Simplest way to refresh the session data
+            }
+        }
+    });
+}
+// Set Variant Primary
+function setVPrimary(imageId, variantId) {
+    $.ajax({
+        url: '@Url.Action("SetVariantPrimary", "Products")',
+        type: 'POST',
+        data: { imageId: imageId, variantId: variantId },
+        success: function (res) {
+            if (res.success) {
+                alert("Image set to Primary");
+                location.reload();
+            } else {
+                alert("Error: " + res.message);
+            }
+        }
+    });
+}
+
+// Delete Variant Image
+        function deleteVImage(imageId, variantId, imgPath) {
+    if (!confirm("Are you sure you want to delete this image?")) return;
+
+    $.ajax({
+        url: '@Url.Action("DeleteVProductImage", "Products")',
+        type: 'POST',
+        data: { imageId: imageId, variantId: variantId, imgPath: imgPath },
+        success: function (res) {
+            if (res.success) {
+                alert("Image deleted");
+                location.reload();
+            } else {
+                alert("Error: " + res.message);
+            }
+        }
+    });
+        }
+        function editVarient(vId) {
+    $.ajax({
+        url: '@Url.Action("ReadProductDetailsfromSession", "Products", new { area = "Products"})',
+        type: 'GET',
+        success: function (res) {
+            if (res && res.product) {
+                // 1. Find the specific variant within the product's variant list
+                let variant = res.product.varients.find(v => v.Id == vId);
+
+                if (!variant) {
+                    alert("Variant not found!");
+                    return;
+                }
+
+                $("#modalHeaderTitle").text(`Edit Variant: ${variant.Colour || ''} ${variant.Size || ''}`);
+
+                // 2. Build Body with Variant-specific fields
+                let bodyHtml = `
+                    <form id="editVariantForm">
+                        <input type="hidden" name="Id" value="${variant.Id}" />
+                        <input type="hidden" name="ProductId" value="${variant.ProductId}" />
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Colour</label>
+                                <input type="text" name="Colour" class="form-control" value="${variant.Colour || ''}" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Size</label>
+                                <input type="text" name="Size" class="form-control" value="${variant.Size || ''}" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Material</label>
+                                <input type="text" name="Material" class="form-control" value="${variant.Material || ''}" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Price</label>
+                                <input type="number" step="0.01" name="Price" class="form-control" value="${variant.Price}" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Stock Quantity</label>
+                                <input type="number" name="StockQuantity" class="form-control" value="${variant.StockQuantity}" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Discount Rate (%)</label>
+                                <input type="number" step="0.01" name="DiscountRate" class="form-control" value="${variant.DiscountRate || 0}" />
+                            </div>
+
+                            <div class="col-12 mt-3">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" name="IsAvailable" id="vEditAvailable" ${variant.IsAvailable ? 'checked' : ''}>
+                                    <label class="form-check-label" for="vEditAvailable">Available</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" name="OnSale" id="vEditOnSale" ${variant.OnSale ? 'checked' : ''}>
+                                    <label class="form-check-label" for="vEditOnSale">On Sale</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                `;
+
+                $("#modalBodyContent").html(bodyHtml);
+
+                let footerHtml = `
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark me-1"></i> Close
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="updateVariant()">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Save Variant
+                    </button>`;
+
+                $("#modalFooterContent").html(footerHtml);
+                $("#genericModal").modal('show');
+            }
+        }
+    });
+}
+function updateVariant() {
+    let form = $("#editVariantForm");
+
+    // Manual handling for checkboxes to ensure boolean values
+    let variantData = {
+        Id: form.find('input[name="Id"]').val(),
+        ProductId: form.find('input[name="ProductId"]').val(),
+        Colour: form.find('input[name="Colour"]').val(),
+        Size: form.find('input[name="Size"]').val(),
+        Material: form.find('input[name="Material"]').val(),
+        Price: form.find('input[name="Price"]').val(),
+        StockQuantity: form.find('input[name="StockQuantity"]').val(),
+        DiscountRate: form.find('input[name="DiscountRate"]').val(),
+        IsAvailable: form.find('#vEditAvailable').is(':checked'),
+        OnSale: form.find('#vEditOnSale').is(':checked')
+    };
+
+    // 2. Validation
+    if (!variantData.Price || variantData.Price.trim() === '') {
+        alert("Price is required");
+        return;
+    }
+    if (!variantData.StockQuantity || variantData.StockQuantity.trim() === '') {
+        alert("Stock Quantity is required");
+        return;
+    }
+
+    $.ajax({
+        url: '@Url.Action("UpdateVariantDetails", "Products")',
+        type: 'POST',
+        data: variantData,
+        success: function (res) {
+            if (res.success) {
+                alert("Variant updated successfully!");
+                $("#genericModal").modal('hide');
+                location.reload(); // Refresh to see changes
+            } else {
+                alert("Update failed: " + res.message);
+            }
+        }
+    });
+        }
+
+        function OpenAddVarientModal() {
+            $("#modalHeaderTitle").text(`Add Variant`);
+            let bodyHtml = `
+     <form id="addMoreVariantForm">
+         <div class="row g-3">
+             <div class="col-md-4">
+                 <label class="form-label">Upload Images</label>
+                  <input type="file" id="newVarientImages" class="form-control" multiple accept="image/*">
+
+             </div>
+             <div class="col-md-4">
+                 <label class="form-label">Colour</label>
+                 <input type="text" name="Colour" class="form-control"/>
+             </div>
+             <div class="col-md-4">
+                 <label class="form-label">Size</label>
+                 <input type="text" name="Size" class="form-control"/>
+             </div>
+             <div class="col-md-4">
+                 <label class="form-label">Material</label>
+                 <input type="text" name="Material" class="form-control"/>
+             </div>
+
+             <div class="col-md-4">
+                 <label class="form-label">Price</label>
+                 <input type="number" step="0.01" name="Price" class="form-control"/>
+             </div>
+             <div class="col-md-4">
+                 <label class="form-label">Stock Quantity</label>
+                 <input type="number" name="StockQuantity" class="form-control"/>
+             </div>
+             <div class="col-md-4">
+                 <label class="form-label">Discount Rate (%)</label>
+                 <input type="number" step="0.01" name="DiscountRate" class="form-control"/>
+             </div>
+
+             <div class="col-12 mt-3">
+                 <div class="form-check form-check-inline">
+                     <input class="form-check-input" type="checkbox" name="IsAvailable">
+                     <label class="form-check-label" for="vEditAvailable">Available</label>
+                 </div>
+                 <div class="form-check form-check-inline">
+                     <input class="form-check-input" type="checkbox" name="OnSale">
+                     <label class="form-check-label" for="vEditOnSale">On Sale</label>
+                 </div>
+             </div>
+         </div>
+     </form>
+ `;
+
+            $("#modalBodyContent").html(bodyHtml);
+
+            let footerHtml = `
+     <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+         <i class="fa-solid fa-xmark me-1"></i> Close
+     </button>
+     <button type="button" class="btn btn-primary" onclick="addNewVariant()">
+         <i class="fa-solid fa-floppy-disk me-1"></i> Save Variant
+     </button>`;
+
+            $("#modalFooterContent").html(footerHtml);
+            $("#genericModal").modal('show');
+        }
+
+      function addNewVariant() {
+    let productId = $("#productId").val();
+    let form = $("#addMoreVariantForm");
+
+    // --- 1. VALIDATION LOGIC ---
+    let price = form.find('input[name="Price"]').val();
+    let stock = form.find('input[name="StockQuantity"]').val();
+
+    // Check for empty or non-numeric values
+    if (!price || price <= 0) {
+        alert("Please enter a valid Price greater than 0.");
+        return; // Stop execution
+    }
+
+    if (!stock || stock === "" || parseInt(stock) < 0) {
+        alert("Please enter a valid Stock Quantity (cannot be negative).");
+        return; // Stop execution
+    }
+
+    // --- 2. PREPARE DATA ---
+    let formData = new FormData();
+
+    // Append Image Files
+    let fileInput = $("#newVarientImages")[0];
+    if (fileInput.files.length > 0) {
+        for (let i = 0; i < fileInput.files.length; i++) {
+            formData.append("variantImages", fileInput.files[i]);
+        }
+    }
+
+    // Append Text Data
+    formData.append("ProductId", productId);
+    formData.append("Colour", form.find('input[name="Colour"]').val());
+    formData.append("Size", form.find('input[name="Size"]').val());
+    formData.append("Material", form.find('input[name="Material"]').val());
+    formData.append("Price", price);
+    formData.append("StockQuantity", stock);
+    formData.append("DiscountRate", form.find('input[name="DiscountRate"]').val() || 0);
+
+    // Checkboxes
+    formData.append("IsAvailable", form.find('input[name="IsAvailable"]').is(':checked'));
+    formData.append("OnSale", form.find('input[name="OnSale"]').is(':checked'));
+
+    // --- 3. SUBMIT VIA AJAX ---
+    $.ajax({
+        url: '@Url.Action("AddVariantWithImages", "Products")',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        beforeSend: function() {
+            $(".btn-primary").prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
+        },
+        success: function (res) {
+            if (res.success) {
+                alert("Variant added successfully!");
+                $("#genericModal").modal('hide');
+                location.reload();
+            } else {
+                alert("Error: " + res.message);
+                $(".btn-primary").prop('disabled', false).html('<i class="fa-solid fa-floppy-disk me-1"></i> Save Variant');
+            }
+        },
+        error: function () {
+            alert("An error occurred during submission.");
+            $(".btn-primary").prop('disabled', false).html('<i class="fa-solid fa-floppy-disk me-1"></i> Save Variant');
+        }
+    });
+        }
+
     </script>
 }

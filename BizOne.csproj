@@ -483,6 +483,7 @@
     <Content Include="Areas\EndUser\Views\Login\SignUp.cshtml" />
     <Content Include="Areas\EndUser\Views\LocalHome\Orders.cshtml" />
     <Content Include="Areas\EndUser\Views\LocalHome\CustomDesigns.cshtml" />
+    <Content Include="Areas\Products\Views\Shop\ProductDetails.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -527,7 +528,6 @@
     <Folder Include="Areas\Products\Data\" />
     <Folder Include="Areas\Products\Views\Orders\" />
     <Folder Include="Areas\Products\Views\Shared\" />
-    <Folder Include="Areas\Products\Views\Shop\" />
     <Folder Include="Views\Base\" />
   </ItemGroup>
   <ItemGroup>

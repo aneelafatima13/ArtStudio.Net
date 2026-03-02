@@ -1,0 +1,229 @@
+﻿
+@{
+    ViewBag.Title = "ProductDetails";
+    Layout = "~/Views/Shared/_FurniLayout.cshtml";
+}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <div id="mainCarousel" class="carousel slide border rounded" data-bs-ride="false">
+                <div class="carousel-inner" id="carouselInner">
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon bg-dark rounded-circle"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon bg-dark rounded-circle"></span>
+                </button>
+            </div>
+
+            <div class="mt-3 d-flex gap-2" id="variantThumbnails">
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h2 id="pName"></h2>
+            <p class="text-muted" id="pSku"></p>
+            <hr>
+            <h3 class="text-primary" id="pPrice"></h3>
+            <div id="pBadges" class="mb-3"></div>
+            <p id="pDescription"></p>
+            <div id="quntityClock"></div>
+            <div class="mt-4">
+                <button class="btn btn-lg btn-primary w-100" id="btnAddToCart">
+                    <i class="mdi mdi-cart"></i> Add to Cart
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" value="@ViewBag.ProductId" id="productId" />
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            let productId = $("#productId").val();
+            loadProductDetails(productId)
+        });
+       let currentProduct = null;
+
+// Initial Load
+function loadProductDetails(id) {
+    $.get('@Url.Action("GetProductDetails", "Shop")', { id: id }, function(res) {
+        if (res) {
+            currentProduct = res.product;
+            // Set basic info that never changes
+            $("#pName").text(currentProduct.Name);
+            $("#pDescription").text(currentProduct.Description);
+
+            renderVariantThumbnails();
+            // Start by showing the main product images OR the first variant
+            renderDetails(null);
+        }
+    });
+}
+// Helper function to format the image URL
+function getImageUrl(path) {
+    if (!path || path === "") return '/FurniAssets/images/product-1.png';
+
+    // This calls your GetImg action and passes the path as a parameter
+    return '@Url.Action("GetImg", "Shop", new { area = "Products"})?path=' + encodeURIComponent(path);
+}
+
+        // 1. Updated Render Variant Thumbnails
+        function renderVariantThumbnails() {
+            let html = "";
+
+            // --- ADDED: Main Product Thumbnail ---
+            // Find the primary image for the main product
+            let mainPrimaryImg = currentProduct.ProductImages.find(i => i.IsPrimary) || currentProduct.ProductImages[0];
+            let mainImgSrc = getImageUrl(mainPrimaryImg ? mainPrimaryImg.ImagePath : '');
+
+            html += `
+        <img src="${mainImgSrc}" class="img-thumbnail variant-thumb active-selection"
+             style="width:80px; height:80px; cursor:pointer; object-fit:cover;"
+             onclick="renderDetails(null, this)"
+             title="Main Product">`;
+
+            // --- Existing Variants ---
+            if (currentProduct.varients && currentProduct.varients.length > 0) {
+                currentProduct.varients.forEach(v => {
+                    let primaryImg = v.imageslist.find(i => i.IsPrimary) || v.imageslist[0];
+                    let imgSrc = getImageUrl(primaryImg ? primaryImg.ImagePath : '');
+
+                    html += `
+                <img src="${imgSrc}" class="img-thumbnail variant-thumb"
+                     style="width:80px; height:80px; cursor:pointer; object-fit:cover;"
+                     onclick="renderDetails(${v.Id}, this)"
+                     title="${v.Colour} - ${v.Size}">`;
+                });
+            }
+            $("#variantThumbnails").html(html);
+        }
+
+        // 2. Updated Render Details to handle UI active states
+        function renderDetails(variantId, element) {
+            if (element) {
+                $(".variant-thumb").removeClass("active-selection border-primary shadow-sm");
+                $(element).addClass("active-selection border-primary shadow-sm");
+            }
+
+            let target = null;
+            let isVariant = false;
+
+            if (variantId) {
+                target = currentProduct.varients.find(v => v.Id == variantId);
+                isVariant = true;
+            } else {
+                target = currentProduct;
+                isVariant = false;
+            }
+
+            // 1. Update Basic Text
+            $("#pName").text(currentProduct.Name + (isVariant ? ` (${target.Colour} - ${target.Size})` : ""));
+            $("#pSku").text("SKU: " + target.SKU);
+            $("#pPrice").text("$" + (target.DiscountPrice || target.Price));
+
+            // 2. Manage Quantity Selector
+            // We use a fixed ID "txtQty" so we can easily read it later
+            let stock = target.StockQuantity || 0;
+            let quntityhtml = `
+        <div class="input-group mb-3 d-flex align-items-center" style="max-width: 120px;">
+            <div class="input-group-prepend">
+                <button class="btn btn-outline-black" type="button" onclick="localQtyChange(-1)">&minus;</button>
+            </div>
+            <input type="text" id="txtQty" class="form-control text-center" value="1" data-stock="${stock}" readonly>
+            <div class="input-group-append">
+                <button class="btn btn-outline-black" type="button" onclick="localQtyChange(1)">&plus;</button>
+            </div>
+        </div>
+        <small class="text-muted">${stock} available in stock</small>`;
+
+            $("#quntityClock").html(quntityhtml); // Use .html() not .append() to clear old one
+
+            // 3. Update Add to Cart Button
+            let vId = isVariant ? target.Id : 'null';
+            $("#btnAddToCart").attr("onclick", `addToCart(event, ${currentProduct.Id}, ${vId})`);
+            let images = variantId ? target.imageslist : currentProduct.ProductImages;
+            // 4. Update Carousel (Images)
+            updateCarousel(images);
+        }
+          // Change quantity ONLY in the UI
+function localQtyChange(change) {
+    const input = $("#txtQty");
+    let currentQty = parseInt(input.val());
+    const maxStock = parseInt(input.data('stock'));
+
+    let newQty = currentQty + change;
+
+    if (newQty < 1) return; // Don't go below 1
+    if (newQty > maxStock) {
+        alert("Cannot exceed available stock.");
+        return;
+    }
+
+    input.val(newQty);
+}
+
+// Updated AddToCart to read the quantity from the input
+function addToCart(event, productId, variantId) {
+    event.preventDefault();
+    const qty = parseInt($("#txtQty").val()); // Read selected quantity
+
+    $.ajax({
+        url: '@Url.Action("AddToCart", "Cart", new { area = "EndUser" })',
+        type: 'POST',
+        data: {
+            id: productId,
+            quantity: qty,
+            VariantId: variantId,
+        },
+        success: function (response) {
+            if (response.success) {
+                const badge = $('#cart-badge');
+                badge.text(response.newCount).show();
+                badge.fadeOut(100).fadeIn(100);
+                alert("Added to cart successfully!");
+            } else {
+                alert(response.message || "Error adding to cart.");
+            }
+        }
+    });
+        }
+
+        function updateCarousel(images) {
+            let carouselHtml = "";
+
+            if (images && images.length > 0) {
+                images.forEach((img, index) => {
+                    // Use the helper we created earlier to get the safe URL
+                    let imgSrc = getImageUrl(img.ImagePath);
+
+                    carouselHtml += `
+                <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                    <img src="${imgSrc}" class="d-block w-100" 
+                         style="height: 450px; object-fit: contain; background: #f8f9fa;" 
+                         alt="Product Image">
+                </div>`;
+                });
+            } else {
+                // Fallback if no images exist for this specific variant
+                let placeholder = getImageUrl('');
+                carouselHtml = `
+            <div class="carousel-item active">
+                <img src="${placeholder}" class="d-block w-100" style="height: 450px; object-fit: contain;">
+            </div>`;
+            }
+
+            // Inject the HTML
+            $("#carouselInner").html(carouselHtml);
+
+            // Bootstrap Reset: Force the carousel to return to the first slide
+            var myCarousel = document.querySelector('#mainCarousel');
+            var carousel = bootstrap.Carousel.getInstance(myCarousel);
+            if (carousel) {
+                carousel.to(0);
+            }
+        }
+    </script>
+}
+

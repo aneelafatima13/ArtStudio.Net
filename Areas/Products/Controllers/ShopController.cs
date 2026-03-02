@@ -49,52 +49,61 @@ namespace BizOne.Areas.Products.Controllers
         }
 
         public JsonResult Index(
-            int page = 1,
-            int pageSize = 12,
-            long? categoryId = null,
-            decimal? minPrice = null,
-            decimal? maxPrice = null,
-            string colour = null,
-            string size = null,
-            bool? onSale = null,
-            string search = null)
+     int page = 1,
+     int pageSize = 12,
+     long? categoryId = null,
+     decimal? minPrice = null,
+     decimal? maxPrice = null,
+     bool? onSale = null,
+     bool? notonSale = null,
+     bool? newProducts = null,
+     bool? inStock = null,
+     string search = null,
+     int? dRate = null,
+     long? dPrice = null
+    )
         {
-            int totalRecords;
-
-            // Call the DAL method we created previously
-            var productList = dal.GetProducts(
-                page,
-                pageSize,
-                out totalRecords,
-                categoryId,
-                minPrice,
-                maxPrice,
-                colour,
-                size,
-                onSale,
-                null, // InStock only (optional toggle)
-                search
-            );
-
-            var model = new ShopViewModel
+            try
             {
-                Products = productList,
-                TotalCount = totalRecords,
-                CurrentPage = page,
-                PageSize = pageSize
-            };
+                int totalRecords;
 
-            // If it's an AJAX request (from your Filter Modal), return a Partial View
-            return Json(new
+                var productList = dal.GetProducts(
+                    page,
+                    pageSize,
+                    out totalRecords,
+                    categoryId,
+                    minPrice,
+                    maxPrice,
+                    onSale,
+                    notonSale,
+                    newProducts,
+                    inStock,
+                    search,
+                    dRate,
+                    dPrice
+                );
+
+                return Json(new
+                {
+                    success = true,
+                    data = productList,
+                    total = totalRecords,
+                    page = page
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
             {
-                data = model.Products,
-                total = model.TotalCount,
-                page = model.CurrentPage
-            }, JsonRequestBehavior.AllowGet);
+                
+                return Json(new
+                {
+                    success = false,
+                    message = "An error occurred while fetching products. Please try again later.",
+                    errorDetails = ex.Message // Optional: remove in production for security
+                }, JsonRequestBehavior.AllowGet);
+            }
         }
-
-
-[HttpGet]
+    
+    [HttpGet]
     public ActionResult GetImg(string path)
     {
         try
@@ -124,5 +133,71 @@ namespace BizOne.Areas.Products.Controllers
         return File(Server.MapPath("~/FurniAssets/images/product-1.png"), "image/png");
     }
 
-}
+
+    public ActionResult ProductDetails(long Id)
+        {
+            ViewBag.ProductId = Id;
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult GetProductDetails(long id)
+        {
+            try
+            {
+                // 1. Explicitly clear the session key before fetching new data
+                Session.Remove("ProductdetailsByUser");
+
+                Product product = pdal.GetProductDetailsById(id);
+
+                if (product == null)
+                {
+                    return Json(null, JsonRequestBehavior.AllowGet);
+                }
+
+                // 2. Save the fresh product details
+                Session["ProductdetailsByUser"] = product;
+
+                return Json(new
+                {
+                    product = product,
+                    imageslist = product.ProductImages,
+                    varients = product.varients,
+                    categories = product.categoriesorder
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = "Internal Server Error" }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult ReadProductDetailsfromSession()
+        {
+            try
+            {
+                Product product = Session["Productdetails"] as Product;
+
+                if (product == null)
+                {
+                    return Json(null, JsonRequestBehavior.AllowGet);
+                }
+
+                return Json(new
+                {
+                    product = product,
+                    imageslist = product.ProductImages,
+                    varients = product.varients,
+                    categories = product.categoriesorder // Add this to show category breadcrumbs
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                // Log exception (ex) here
+                return Json(new { error = "Internal Server Error" }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+    }
 }

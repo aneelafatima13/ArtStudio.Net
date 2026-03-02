@@ -213,20 +213,42 @@
                     data: "Id",
                     render: function (data) {
                         return `
-                            <a type="button" class="btn btn-icon btn-primary edit-product" href="@Url.Action("ProductDetails", "Products", new { area = "Products"})?id=${data}" data-id="${data}">
-                                <span class="tf-icons mdi mdi-information-outline"></span>
-                            </a>
-                           
-                            <button type="button" class="btn btn-icon btn-danger delete-product" data-id="${data}">
-                                <span class="tf-icons mdi mdi-delete-outline"></span>
-                            </button>
-                        `;
+    <div class="d-flex gap-1">
+        <a class="btn btn-icon btn-primary"
+           href="@Url.Action("ProductDetails", "Products", new { area = "Products"})?id=${data}"
+           title="View Product Details">
+            <span class="tf-icons mdi mdi-information-outline"></span>
+        </a>
+
+        <a class="btn btn-icon btn-danger delete-product"
+           href="@Url.Action("ProductDetails", "Products", new { area = "Products"})?id=${data}"
+           data-id="${data}"
+           title="Delete Product or Variant">
+            <span class="tf-icons mdi mdi-delete-outline"></span>
+        </a>
+
+        <a class="btn btn-icon btn-warning edit-product"
+           href="@Url.Action("ProductDetails", "Products", new { area = "Products"})?id=${data}"
+           data-id="${data}"
+           title="Edit Product or Variant">
+            <span class="tf-icons mdi mdi-pencil"></span>
+        </a>
+
+        <a class="btn btn-icon btn-success"
+           href="@Url.Action("ProductDetails", "Products", new { area = "Products"})?id=${data}"
+           title="Manage Variants">
+            <span class="tf-icons mdi mdi-table"></span>
+        </a>
+    </div>
+`;
                     },
                     orderable: false
                 }
             ]
         });
-    });
+        });
+
+
         $(document).ready(function () {
             loadCategories();
 
@@ -256,7 +278,7 @@ function loadCategories() {
                 debugger;
     let categoryId = $(this).val();
                 let level = parseInt($(this).data("level"));
-               
+
     $(`#categoriesWrapper .category-container`).each(function () {
         if ($(this).data("level") > level) {
             $(this).remove();
