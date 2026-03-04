@@ -48,62 +48,77 @@ namespace BizOne.Areas.Products.Controllers
             return Json(categories, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult Index(
-     int page = 1,
-     int pageSize = 12,
-     long? categoryId = null,
-     decimal? minPrice = null,
-     decimal? maxPrice = null,
-     bool? onSale = null,
-     bool? notonSale = null,
-     bool? newProducts = null,
-     bool? inStock = null,
-     string search = null,
-     int? dRate = null,
-     long? dPrice = null
-    )
+        public JsonResult Index(int page = 1, int pageSize = 12, long? categoryId = null, decimal? minPrice = null, decimal? maxPrice = null, bool? onSale = null, bool? notonSale = null, bool? newProducts = null, bool? inStock = null, string search = null, int? dRate = null, long? dPrice = null)
         {
             try
             {
-                int totalRecords;
+                string currency = Request.Cookies["SelectedCurrency"]?.Value ?? "PKR";
+                string symbol = Request.Cookies["SelectedSymbol"]?.Value ?? "Rs.";
+                string rateStr = Request.Cookies["SelectedRate"]?.Value ?? "1";
 
-                var productList = dal.GetProducts(
-                    page,
-                    pageSize,
-                    out totalRecords,
-                    categoryId,
-                    minPrice,
-                    maxPrice,
-                    onSale,
-                    notonSale,
-                    newProducts,
-                    inStock,
-                    search,
-                    dRate,
-                    dPrice
-                );
+                decimal exchangeRate = decimal.Parse(rateStr);
+
+                int totalRecords;
+                var productList = dal.GetProducts(page, pageSize, out totalRecords, categoryId, minPrice, maxPrice, onSale, notonSale, newProducts, inStock, search, dRate, dPrice);
+
+                foreach (var p in productList)
+                {
+                    if (currency == "USD")
+                    {
+                        // Convert Base Price
+                        p.ConvertedPrice = p.Price.HasValue ? Math.Round(p.Price.Value / exchangeRate, 2) : 0;
+
+                        // Convert Discount Price (if exists)
+                        if (p.DiscountPrice.HasValue && p.DiscountPrice > 0)
+                        {
+                            p.ConvertedDiscountPrice = Math.Round(p.DiscountPrice.Value / exchangeRate, 2);
+                        }
+                    }
+                    else
+                    {
+                        p.ConvertedPrice = p.Price;
+                        p.ConvertedDiscountPrice = p.DiscountPrice;
+                    }
+                    if (p.HasMoreVarients)
+                    {
+                        foreach (var v in p.varients)
+                        {
+                            if (currency == "USD")
+                            {
+                                // Convert Base Price
+                                v.ConvertedPrice = v.Price.HasValue ? Math.Round(v.Price.Value / exchangeRate, 2) : 0;
+
+                                // Convert Discount Price (if exists)
+                                if (v.DiscountPrice.HasValue && v.DiscountPrice > 0)
+                                {
+                                    v.ConvertedDiscountPrice = Math.Round(v.DiscountPrice.Value / exchangeRate, 2);
+                                }
+                            }
+                            else
+                            {
+                                v.ConvertedPrice = v.Price;
+                                v.ConvertedDiscountPrice = v.DiscountPrice;
+                            }
+                        }
+                    }
+                }
 
                 return Json(new
                 {
                     success = true,
                     data = productList,
                     total = totalRecords,
-                    page = page
+                    page = page,
+                    currencySymbol = symbol,
                 }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
-                
-                return Json(new
-                {
-                    success = false,
-                    message = "An error occurred while fetching products. Please try again later.",
-                    errorDetails = ex.Message // Optional: remove in production for security
-                }, JsonRequestBehavior.AllowGet);
+                return Json(new { success = false, message = "Error fetching products.", errorDetails = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
-    
-    [HttpGet]
+
+        [HttpGet]
     public ActionResult GetImg(string path)
     {
         try
@@ -129,14 +144,14 @@ namespace BizOne.Areas.Products.Controllers
             // Log your exception here: Elmah, NLog, etc.
         }
 
-        // 4. Fallback: Return a default "Image Not Found" placeholder
         return File(Server.MapPath("~/FurniAssets/images/product-1.png"), "image/png");
     }
 
 
-    public ActionResult ProductDetails(long Id)
+    public ActionResult ProductDetails(long Id, long? VarientId)
         {
             ViewBag.ProductId = Id;
+            ViewBag.VarientId = VarientId;
             return View();
         }
 
@@ -145,25 +160,51 @@ namespace BizOne.Areas.Products.Controllers
         {
             try
             {
-                // 1. Explicitly clear the session key before fetching new data
-                Session.Remove("ProductdetailsByUser");
+                // 1. Read Cookies (Set by the Navbar)
+                string currency = Request.Cookies["SelectedCurrency"]?.Value ?? "PKR";
+                string symbol = Request.Cookies["SelectedSymbol"]?.Value ?? "Rs.";
+                string rateStr = Request.Cookies["SelectedRate"]?.Value ?? "1";
 
+                // Parse rate safely; default to 1 if PKR or cookie missing
+                decimal exchangeRate = decimal.TryParse(rateStr, out decimal r) ? r : 1.0m;
+
+                // 2. Fetch Data
+                Session.Remove("Productdetails");
                 Product product = pdal.GetProductDetailsById(id);
 
-                if (product == null)
+                if (product == null) return Json(null, JsonRequestBehavior.AllowGet);
+
+                // 3. Dynamic Conversion Logic
+                // Convert Main Product Prices
+                product.ConvertedPrice = product.Price.HasValue
+                    ? Math.Round(product.Price.Value / exchangeRate, 2) : 0;
+
+                product.ConvertedDiscountPrice = (decimal?)((product.DiscountPrice.HasValue && product.DiscountPrice > 0)
+                    ? Math.Round(product.DiscountPrice.Value / exchangeRate, 2)
+                    : product.ConvertedPrice);
+
+                // Convert Variant Prices
+                if (product.varients != null)
                 {
-                    return Json(null, JsonRequestBehavior.AllowGet);
+                    foreach (var v in product.varients)
+                    {
+                        v.ConvertedPrice = v.Price.HasValue
+                            ? Math.Round(v.Price.Value / exchangeRate, 2) : 0;
+
+                        v.ConvertedDiscountPrice = (v.DiscountPrice.HasValue && v.DiscountPrice > 0)
+                            ? Math.Round(v.DiscountPrice.Value / exchangeRate, 2)
+                            : v.ConvertedPrice;
+                    }
                 }
 
-                // 2. Save the fresh product details
-                Session["ProductdetailsByUser"] = product;
+                Session["Productdetails"] = product;
 
                 return Json(new
                 {
                     product = product,
                     imageslist = product.ProductImages,
                     varients = product.varients,
-                    categories = product.categoriesorder
+                    symbol = symbol // Send symbol to Frontend
                 }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
@@ -171,7 +212,8 @@ namespace BizOne.Areas.Products.Controllers
                 return Json(new { error = "Internal Server Error" }, JsonRequestBehavior.AllowGet);
             }
         }
-
+        
+        
         [HttpGet]
         public ActionResult ReadProductDetailsfromSession()
         {
@@ -199,5 +241,16 @@ namespace BizOne.Areas.Products.Controllers
             }
         }
 
+        public ActionResult GetCurrencyDropdown()
+        {
+            int total;
+            // Mode 6: Fetch all records without paging
+            var list = pdal.GetExchangeRates(6, null, 0, 0, out total);
+
+            // Check if a cookie already exists to set the label
+            var selected = Request.Cookies["SelectedCurrency"]?.Value ?? "PKR";
+            
+            return Json(new { success = true, data = list }, JsonRequestBehavior.AllowGet);   
+        }
     }
 }

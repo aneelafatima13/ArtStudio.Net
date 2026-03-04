@@ -43,13 +43,18 @@
                     <li><a class="nav-link" href="@Url.Action("Shop", "LocalHome", new { area = "EndUser" })">Shop</a></li>
                     <li><a class="nav-link" href="@Url.Action("CustomDesigns", "LocalHome", new { area = "EndUser" })">Custom Designs</a></li>
                     <li><a class="nav-link" href="@Url.Action("AboutUs", "LocalHome", new { area = "EndUser" })">About us</a></li>
+                   
+                    <li><a class="nav-link" href="@Url.Action("ContactUs", "LocalHome", new { area = "EndUser" })">Contact us</a></li>
+                </ul>
+
+                <ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-2">
                     @if (Request.Cookies["CustomerAuth"] != null && Request.Cookies["CustomerAuth"]["FullName"] != null)
                     {
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="ordersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Orders History
                             </a>
-                            
+
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ordersDropdown">
                                 <li>
                                     <a class="dropdown-item" href="@Url.Action("Orders", "LocalHome", new { area = "EndUser", type = "Ready" })">
@@ -65,10 +70,17 @@
                             </ul>
                         </li>
                     }
-                    <li><a class="nav-link" href="@Url.Action("ContactUs", "LocalHome", new { area = "EndUser" })">Contact us</a></li>
                 </ul>
-
                 <ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="currencyDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="me-1">🌐</span>
+                            <span id="currentCurrency">PKR</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="currencyDropdown" id="currencyDropdownList">
+                           
+                        </ul>
+                    </li>
                     @if (Request.Cookies["CustomerAuth"] != null && Request.Cookies["CustomerAuth"]["FullName"] != null)
                     {
                         <li class="nav-item dropdown">
@@ -187,6 +199,73 @@
     <!-- End Footer Section -->
 
     <script>
+      $(document).ready(function () {
+    // 1. Initial UI check from Cookies
+    const savedCurrency = getCookie("SelectedCurrency");
+    if (savedCurrency) {
+        $("#currentCurrency").text(savedCurrency);
+    }
+
+    // 2. Fetch Currency List via AJAX
+    $.ajax({
+        url: '@Url.Action("GetCurrencyDropdown", "Shop", new { area = "Products" })',
+        type: 'GET', // or POST depending on your Controller attribute
+        data: { mode: 6 },
+        success: function (res) {
+            debugger;
+            if (res && res.data) {
+                let dropdownHtml = '';
+
+                // Always add PKR as the first/default option
+                dropdownHtml += `<li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center"
+                       href="javascript:void(0);" onclick="updateCurrency('PKR', 'Rs.', 1)">
+                       PKR <span>(Rs.)</span>
+                    </a>
+                </li>`;
+
+                // Map through database results
+                res.data.forEach(item => {
+                    debugger;
+                    if (item.CurrencyType !== 'PKR') {
+                        dropdownHtml += `<li>
+                            <a class="dropdown-item d-flex justify-content-between align-items-center"
+                               href="javascript:void(0);"
+                               onclick="updateCurrency('${item.CurrencyType}', '${item.CurrencySymbol}', ${item.ExchangeRate})">
+                               ${item.CurrencyType} <span>(${item.CurrencySymbol})</span>
+                            </a>
+                        </li>`;
+                    }
+                });
+
+                $("#currencyDropdownList").html(dropdownHtml);
+            }
+        },
+        error: function (err) {
+            console.error("Failed to load currencies:", err);
+        }
+    });
+});
+        function updateCurrency(code, symbol, rate) {
+            const d = new Date();
+            d.setTime(d.getTime() + (30 * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + d.toUTCString() + ";path=/;SameSite=Lax";
+
+            // Store all pieces of info in cookies
+            document.cookie = "SelectedCurrency=" + code + ";" + expires;
+            document.cookie = "SelectedSymbol=" + symbol + ";" + expires;
+            document.cookie = "SelectedRate=" + rate + ";" + expires;
+
+            // Refresh page to apply changes
+            location.reload();
+        }
+
+        // Helper to get cookie value
+        function getCookie(name) {
+            let value = "; " + document.cookie;
+            let parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop().split(";").shift();
+        }
         $(document).ready(function () {
             // 1. Get the current URL path and clean it (remove trailing slashes)
             var currentPath = window.location.pathname.toLowerCase();

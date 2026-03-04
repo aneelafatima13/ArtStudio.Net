@@ -1061,3 +1061,44 @@ textarea {
         margin-top: 0;
     }
 }*/
+
+/* Modern Quantity Selector */
+.custom-qty-selector {
+    background: #fff;
+    overflow: hidden;
+    height: 45px;
+    width: 140px;
+}
+
+.qty-btn {
+    background: transparent;
+    border: none;
+    width: 40px;
+    height: 100%;
+    color: #000;
+    font-size: 1.2rem;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+    .qty-btn:hover {
+        background: #f8f9fa;
+    }
+
+.qty-input {
+    width: 60px;
+    height: 100%;
+    font-weight: 600;
+    font-size: 1rem;
+    outline: none !important;
+    background: transparent;
+}
+
+/* Add to cart button polish */
+#btnAddToCart {
+    height: 55px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+}

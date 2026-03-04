@@ -390,15 +390,20 @@ function renderOrderTable(cartData) {
        if (!orderDetails.PaymentMethod) return alert("PaymentMethod required");
 
     $.ajax({
-        url: '@Url.Action("FinalizeOrder", "Orders", new { area = "EndUser"})',
+        url: '@Url.Action("FinalizeOrder", "Orders", new { area = "Products"})',
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(orderDetails),
-
         success: function (res) {
             if (res.success) {
+                const badge = $('#cart-badge');
+                badge.text('');
+                badge.hide();
+
+                setTimeout(function () {
                 window.location.href = '@Url.Action("Orders", "LocalHome", new { area = "EndUser", returnType = 1 })';
-            }
+
+                }, 1000);    }
             else {
                 alert(res.message);
             }

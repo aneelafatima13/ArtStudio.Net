@@ -23,7 +23,6 @@ namespace BizOne.Areas.Products.Controllers
             if (cartData == null || cartData.Items.Count == 0)
                 return Json(new { success = false, message = "Cart is empty" });
 
-
             try
             {
                 long orderId = dal.ExecuteFinalizeOrder(model, cartData);

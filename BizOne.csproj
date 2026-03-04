@@ -271,6 +271,7 @@
     <Compile Include="Areas\EndUser\Controllers\LoginController.cs" />
     <Compile Include="Areas\EndUser\EndUserAreaRegistration.cs" />
     <Compile Include="Areas\Products\Controllers\CategoriesController.cs" />
+    <Compile Include="Areas\Products\Controllers\ExchangeRatesController.cs" />
     <Compile Include="Areas\Products\Controllers\OrdersController.cs" />
     <Compile Include="Areas\Products\Controllers\ProductsController.cs" />
     <Compile Include="Areas\Products\Controllers\ShopController.cs" />
@@ -484,6 +485,7 @@
     <Content Include="Areas\EndUser\Views\LocalHome\Orders.cshtml" />
     <Content Include="Areas\EndUser\Views\LocalHome\CustomDesigns.cshtml" />
     <Content Include="Areas\Products\Views\Shop\ProductDetails.cshtml" />
+    <Content Include="Areas\Products\Views\Products\ExchangeRateForms.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -526,6 +528,7 @@
     <Folder Include="Areas\EndUser\Views\Cart\" />
     <Folder Include="Areas\EndUser\Views\Shared\" />
     <Folder Include="Areas\Products\Data\" />
+    <Folder Include="Areas\Products\Views\ExchangeRates\" />
     <Folder Include="Areas\Products\Views\Orders\" />
     <Folder Include="Areas\Products\Views\Shared\" />
     <Folder Include="Views\Base\" />

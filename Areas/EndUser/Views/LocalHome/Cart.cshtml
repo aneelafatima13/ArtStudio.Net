@@ -132,19 +132,19 @@
                         <td>
                             <div class="input-group mb-3 d-flex align-items-center quantity-container" style="max-width: 120px;">
                                 <div class="input-group-prepend">
-                                    <button class="btn btn-outline-black decrease" type="button" onclick="changeQty(${item.ProductId}, -1)">&minus;</button>
+                                    <button class="btn btn-outline-black decrease" type="button" onclick="changeQty(${item.ProductId},${item.VariantId}, -1)">&minus;</button>
                                 </div>
-                               <input type="text" id="qty-${item.ProductId}"
+                               <input type="text" id="qty-${item.ProductId}-${item.VariantId}"
        class="form-control text-center quantity-amount"
        value="${item.Quantity}"
        data-stock="${item.ActualStockQuantity}" readonly>
        <div class="input-group-append">
-                                    <button class="btn btn-outline-black increase" type="button" onclick="changeQty(${item.ProductId}, 1)">&plus;</button>
+                                    <button class="btn btn-outline-black increase" type="button" onclick="changeQty(${item.ProductId}, ${item.VariantId},1)">&plus;</button>
                                 </div>
                             </div>
                         </td>
                         <td>$${item.Total.toFixed(2)}</td>
-                        <td><a href="javascript:void(0)" onclick="removeItem(${item.ProductId})" class="btn btn-black btn-sm">X</a></td>
+                        <td><a href="javascript:void(0)" onclick="removeItem(${item.ProductId},${item.VariantId})" class="btn btn-black btn-sm">X</a></td>
                     </tr>`;
                 tbody.append(row);
             });
@@ -154,7 +154,7 @@
             $('.text-right strong.text-black').text('$' + subtotal.toFixed(2));
         }
 
-      function changeQty(productId, change) {
+        function changeQty(productId, VariantId, change) {
     const input = $(`#qty-${productId}`);
     const currentQty = parseInt(input.val());
     const maxStock = parseInt(input.data('stock'));
@@ -168,7 +168,7 @@
     $.ajax({
         url: '@Url.Action("UpdateQuantity", "Cart", new { area = "EndUser" })',
         type: 'POST',
-        data: { id: productId, change: change },
+        data: { id: productId, VariantId: VariantId, change: change },
         success: function (response) {
             if (response.success) {
                 loadCart();
@@ -177,12 +177,12 @@
         }
     });
 }
-function removeItem(productId) {
+        function removeItem(productId, VariantId) {
     if (confirm("Are you sure you want to remove this item?")) {
         $.ajax({
             url: '@Url.Action("RemoveFromCart", "Cart", new { area = "EndUser" })',
             type: 'POST',
-            data: { id: productId },
+            data: { id: productId, VariantId: VariantId },
             success: function (response) {
                 if (response.success) {
                     loadCart();

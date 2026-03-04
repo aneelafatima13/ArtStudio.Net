@@ -1,0 +1,248 @@
+﻿
+@{
+    ViewBag.Title = "ExchangeRateForms";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <div class="col-md">
+        <!-- Add Role -->
+        <div class="card mb-4">
+            <h5 class="card-header">Add ExchangeRates</h5>
+            <div class="card-body">
+                <input type="hidden" id="Id" />
+                <div class="row">
+                    <div class="col-xl-6">
+                        <label class="form-label">Public Currency Type List</label>
+                        <!-- hidden role id for edit -->
+                        <select type="text" class="form-control" id="publicApicurrencyType" ></select>
+                    </div>
+                    <div class="col-xl-6">
+                        <label class="form-label">Currency Type</label>
+                        <!-- hidden role id for edit -->
+                        <input type="text" class="form-control" id="currencyType" />
+                   </div>
+                    <div class="col-xl-6">
+                        <label class="form-label">Currency Symbol</label>
+                        <!-- hidden role id for edit -->
+                        <input type="text" class="form-control" id="currencySymbol" />
+                    </div>
+                    <div class="col-xl-6">
+                        <label class="form-label">Exchange Rate</label>
+                        <!-- hidden role id for edit -->
+                        <input type="text" class="form-control" id="exchangeRate" />
+                    </div>
+                    <div class="col-12 text-end p-4">
+                        <button type="button" class="btn btn-primary waves-effect waves-light" id="btnSave">
+                            <span class="tf-icons mdi mdi-checkbox-marked-circle-outline me-1"></span>
+                            Save
+                        </button>
+                       
+                        <button type="button" class="btn btn-secondary waves-effect waves-light d-none" id="btnCancelEdit">
+                            Cancel
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- Roles List -->
+        <div class="card mb-4">
+            <h5 class="card-header">ExchangeRates List</h5>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <table id="ExchangeRatesTable" class="table table-hover display" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Currency Type</th>
+                                    <th>Currency Symbol</th>
+                                    <th>Exchange Rate</th>
+                                    <th>Created Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+   $(document).ready(function () {
+    var ExchangeRatesTable;
+       // Replace with your actual free API key from exchangerate-api.com
+       const myApiKey = '1d7bfb7b893f41030b409a13';
+       const exchangeRateUrl = `https://v6.exchangerate-api.com/v6/${myApiKey}`;
+
+       const currencySymbols = {
+           // --- NORTH & SOUTH AMERICA ---
+           "USD": "$", "CAD": "$", "MXN": "$", "ARS": "$", "CLP": "$", "COP": "$",
+           "BRL": "R$", "PAB": "B/.", "PEN": "S/.", "UYU": "$U",
+
+           // --- EUROPE ---
+           "EUR": "€", "GBP": "£", "GGP": "£", "JEP": "£", "IMP": "£",
+           "CHF": "Fr.", "RUB": "₽", "TRY": "₺", "UAH": "₴", "PLN": "zł",
+           "CZK": "Kč", "HUF": "Ft", "DKK": "kr", "SEK": "kr", "NOK": "kr",
+           "ISK": "kr", "RON": "lei", "BGN": "лв",
+
+           // --- MIDDLE EAST & AFRICA ---
+           "PKR": "Rs.", "AED": "د.إ", "SAR": "SR", "KWD": "KD", "BHD": "BD",
+           "QAR": "QR", "OMR": "RO", "JOD": "JD", "ILS": "₪", "EGP": "E£",
+           "ZAR": "R", "NGN": "₦", "KES": "KSh", "GHS": "GH₵", "MAD": "DH",
+
+           // --- ASIA & OCEANIA ---
+           "INR": "₹", "JPY": "¥", "CNY": "¥", "HKD": "$", "SGD": "$",
+           "AUD": "$", "NZD": "$", "TWD": "NT$", "KRW": "₩", "THB": "฿",
+           "VND": "₫", "PHP": "₱", "IDR": "Rp", "MYR": "RM", "LKR": "Rs",
+           "BDT": "৳", "MVR": "Rf", "NPR": "Rs"
+       };
+           // --- 1. Load All Supported Currencies ---
+           function loadPublicCurrencies() {
+               $.get(`${exchangeRateUrl}/codes`, function (data) {
+                   if (data.result === "success") {
+                       let options = '<option value="">-- Sync from Live API --</option>';
+                       data.supported_codes.forEach(code => {
+                           options += `<option value="${code[0]}">${code[0]} (${code[1]})</option>`;
+                       });
+                       $("#publicApicurrencyType").html(options);
+                   }
+               });
+           }
+           loadPublicCurrencies();
+
+           // --- 2. Handle Selection and Auto-fill ---
+           $("#publicApicurrencyType").change(function () {
+               const selectedCurrency = $(this).val();
+               if (!selectedCurrency) return;
+
+               $.get(`${exchangeRateUrl}/pair/${selectedCurrency}/PKR`, function (data) {
+                   if (data.result === "success") {
+                       // 1. Set Currency Type (Code)
+                       $("#currencyType").val(selectedCurrency);
+
+                       // 2. Set Exchange Rate
+                       $("#exchangeRate").val(data.conversion_rate);
+
+                       // 3. Set Symbol (Lookup in hardcoded array, fallback to Code if not found)
+                       const symbol = currencySymbols[selectedCurrency] || selectedCurrency;
+                       $("#currencySymbol").val(symbol);
+
+                       console.log(`Synced: 1 ${selectedCurrency} = ${data.conversion_rate} PKR`);
+                   }
+               }).fail(function () {
+                   alert("API Error: Please check your API Key or connection.");
+               });
+           });
+      
+    // --- 3. Save or Update ---
+    $("#btnSave").click(function () {
+        var id = $("#Id").val();
+        var type = $("#currencyType").val();
+        var symbol = $("#currencySymbol").val();
+        var rate = $("#exchangeRate").val();
+
+        if (!type || !symbol || !rate) {
+            alert("Please fill all fields");
+            return;
+        }
+
+        var mode = id ? 2 : 1;
+
+        $.ajax({
+            url: '@Url.Action("SaveExchangeRate", "ExchangeRates", new { area = "Products" })',
+            type: "POST",
+            data: JSON.stringify({
+                mode: mode,
+                id: id || 0,
+                currencyType: type,
+                currencySymbol: symbol,
+                exchangeRate: rate
+            }),
+            contentType: "application/json; charset=utf-8",
+            success: function (response) {
+                if (response.success) {
+                    alert("Exchange Rate saved successfully!");
+                    resetForm();
+                    ExchangeRatesTable.ajax.reload();
+                } else {
+                    alert("Error: " + response.message);
+                }
+            }
+        });
+    });
+
+    // --- 4. Edit ---
+    $('#ExchangeRatesTable').on('click', '.edit-rate', function () {
+        var id = $(this).data("id");
+        $.get('@Url.Action("GetExchangeRateById", "ExchangeRates", new { area = "Products" })', { id: id }, function (res) {
+            $("#Id").val(res.Id);
+            $("#currencyType").val(res.CurrencyType);
+            $("#currencySymbol").val(res.CurrencySymbol);
+            $("#exchangeRate").val(res.ExchangeRate);
+            $("#publicApicurrencyType").val(""); // Clear sync dropdown on edit
+
+            $("#btnCancelEdit").removeClass("d-none");
+            $('html, body').animate({ scrollTop: 0 }, 'fast');
+        });
+    });
+
+    // --- 5. Delete ---
+    $('#ExchangeRatesTable').on('click', '.delete-rate', function () {
+        var id = $(this).data("id");
+        if (confirm("Delete this currency?")) {
+            $.ajax({
+                url: '@Url.Action("SaveExchangeRate", "ExchangeRates", new { area = "Products" })',
+                type: "POST",
+                data: JSON.stringify({ mode: 4, id: id }),
+                contentType: "application/json; charset=utf-8",
+                success: function () {
+                    ExchangeRatesTable.ajax.reload();
+                }
+            });
+        }
+    });
+
+    function resetForm() {
+        $("#Id").val("");
+        $("#currencyType").val("");
+        $("#currencySymbol").val("");
+        $("#exchangeRate").val("");
+        $("#publicApicurrencyType").val("");
+        $("#btnCancelEdit").addClass("d-none");
+    }
+
+    $("#btnCancelEdit").click(resetForm);
+
+    // --- 6. DataTable ---
+    ExchangeRatesTable = $('#ExchangeRatesTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '@Url.Action("GetExchangeRates", "ExchangeRates", new { area = "Products" })',
+            type: "POST"
+        },
+        columns: [
+            { data: "Id" },
+            { data: "CurrencyType" },
+            { data: "CurrencySymbol" },
+            { data: "ExchangeRate" },
+            { data: "CreatedDatestring" },
+            {
+                data: "Id",
+                render: function (data) {
+                    return `
+                        <button type="button" class="btn btn-sm btn-primary edit-rate" data-id="${data}"><span class="mdi mdi-pencil"></span></button>
+                        <button type="button" class="btn btn-sm btn-danger delete-rate" data-id="${data}"><span class="mdi mdi-delete"></span></button>`;
+                }
+            }
+        ]
+    });
+});
+    </script>
+}

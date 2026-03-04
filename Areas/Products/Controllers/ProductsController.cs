@@ -12,7 +12,7 @@ namespace BizOne.Areas.Products.Controllers
     public class ProductsController : Controller
     {
         private readonly ProductsDAL dal = new ProductsDAL();
-        // GET: Products/Profucts
+        
         public ActionResult ManageProducts()
         {
             return View();
@@ -86,10 +86,10 @@ namespace BizOne.Areas.Products.Controllers
         [HttpGet]
         public ActionResult GetProductImage(string path)
         {
-            // Ensure the path is safe and return the file
+            
             try
             {
-                // 1. Check if path is empty
+                
                 if (string.IsNullOrWhiteSpace(path))
                 {
                     return File(Server.MapPath("~/FurniAssets/images/product-1.png"), "image/png");
@@ -97,10 +97,9 @@ namespace BizOne.Areas.Products.Controllers
 
                 string physicalPath = path;
 
-                // 3. Security & Existence Check
                 if (System.IO.File.Exists(physicalPath))
                 {
-                    // Detects MIME type (image/jpeg, image/png, etc.) automatically
+                    
                     string contentType = MimeMapping.GetMimeMapping(physicalPath);
                     return File(physicalPath, contentType);
                 }
@@ -110,7 +109,6 @@ namespace BizOne.Areas.Products.Controllers
                 // Log your exception here: Elmah, NLog, etc.
             }
 
-            // 4. Fallback: Return a default "Image Not Found" placeholder
             return File(Server.MapPath("~/FurniAssets/images/product-1.png"), "image/png");
 
         }
@@ -663,6 +661,11 @@ namespace BizOne.Areas.Products.Controllers
             {
                 return Json(new { success = false, message = ex.Message });
             }
+        }
+
+        public ActionResult ExchangeRateForms()
+        {
+            return View();
         }
     }
 }
