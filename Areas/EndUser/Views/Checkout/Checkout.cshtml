@@ -118,27 +118,10 @@
 
                 </div>
 
-                <div class="row mb-5 mt-5">
-                    <div class="col-md-12">
-                        <h2 class="h3 mb-3 text-black">Coupon Code</h2>
-                        <div class="p-3 p-lg-5 border bg-white">
-
-                            <label for="c_code" class="text-black mb-3">Enter your coupon code if you have one</label>
-                            <div class="input-group w-75 couponcode-wrap">
-                                <input type="text" class="form-control me-2" id="c_code" placeholder="Coupon Code" aria-label="Coupon Code" aria-describedby="button-addon2">
-                                <div class="input-group-append">
-                                    <button class="btn btn-black btn-sm" type="button" id="button-addon2">Apply</button>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
             </div>
             <div class="col-md-6">
 
-                
+
                 <div class="row mb-5">
                     <div class="col-md-12">
                         <h2 class="h3 mb-3 text-black">Your Order</h2>
@@ -296,6 +279,7 @@
 </div>
 @section scripts{
     <script>
+        let checkoutSymbol = "Rs.";
         $(document).ready(function () {
     loadCheckoutDetails();
 });
@@ -306,7 +290,7 @@ function loadCheckoutDetails() {
         type: 'GET',
         success: function (response) {
             if (response.success) {
-                // 1. Render Order Table
+                checkoutSymbol = response.symbol || "Rs.";
                 renderOrderTable(response.cart);
 
                 // 2. Auto-fill User Data if logged in
@@ -333,25 +317,28 @@ function loadCheckoutDetails() {
     });
 }
 
+
 function renderOrderTable(cartData) {
     if (!cartData || !cartData.Items) return;
 
     const tableBody = $('#checkoutOrderTable');
     let rows = '';
 
+    // Clear existing rows except the subtotal/total rows
+    tableBody.find('tr:not(:has(#checkoutSubtotal)):not(:has(#checkoutTotal))').remove();
+
     cartData.Items.forEach(item => {
         rows += `
             <tr>
                 <td>${item.Name} <strong class="mx-2">x</strong> ${item.Quantity}</td>
-                <td>$${item.Total.toFixed(2)}</td>
+                <td>${checkoutSymbol} ${item.Total.toFixed(2)}</td>
             </tr>`;
     });
 
-    // Prepend the items before the subtotal/total rows
     tableBody.prepend(rows);
-    $('#checkoutSubtotal').text('$' + cartData.GrandTotal.toFixed(2));
-    $('#checkoutTotal').text('$' + cartData.GrandTotal.toFixed(2));
-        }
+    $('#checkoutSubtotal').text(checkoutSymbol + ' ' + cartData.GrandTotal.toFixed(2));
+    $('#checkoutTotal').text(checkoutSymbol + ' ' + cartData.GrandTotal.toFixed(2));
+}
    function placeOrder() {
 
        const orderDetails = {
@@ -412,5 +399,5 @@ function renderOrderTable(cartData) {
 }
 
     </script>
-    }
+}
 

@@ -267,10 +267,12 @@
     <Compile Include="Areas\EMS\Controllers\LeavesController.cs" />
     <Compile Include="Areas\EMS\EMSAreaRegistration.cs" />
     <Compile Include="Areas\EndUser\Controllers\CartController.cs" />
+    <Compile Include="Areas\EndUser\Controllers\CheckoutController.cs" />
     <Compile Include="Areas\EndUser\Controllers\LocalHomeController.cs" />
     <Compile Include="Areas\EndUser\Controllers\LoginController.cs" />
     <Compile Include="Areas\EndUser\EndUserAreaRegistration.cs" />
     <Compile Include="Areas\Products\Controllers\CategoriesController.cs" />
+    <Compile Include="Areas\Products\Controllers\CoupensController.cs" />
     <Compile Include="Areas\Products\Controllers\ExchangeRatesController.cs" />
     <Compile Include="Areas\Products\Controllers\OrdersController.cs" />
     <Compile Include="Areas\Products\Controllers\ProductsController.cs" />
@@ -453,8 +455,6 @@
     <Content Include="FurniAssets\scss\style.scss" />
     <Content Include="Areas\EndUser\Views\LocalHome\AboutUs.cshtml" />
     <Content Include="Areas\EndUser\Views\LocalHome\Blog.cshtml" />
-    <Content Include="Areas\EndUser\Views\LocalHome\Cart.cshtml" />
-    <Content Include="Areas\EndUser\Views\LocalHome\Checkout.cshtml" />
     <Content Include="Areas\EndUser\Views\LocalHome\ContactUs.cshtml" />
     <Content Include="Areas\EndUser\Views\LocalHome\Home.cshtml" />
     <Content Include="Areas\EndUser\Views\LocalHome\Services.cshtml" />
@@ -482,10 +482,13 @@
     <Content Include="Areas\Products\Views\Products\ProductDetails.cshtml" />
     <Content Include="Areas\EndUser\Views\Login\Login.cshtml" />
     <Content Include="Areas\EndUser\Views\Login\SignUp.cshtml" />
-    <Content Include="Areas\EndUser\Views\LocalHome\Orders.cshtml" />
     <Content Include="Areas\EndUser\Views\LocalHome\CustomDesigns.cshtml" />
     <Content Include="Areas\Products\Views\Shop\ProductDetails.cshtml" />
     <Content Include="Areas\Products\Views\Products\ExchangeRateForms.cshtml" />
+    <Content Include="Areas\Products\Views\Coupens\ManageCoupens.cshtml" />
+    <Content Include="Areas\EndUser\Views\Cart\Cart.cshtml" />
+    <Content Include="Areas\EndUser\Views\Checkout\Checkout.cshtml" />
+    <Content Include="Areas\Products\Views\Orders\Orders.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -525,11 +528,9 @@
     <Folder Include="Areas\EMS\Data\" />
     <Folder Include="Areas\EMS\Views\Shared\" />
     <Folder Include="Areas\EndUser\Data\" />
-    <Folder Include="Areas\EndUser\Views\Cart\" />
     <Folder Include="Areas\EndUser\Views\Shared\" />
     <Folder Include="Areas\Products\Data\" />
     <Folder Include="Areas\Products\Views\ExchangeRates\" />
-    <Folder Include="Areas\Products\Views\Orders\" />
     <Folder Include="Areas\Products\Views\Shared\" />
     <Folder Include="Views\Base\" />
   </ItemGroup>

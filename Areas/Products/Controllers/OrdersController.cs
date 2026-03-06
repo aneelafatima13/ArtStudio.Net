@@ -16,15 +16,42 @@ namespace BizOne.Areas.Products.Controllers
     {
         private readonly static ProductsDAL dal = new ProductsDAL();
 
+
+
+
+
+
+        public ActionResult Orders(int returnType = 0)
+        {
+            ViewBag.ReturnType = returnType;
+            var userCookie = Request.Cookies["CustomerAuth"];
+
+            long? customerId = null;
+
+            if (userCookie != null)
+            {
+                customerId = Convert.ToInt64(userCookie["UserId"]);
+
+            }
+            ViewBag.CustomerId = customerId;
+
+            return View();
+        }
+
         [HttpPost]
         public JsonResult FinalizeOrder(OrderModel model)
         {
             var cartData = Session["CheckoutData"] as CheckoutSessionModel;
             if (cartData == null || cartData.Items.Count == 0)
                 return Json(new { success = false, message = "Cart is empty" });
-
             try
             {
+                foreach(var data in cartData.Items)
+                {
+                    string archivedImgPath = ArchiveOrderImage(data.ImgPath);
+                    data.ImgPath = archivedImgPath;
+
+                }
                 long orderId = dal.ExecuteFinalizeOrder(model, cartData);
 
                 if (orderId > 0)
@@ -42,6 +69,47 @@ namespace BizOne.Areas.Products.Controllers
             }
 
             return Json(new { success = false, message = "Could not process order." });
+        }
+
+        private string ArchiveOrderImage(string sourceRelativePath)
+        {
+            if (string.IsNullOrEmpty(sourceRelativePath)) return "/Uploads/no-image.png";
+
+            try
+            {
+                // 1. Prepare naming
+                string originalFileName = Path.GetFileName(sourceRelativePath);
+                string newFileName = originalFileName; // e.g., 638452_product.jpg
+
+                // 2. Physical Paths (For System.IO)
+                string targetFolder = Server.MapPath("~/Uploads/OrderedItemsImages/");
+                string targetPhysicalPath = Path.Combine(targetFolder, newFileName);
+
+                if (!Directory.Exists(targetFolder)) Directory.CreateDirectory(targetFolder);
+
+                
+                string sourcePhysicalPath = sourceRelativePath.Contains(":")
+                    ? sourceRelativePath
+                    : Server.MapPath(sourceRelativePath);
+
+                if (System.IO.File.Exists(sourcePhysicalPath))
+                {
+                    if (!System.IO.File.Exists(targetPhysicalPath))
+                    {
+                        System.IO.File.Copy(sourcePhysicalPath, targetPhysicalPath, true);
+                    }
+                    return targetPhysicalPath;
+
+                }
+                else
+                {
+                    return sourceRelativePath;
+                }
+            }
+            catch
+            {
+                return sourceRelativePath;
+            }
         }
 
         // GET: Products/Orders

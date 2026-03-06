@@ -9,31 +9,31 @@
         <div class="alert alert-success mt-4">
             Your Order has been placed successfully!
         </div>
+    </div>
+}
+
+<div class="untree_co-section before-footer-section">
+    <div class="container">
+        <div id="OrdersList">
         </div>
-        }
 
-        <div class="untree_co-section before-footer-section">
-            <div class="container">
-                <div id="OrdersList">
-                </div>
-
-                <div class="row mt-5">
-                    <div class="col-12 text-center">
-                        <div id="pagination-controls" class="btn-group">
-                            <button class="btn btn-outline-black btn-sm" id="prevPage" onclick="changePage(-1)">Previous</button>
-                            <span class="btn btn-sm" id="currentPageDisplay" style="pointer-events: none;">Page 1</span>
-                            <button class="btn btn-outline-black btn-sm" id="nextPage" onclick="changePage(1)">Next</button>
-                        </div>
-                    </div>
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <div id="pagination-controls" class="btn-group">
+                    <button class="btn btn-outline-black btn-sm" id="prevPage" onclick="changePage(-1)">Previous</button>
+                    <span class="btn btn-sm" id="currentPageDisplay" style="pointer-events: none;">Page 1</span>
+                    <button class="btn btn-outline-black btn-sm" id="nextPage" onclick="changePage(1)">Next</button>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        @* Use @ViewBag.CustomerId directly in the hidden field *@
-        <input type="hidden" id="c_id" value="@ViewBag.CustomerId" />
+@* Use @ViewBag.CustomerId directly in the hidden field *@
+<input type="hidden" id="c_id" value="@ViewBag.CustomerId" />
 
-        @section scripts{
-            <script>
+@section scripts{
+    <script>
         var currentPage = 1;
         var pageSize = 10;
 
@@ -154,5 +154,5 @@
 
                    }
                 }
-            </script>
-        }
+    </script>
+}

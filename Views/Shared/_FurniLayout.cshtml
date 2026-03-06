@@ -40,7 +40,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("Home", "LocalHome", new { area = "EndUser" })">Home</a>
                     </li>
-                    <li><a class="nav-link" href="@Url.Action("Shop", "LocalHome", new { area = "EndUser" })">Shop</a></li>
+                    <li><a class="nav-link" href="@Url.Action("Shop", "LocalHome", new { area = "EndUser" })">Collections</a></li>
                     <li><a class="nav-link" href="@Url.Action("CustomDesigns", "LocalHome", new { area = "EndUser" })">Custom Designs</a></li>
                     <li><a class="nav-link" href="@Url.Action("AboutUs", "LocalHome", new { area = "EndUser" })">About us</a></li>
                    
@@ -57,7 +57,7 @@
 
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ordersDropdown">
                                 <li>
-                                    <a class="dropdown-item" href="@Url.Action("Orders", "LocalHome", new { area = "EndUser", type = "Ready" })">
+                                    <a class="dropdown-item" href="@Url.Action("Orders", "Orders", new { area = "Products", type = "Ready" })">
                                         Ready Items Orders
                                     </a>
                                 </li>
@@ -107,7 +107,7 @@
                     }
 
                     <li>
-                        <a class="nav-link position-relative" href="@Url.Action("Cart", "LocalHome", new { area = "EndUser" })">
+                        <a class="nav-link position-relative" href="@Url.Action("Cart", "Cart", new { area = "EndUser" })">
                             <img src="@Url.Content("~/FurniAssets/images/cart.svg")">
                             <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                                   style="@(Session["CartCount"] == null || (int)Session["CartCount"] == 0 ? "display:none;" : "")">

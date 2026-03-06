@@ -39,33 +39,6 @@ namespace BizOne.Areas.EndUser.Controllers
             return View();
         }
 
-        public ActionResult Checkout()
-        {
-            return View();
-        }
-        
-
-        public ActionResult Cart()
-        {
-            return View();
-        }
-        public ActionResult Orders(int returnType = 0)
-        {
-            ViewBag.ReturnType = returnType;
-            var userCookie = Request.Cookies["CustomerAuth"];
-
-            long? customerId = null;
-
-            if (userCookie != null)
-            {
-                customerId = Convert.ToInt64(userCookie["UserId"]);
-                
-            }
-            ViewBag.CustomerId = customerId;
-
-            return View();
-        }
-
         public ActionResult CustomDesigns()
         {
             

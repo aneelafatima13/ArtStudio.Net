@@ -21,7 +21,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                           
                         </tbody>
                     </table>
                 </div>
@@ -47,7 +46,7 @@
                         <input type="text" class="form-control py-3" id="coupon" placeholder="Coupon Code">
                     </div>
                     <div class="col-md-4">
-                        <button class="btn btn-black">Apply Coupon</button>
+                        <button class="btn btn-black" id="varifyCoupen">Apply Coupon</button>
                     </div>
                 </div>
             </div>
@@ -79,7 +78,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <button class="btn btn-black btn-lg py-3 btn-block" onclick="proceedToCheckout()">Proceed To Checkout</button>
-                                    </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -89,6 +88,8 @@
 </div>
 @section Scripts {
     <script>
+        let currentSymbol = "Rs."; // Global variable for the cart
+
         $(document).ready(function () {
             loadCart();
         });
@@ -99,6 +100,7 @@
                 type: 'GET',
                 success: function (response) {
                     if (response.success) {
+                        currentSymbol = response.symbol; // Update symbol from server
                         renderCartTable(response.data);
                         updateTotals(response.subtotal);
                     }
@@ -120,90 +122,101 @@
                     ? `/Products/Shop/GetImg?path=${encodeURIComponent(item.ImagePath)}`
                     : '/FurniAssets/images/product-1.png';
 
+                // Use the variant info if it exists
+                const nameDisplay = item.VariantDetails
+                    ? `${item.Name} <br><small class="text-muted">${item.VariantDetails}</small>`
+                    : item.Name;
+
                 const row = `
                     <tr>
                         <td class="product-thumbnail">
-                            <img src="${imageSrc}" alt="Image" class="img-fluid" style="max-height: 100px;">
+                            <img src="${imageSrc}" alt="Image" class="img-fluid" style="max-height: 80px; object-fit: contain;">
                         </td>
                         <td class="product-name">
-                            <h2 class="h5 text-black">${item.Name}</h2>
+                            <h2 class="h5 text-black">${nameDisplay}</h2>
                         </td>
-                        <td>$${item.Price.toFixed(2)}</td>
+                        <td>${currentSymbol} ${item.Price.toFixed(2)}</td>
                         <td>
                             <div class="input-group mb-3 d-flex align-items-center quantity-container" style="max-width: 120px;">
                                 <div class="input-group-prepend">
-                                    <button class="btn btn-outline-black decrease" type="button" onclick="changeQty(${item.ProductId},${item.VariantId}, -1)">&minus;</button>
+                                    <button class="btn btn-outline-black decrease" type="button" onclick="changeQty(${item.ProductId}, ${item.VariantId || 0}, -1)">&minus;</button>
                                 </div>
-                               <input type="text" id="qty-${item.ProductId}-${item.VariantId}"
-       class="form-control text-center quantity-amount"
-       value="${item.Quantity}"
-       data-stock="${item.ActualStockQuantity}" readonly>
-       <div class="input-group-append">
-                                    <button class="btn btn-outline-black increase" type="button" onclick="changeQty(${item.ProductId}, ${item.VariantId},1)">&plus;</button>
+                                <input type="text" id="qty-${item.ProductId}-${item.VariantId || 0}"
+                                       class="form-control text-center quantity-amount"
+                                       value="${item.Quantity}"
+                                       data-stock="${item.ActualStockQuantity}" readonly>
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-black increase" type="button" onclick="changeQty(${item.ProductId}, ${item.VariantId || 0}, 1)">&plus;</button>
                                 </div>
                             </div>
                         </td>
-                        <td>$${item.Total.toFixed(2)}</td>
-                        <td><a href="javascript:void(0)" onclick="removeItem(${item.ProductId},${item.VariantId})" class="btn btn-black btn-sm">X</a></td>
+                        <td>${currentSymbol} ${item.Total.toFixed(2)}</td>
+                        <td><a href="javascript:void(0)" onclick="removeItem(${item.ProductId}, ${item.VariantId || 0})" class="btn btn-black btn-sm">X</a></td>
                     </tr>`;
                 tbody.append(row);
             });
         }
 
         function updateTotals(subtotal) {
-            $('.text-right strong.text-black').text('$' + subtotal.toFixed(2));
+            // Update all total spans with the correct symbol and amount
+            $('.text-right strong.text-black, #cart-subtotal').text(currentSymbol + ' ' + subtotal.toFixed(2));
         }
 
-        function changeQty(productId, VariantId, change) {
-    const input = $(`#qty-${productId}`);
-    const currentQty = parseInt(input.val());
-    const maxStock = parseInt(input.data('stock'));
+        function changeQty(productId, variantId, change) {
+            // Fixed ID selector to include variantId
+            const input = $(`#qty-${productId}-${variantId}`);
+            const currentQty = parseInt(input.val());
+            const maxStock = parseInt(input.data('stock'));
 
-    // Prevent increase if it exceeds stock
-    if (change > 0 && currentQty >= maxStock) {
-        alert(`Only ${maxStock} items available in stock.`);
-        return;
-    }
-
-    $.ajax({
-        url: '@Url.Action("UpdateQuantity", "Cart", new { area = "EndUser" })',
-        type: 'POST',
-        data: { id: productId, VariantId: VariantId, change: change },
-        success: function (response) {
-            if (response.success) {
-                loadCart();
-                updateBadge();
+            if (change > 0 && currentQty >= maxStock) {
+                alert(`Only ${maxStock} items available in stock.`);
+                return;
             }
-        }
-    });
-}
-        function removeItem(productId, VariantId) {
-    if (confirm("Are you sure you want to remove this item?")) {
-        $.ajax({
-            url: '@Url.Action("RemoveFromCart", "Cart", new { area = "EndUser" })',
-            type: 'POST',
-            data: { id: productId, VariantId: VariantId },
-            success: function (response) {
-                if (response.success) {
-                    loadCart();
-                    updateBadge();
+            if (change < 0 && currentQty <= 1) {
+                removeItem(productId, variantId);
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("UpdateQuantity", "Cart", new { area = "EndUser" })',
+                type: 'POST',
+                data: { id: productId, VariantId: variantId, change: change },
+                success: function (response) {
+                    if (response.success) {
+                        loadCart();
+                        updateBadge();
+                    }
                 }
-            }
-        });
-    }
-}
-
-function updateBadge() {
-    $.get('@Url.Action("GetCartCount", "Cart", new { area = "EndUser" })', function(data) {
-        const badge = $('#cart-badge');
-        badge.text(data.count);
-        data.count > 0 ? badge.show() : badge.hide();
-    });
+            });
         }
 
-        function proceedToCheckout() {
+        function removeItem(productId, variantId) {
+            if (confirm("Are you sure you want to remove this item?")) {
+                $.ajax({
+                    url: '@Url.Action("RemoveFromCart", "Cart", new { area = "EndUser" })',
+                    type: 'POST',
+                    data: { id: productId, VariantId: variantId },
+                    success: function (response) {
+                        if (response.success) {
+                            loadCart();
+                            updateBadge();
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateBadge() {
+            $.get('@Url.Action("GetCartCount", "Cart", new { area = "EndUser" })', function(data) {
+                const badge = $('#cart-badge');
+                badge.text(data.count);
+                data.count > 0 ? badge.show() : badge.hide();
+            });
+        }
+
+         function proceedToCheckout() {
     $.ajax({
-        url: '@Url.Action("PrepareCheckout", "Cart", new { area = "EndUser" })',
+        url: '@Url.Action("PrepareCheckout", "Checkout", new { area = "EndUser" })',
         type: 'POST',
         success: function (response) {
             if (response.success) {
@@ -211,6 +224,42 @@ function updateBadge() {
             }
         }
     });
-}
+        }
+
+        $('#varifyCoupen').click(function () {
+    const code = $('#coupon').val();
+    if (!code) {
+        alert("Please enter a code");
+        return;
+    }
+
+    $.ajax({
+        url: "@Url.Action("VarifyCouponCode", "Coupens")",
+        type: "GET",
+        data: { code: code },
+        success: function (res) {
+            if (res.success) {
+                Swal.fire({
+                    title: 'Coupon Valid!',
+                    text: res.message,
+                    icon: 'success',
+                    showCancelButton: true,
+                    confirmButtonText: 'Continue',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#000'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Apply discount to the total in your UI
+                        applyDiscountToTotal(res.discount);
+                    } else {
+                        $('#coupon').val(''); // Reset if cancelled
+                    }
+                });
+            } else {
+                Swal.fire('Error', res.message, 'error');
+            }
+        }
+    });
+});
     </script>
 }

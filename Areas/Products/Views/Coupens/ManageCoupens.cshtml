@@ -1,0 +1,358 @@
+﻿
+@{
+    ViewBag.Title = "ManageCoupens";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+
+
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <div class="col-md">
+        <!-- Add Role -->
+        <div class="card mb-4">
+            <h5 class="card-header">Generate Coupens</h5>
+            <div class="card-body">
+                <input type="hidden" id="couponId" value="0" />
+               
+                <div class="row g-3">
+                    <div class="col-xl-6">
+                        <label class="form-label fw-bold">Coupon Code</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="couponCode" placeholder="Enter or generate code" style="text-transform:uppercase" />
+                            <button class="btn btn-outline-primary waves-effect" type="button" id="btnGenerate">
+                                <i class="mdi mdi-refresh me-1"></i> Generate
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-6">
+                        <label class="form-label fw-bold">Coupon Type</label>
+                        <select class="form-select" id="couponType">
+                            <option value="Discount">Discount</option>
+                            <option value="Free Shipping">Free Shipping</option>
+                            <option value="BOGO">Buy One Get One</option>
+                            <option value="Private Access">Private Access</option>
+                        </select>
+                    </div>
+
+                    <div class="col-xl-6">
+                        <label class="form-label fw-bold">Purpose</label>
+                        <select class="form-select" id="purpose">
+                            <option value="Public">Public (Anyone)</option>
+                            <option value="Specific">Specific Customer</option>
+                        </select>
+                    </div>
+
+                    <div class="col-xl-6" id="customerSection" style="display: none">
+                        <label class="form-label fw-bold">Verify Customer Email</label>
+                        <div class="input-group">
+                            <input type="hidden" id="customerId" value="0" />
+
+                            <input type="email" class="form-control" id="customerEmail" placeholder="customer@example.com" />
+                            <button class="btn btn-outline-info waves-effect" type="button" id="btnVerifyEmail">
+                                <i class="mdi mdi-check-decagram me-1"></i> Verify
+                            </button>
+                        </div>
+                        <small id="verifyStatus" class="form-text"></small>
+                    </div>
+
+                    <div class="col-xl-6">
+                        <label class="form-label fw-bold">Expiry Date</label>
+                        <input type="date" class="form-control" id="expiryDate" />
+                    </div>
+
+                    <div class="col-xl-6">
+                        <label class="form-label fw-bold">Usage Limit</label>
+                        <input type="number" class="form-control" id="usageLimit" value="1" min="1" />
+                    </div>
+
+                    <div class="col-xl-6 discount-fields">
+                        <label class="form-label fw-bold">Discount Rate (%)</label>
+                        <input type="number" class="form-control" id="discountRate" placeholder="e.g. 10" />
+                    </div>
+
+                    <div class="col-xl-6 discount-fields">
+                        <label class="form-label fw-bold">Max Discount Price</label>
+                        <input type="number" class="form-control" id="maxDiscount" placeholder="Flat amount cap" />
+                    </div>
+
+                    <div class="col-12 text-end mt-4">
+                        <button type="button" class="btn btn-secondary waves-effect me-2 d-none" id="btnCancelEdit">
+                            Cancel
+                        </button>
+                        <button type="button" class="btn btn-primary waves-effect waves-light" id="btnSave">
+                            <span class="tf-icons mdi mdi-checkbox-marked-circle-outline me-1"></span>
+                            Save Coupon
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Roles List -->
+        <div class="card mb-4">
+            <h5 class="card-header">Coupens List</h5>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <table id="coupensTable" class="table table-hover display" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Type</th>
+                                    <th>Purpose</th>
+                                    <th>Limit</th>
+                                    <th>Active Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="viewCouponModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content" style="border-left: 5px solid #666cff;">
+            <div class="modal-header">
+                <h5 class="modal-title">Coupon Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="couponDetailContent">
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script>
+        var table;
+        $(document).ready(function () {
+            // --- 1. DATATABLE INITIALIZATION (Server-Side) ---
+            table = $('#coupensTable').DataTable({
+                "processing": true,
+                "serverSide": true,
+                "ajax": {
+                    "url": "@Url.Action("GetCouponsList", "Coupens")",
+                    "type": "POST"
+                },
+                "columns": [
+                    { "data": "CouponCode" },
+                    { "data": "CouponType" },
+                    { "data": "Purpose" },
+                    { "data": "UsageLimit" },
+                    {
+                        "data": "IsActive",
+                        "render": function (data, type, row) {
+                            var isChecked = data ? "checked" : "";
+                            // Using 'disabled' makes it read-only for display purposes
+                            return `
+            <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" role="switch"
+                       ${isChecked} disabled style="opacity: 1; cursor: default;">
+            </div>`;
+                        }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data) {
+                            var statusClass = data.IsActive ? "btn-outline-success" : "btn-outline-warning";
+                            var statusIcon = data.IsActive ? "mdi-eye-check" : "mdi-eye-off";
+
+                            return `
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-icon btn-outline-primary" onclick="editCoupon(${data.Id})" title="Edit"><i class="mdi mdi-pencil"></i></button>
+                                    <button class="btn btn-sm btn-icon btn-outline-info" onclick="viewCoupon(${data.Id})" title="View"><i class="mdi mdi-information-variant"></i></button>
+                                    <button class="btn btn-sm btn-icon ${statusClass}" onclick="toggleStatus(${data.Id})" title="Toggle Active"><i class="mdi ${statusIcon}"></i></button>
+                                    <button class="btn btn-sm btn-icon btn-outline-danger" onclick="deleteCoupon(${data.Id})" title="Delete"><i class="mdi mdi-delete"></i></button>
+                                </div>`;
+                        }
+                    }
+                ]
+            });
+
+            // --- 2. CORE CRUD ACTIONS ---
+
+            // EDIT: Fetch data, fill form, and scroll up
+
+            // --- 3. FORM INTERACTION ---
+
+            $('#btnGenerate').click(function () {
+                const code = "BIZ-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+                $('#couponCode').val(code);
+            });
+
+            $('#purpose').change(function () {
+                if ($(this).val() === 'Specific') {
+                    $('#customerSection').fadeIn();
+                } else {
+                    // 1. Hide the section
+                    $('#customerSection').hide();
+
+
+                }
+                // 2. Reset the hidden ID to 0
+                $('#customerId').val(0);
+
+                // 3. Clear the email input field
+                $('#customerEmail').val('');
+
+                // 4. Clear the verification status message and classes
+                $('#verifyStatus').text('')
+                    .removeClass('text-success text-danger');
+            });
+
+            $('#couponType').change(function () {
+                $(this).val() === 'Discount' ? $('.discount-fields').fadeIn() : $('.discount-fields').hide();
+            });
+
+            $('#btnVerifyEmail').click(function () {
+                const email = $('#customerEmail').val();
+                if (!email) return;
+                $.get("@Url.Action("VerifyCustomer", "Coupens")", { email: email }, function (res) {
+                    if (res.success) {
+                        $('#customerId').val(res.userId);
+                        $('#verifyStatus').text("✓ " + res.userName).addClass('text-success').removeClass('text-danger');
+                    } else {
+                        $('#verifyStatus').text("✗ Not Found").addClass('text-danger').removeClass('text-success');
+                    }
+                });
+            });
+
+            $('#btnSave').click(function () {
+                const data = {
+                    Id: $('#couponId').val(),
+                    CouponCode: $('#couponCode').val(),
+                    CouponType: $('#couponType').val(),
+                    Purpose: $('#purpose').val(),
+                    CustomerId: $('#customerId').val(),
+                    ExpiryDate: $('#expiryDate').val(),
+                    UsageLimit: $('#usageLimit').val(),
+                    DiscountRate: $('#discountRate').val()
+                };
+
+                $.ajax({
+                    url: "@Url.Action("SaveCoupon", "Coupens")",
+                    type: "POST",
+                    data: data,
+                    success: function (res) {
+                        if (res.success) {
+                            alert(res.message);
+                            location.reload();
+                        } else {
+                            if (res.message.includes("Cannot insert duplicate key")) {
+                                $('#couponCode').addClass('is-invalid').focus();
+                                // If you use a label or small tag for errors:
+                                alert("Code already exists, please change it.");
+                            } else {
+                                alert(res.message);
+                            }
+                        }
+                    }
+                });
+            });
+
+            $('#btnCancelEdit').click(function(){
+                location.reload();
+            });
+        });
+
+                    window.editCoupon = function (id) {
+                $.ajax({
+                    url: "@Url.Action("GetCouponById", "Coupens")",
+                    type: "GET",
+                    data: { id: id },
+                    success: function (res) {
+                        $('#couponId').val(res.Id);
+                        $('#customerId').val(res.CustomerId || 0);
+                        $('#couponCode').val(res.CouponCode);
+                        $('#couponType').val(res.CouponType).trigger('change');
+                        $('#purpose').val(res.Purpose).trigger('change');
+                        $('#usageLimit').val(res.UsageLimit);
+                        $('#discountRate').val(res.DiscountRate);
+
+                        if (res.ExpiryDate) {
+                            // Extract date if it comes in /Date(ms)/ format or ISO string
+                            var dateVal = res.ExpiryDate.includes("Date")
+                                ? new Date(parseInt(res.ExpiryDate.substr(6)))
+                                : new Date(res.ExpiryDate);
+                            $('#expiryDate').val(dateVal.toISOString().split('T')[0]);
+                        }
+
+                        $('#btnCancelEdit').removeClass('d-none');
+                        $('#btnSave').html('<i class="mdi mdi-check-circle-outline"></i> Update Coupon');
+
+                        // Scroll to top of form
+                        $('html, body').animate({ scrollTop: $(".card:first").offset().top - 20 }, 'slow');
+                    }
+                });
+            };
+
+            // VIEW: Show details in side modal
+            window.viewCoupon = function (id) {
+                $.get("@Url.Action("GetCouponById", "Coupens")", { id: id }, function (res) {
+                    var statusBadge = res.IsActive
+                        ? '<span class="badge bg-label-success">Active</span>'
+                        : '<span class="badge bg-label-danger">Inactive</span>';
+
+                    var html = `
+            <div class="list-group list-group-flush">
+                <div class="list-group-item d-flex justify-content-between">
+                    <strong>Status:</strong> ${statusBadge}
+                </div>
+                <div class="list-group-item"><strong>Code:</strong> <span class="text-primary fw-bold">${res.CouponCode}</span></div>
+                <div class="list-group-item"><strong>Type:</strong> ${res.CouponType}</div>
+                <div class="list-group-item"><strong>Purpose:</strong> ${res.Purpose}</div>
+                <div class="list-group-item"><strong>Discount Rate:</strong> ${res.DiscountRate ? res.DiscountRate + '%' : 'N/A'}</div>
+                <div class="list-group-item"><strong>Usage Limit:</strong> ${res.UsageLimit}</div>
+                <hr class="my-2">
+                <div class="list-group-item"><strong>Customer:</strong> ${res.CustomerName || 'All Customers (Public)'}</div>
+                <div class="list-group-item"><strong>Expiry Date:</strong> ${res.ExpiryDate || 'No Expiry'}</div>
+                <hr class="my-2">
+                <div class="list-group-item small text-muted">
+                    <i class="mdi mdi-account-plus-outline"></i> <strong>Created By:</strong> ${res.CreatedBy || 'System'}<br>
+                    <i class="mdi mdi-calendar"></i> <strong>Created At:</strong> ${res.CreatedDatestring}
+                </div>
+                <div class="list-group-item small text-muted">
+                    <i class="mdi mdi-account-edit-outline"></i> <strong>Modified By:</strong> ${res.ModifiedBy || 'N/A'}<br>
+                    <i class="mdi mdi-calendar-clock"></i> <strong>Modified At:</strong> ${res.ModifiedDatestring}
+                </div>
+            </div>`;
+                    $('#couponDetailContent').html(html);
+                    $('#viewCouponModal').modal('show');
+                });
+            };
+
+            // TOGGLE STATUS (Active/Inactive)
+            window.toggleStatus = function (id) {
+    $.ajax({
+        url: "@Url.Action("ToggleCouponStatus", "Coupens")",
+        type: "POST",
+        data: { id: id },
+        success: function (res) {
+            if (res.success) {
+                alert(res.message);
+                location.reload();
+            } else {
+                alert("Error: " + res.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            alert("Connection error: Could not update status.");
+            console.error(xhr.responseText);
+        }
+    });
+};
+            // DELETE
+            window.deleteCoupon = function (id) {
+                if (confirm("Are you sure you want to delete this record?")) {
+                    $.post("@Url.Action("DeleteCoupon", "Coupens")", { id: id }, function (res) {
+                        if (res.success) location.reload();
+                        else alert(res.message);
+                    });
+                }
+            };
+
+    </script>
+}
