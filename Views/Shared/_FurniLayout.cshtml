@@ -43,7 +43,7 @@
                     <li><a class="nav-link" href="@Url.Action("Shop", "LocalHome", new { area = "EndUser" })">Collections</a></li>
                     <li><a class="nav-link" href="@Url.Action("CustomDesigns", "LocalHome", new { area = "EndUser" })">Custom Designs</a></li>
                     <li><a class="nav-link" href="@Url.Action("AboutUs", "LocalHome", new { area = "EndUser" })">About us</a></li>
-                   
+
                     <li><a class="nav-link" href="@Url.Action("ContactUs", "LocalHome", new { area = "EndUser" })">Contact us</a></li>
                 </ul>
 
@@ -78,7 +78,6 @@
                             <span id="currentCurrency">PKR</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="currencyDropdown" id="currencyDropdownList">
-                           
                         </ul>
                     </li>
                     @if (Request.Cookies["CustomerAuth"] != null && Request.Cookies["CustomerAuth"]["FullName"] != null)
@@ -292,7 +291,7 @@
     <script src="@Url.Content("~/FurniAssets/js/bootstrap.bundle.min.js")"></script>
     <script src="@Url.Content("~/FurniAssets/js/tiny-slider.js")"></script>
     <script src="@Url.Content("~/FurniAssets/js/custom.js")"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

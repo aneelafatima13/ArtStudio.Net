@@ -8,20 +8,29 @@
     <div class="container">
         <div class="row mb-5">
             <form class="col-md-12" method="post">
+                <div id="activeCouponContainer" class="mb-4" style="display:none;">
+                    <div class="alert alert-success d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fa fa-ticket-alt me-2"></i>
+                            <strong>Coupon Applied: </strong> <span id="displayCouponCode" class="badge bg-dark"></span>
+                            <small id="couponShortDesc" class="ms-2 text-muted"></small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeCoupon()">Remove</button>
+                    </div>
+                </div>
+
                 <div class="site-blocks-table">
                     <table class="table" id="cartItems">
                         <thead>
                             <tr>
-                                <th class="product-thumbnail">Image</th>
-                                <th class="product-name">Product</th>
-                                <th class="product-price">Price</th>
+                                <th class="product-name">Product Details</th>
+                                <th class="product-price">Price Analysis</th>
                                 <th class="product-quantity">Quantity</th>
-                                <th class="product-total">Total</th>
-                                <th class="product-remove">Remove</th>
+                                <th class="product-total">Row Total</th>
+                                <th class="product-remove">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
-                        </tbody>
+                        <tbody></tbody>
                     </table>
                 </div>
             </form>
@@ -29,14 +38,7 @@
 
         <div class="row">
             <div class="col-md-6">
-                <div class="row mb-5">
-                    <div class="col-md-6 mb-3 mb-md-0">
-                        <button class="btn btn-black btn-sm btn-block">Update Cart</button>
-                    </div>
-                    <div class="col-md-6">
-                        <button class="btn btn-outline-black btn-sm btn-block">Continue Shopping</button>
-                    </div>
-                </div>
+                
                 <div class="row">
                     <div class="col-md-12">
                         <label class="text-black h4" for="coupon">Coupon</label>
@@ -46,7 +48,7 @@
                         <input type="text" class="form-control py-3" id="coupon" placeholder="Coupon Code">
                     </div>
                     <div class="col-md-4">
-                        <button class="btn btn-black" id="varifyCoupen">Apply Coupon</button>
+                        <button class="btn btn-black" id="varifyCoupen" onclick="applyCoupen()">Apply Coupon</button>
                     </div>
                 </div>
             </div>
@@ -63,15 +65,25 @@
                                 <span class="text-black">Subtotal</span>
                             </div>
                             <div class="col-md-6 text-right">
-                                <strong class="text-black">$230.00</strong>
+                                <strong class="text-black" id="cart-raw-subtotal">0.00</strong>
                             </div>
                         </div>
+
+                        <div class="row mb-3" id="discount-row" style="display:none;">
+                            <div class="col-md-6">
+                                <span class="text-success">Discount (<span id="applied-coupon-label"></span>)</span>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <strong class="text-success" id="cart-discount-amount">-0.00</strong>
+                            </div>
+                        </div>
+
                         <div class="row mb-5">
                             <div class="col-md-6">
                                 <span class="text-black">Total</span>
                             </div>
                             <div class="col-md-6 text-right">
-                                <strong class="text-black">$230.00</strong>
+                                <strong class="text-black" id="cart-final-total">0.00</strong>
                             </div>
                         </div>
 
@@ -94,74 +106,176 @@
             loadCart();
         });
 
-        function loadCart() {
+// Update loadCart to pass the coupon data
+// Update loadCart to pass the coupon data and manage UI state
+function loadCart(couponCode = "") {
+    const appliedCode = couponCode || ""; // If removing, pass empty string
+    $.ajax({
+        url: '@Url.Action("GetCartItems", "Cart", new { area = "EndUser" })',
+        type: 'GET',
+        data: { code: appliedCode },
+        success: function (res) {
+            if (res.success) {
+                currentSymbol = res.symbol;
+                renderCartTable(res.data.Items, res.data.CoupenData);
+                updateTotals(res.rawSubtotal, res.discount, res.subtotal, res.data.CoupenCode);
+
+                // --- NEW LOGIC: Manage Apply Button State ---
+                const applyBtn = $('#varifyCoupen');
+                const couponInput = $('#coupon');
+
+                if (res.data.HasCoupon) {
+                    applyBtn.prop('disabled', true).text('Coupon Applied');
+                    couponInput.prop('disabled', true).val(res.data.CoupenCode);
+                } else {
+                    applyBtn.prop('disabled', false).text('Apply Coupon');
+                    couponInput.prop('disabled', false).val('');
+                }
+            }
+        }
+    });
+}
+
+// Function to remove the coupon
+function removeCoupon() {
+    Swal.fire({
+        title: 'Remove Coupon?',
+        text: "Are you sure you want to remove the applied discount?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Yes, remove it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
             $.ajax({
-                url: '@Url.Action("GetCartItems", "Cart", new { area = "EndUser" })',
-                type: 'GET',
-                success: function (response) {
-                    if (response.success) {
-                        currentSymbol = response.symbol; // Update symbol from server
-                        renderCartTable(response.data);
-                        updateTotals(response.subtotal);
+                url: '@Url.Action("RemoveCoupon", "Cart", new { area = "EndUser" })',
+                type: 'POST',
+                success: function (res) {
+                    if (res.success) {
+                        loadCart(""); // Reload cart with no code
+                        Swal.fire('Removed!', 'The coupon has been removed.', 'success');
                     }
                 }
             });
         }
+    });
+}
 
-        function renderCartTable(items) {
+
+        function renderCartTable(items, couponData) {
             const tbody = $('#cartItems tbody');
             tbody.empty();
 
-            if (items.length === 0) {
-                tbody.append('<tr><td colspan="6" class="text-center py-5">Your cart is empty.</td></tr>');
-                return;
+            // 1. Handle Active Coupon UI and Implementation Summary
+            if (couponData && couponData.CouponCode) {
+                let implementationDetail = "";
+                const discountVal = couponData.DiscountRate > 0
+                    ? `${couponData.DiscountRate}%`
+                    : `${currentSymbol}${couponData.DiscountPrice}`;
+
+                // Generate dynamic summary based on CouponType
+                switch (couponData.CouponType) {
+                    case "Discount":
+                        implementationDetail = `Applied ${discountVal} discount on the total order value.`;
+                        break;
+                    case "DiscountWithoutSaleItems":
+                        implementationDetail = `Applied ${discountVal} discount only on non-sale items.`;
+                        break;
+                    case "Discount1stItem":
+                        implementationDetail = `Applied ${discountVal} discount on the first unit of each product.`;
+                        break;
+                    case "BOGO":
+                        implementationDetail = `Buy 1 Get 1 Free: 100% discount applied to every second unit of a product.`;
+                        break;
+                    case "BTGO":
+                        implementationDetail = `Buy 2 Get 1 Free: Every third unit is free.`;
+                        break;
+                    case "Free Shipping":
+                        implementationDetail = `Standard shipping charges have been waived.`;
+                        break;
+                    default:
+                        implementationDetail = `Coupon applied successfully to your cart.`;
+                }
+
+                $('#activeCouponContainer').fadeIn();
+                $('#displayCouponCode').text(couponData.CouponCode);
+
+                // Show the Type and the Implementation Explanation
+                $('#couponShortDesc').html(`
+            <br><small class="text-primary fw-bold">Type: ${couponData.CouponType}</small>
+            <br><small class="text-dark"><strong>How it works:</strong> ${implementationDetail}</small>
+        `);
+            } else {
+                $('#activeCouponContainer').hide();
             }
 
+            // 2. Render Items
             items.forEach(item => {
-                const imageSrc = item.ImagePath
-                    ? `/Products/Shop/GetImg?path=${encodeURIComponent(item.ImagePath)}`
-                    : '/FurniAssets/images/product-1.png';
+                const imageSrc = item.ImgPath ? `/Products/Shop/GetImg?path=${encodeURIComponent(item.ImgPath)}` : '/FurniAssets/images/product-1.png';
 
-                // Use the variant info if it exists
-                const nameDisplay = item.VariantDetails
-                    ? `${item.Name} <br><small class="text-muted">${item.VariantDetails}</small>`
-                    : item.Name;
+                // Column: Product Details
+                let productDetailsHtml = `
+            <div class="d-flex align-items-center">
+                <img src="${imageSrc}" class="img-fluid rounded border me-3" style="width: 70px; height: 70px; object-fit: cover;">
+                <div class="text-start">
+                    <h2 class="h6 text-black mb-0">${item.Name}</h2>
+                    ${item.VariantId ? '<span class="badge bg-secondary" style="font-size: 0.7rem;">Variant</span>' : ''}
+                    ${item.VariantInfo ? `<br><small class="text-muted">${item.VariantInfo}</small>` : ''}
+                </div>
+            </div>`;
+
+                // Column: Price Analysis (Showing Item-Level Coupon Impact)
+                let priceHtml = `
+            <div class="text-start">
+                <div class="text-muted" style="text-decoration: ${item.OnSale ? 'line-through' : 'none'}; font-size: 0.85rem;">
+                    ${currentSymbol} ${item.ActualPrice.toFixed(2)}
+                </div>
+                ${item.OnSale ? `
+                    <div class="mb-1">
+                        <span class="badge bg-danger" style="font-size: 0.65rem;">SALE ${item.DiscountRate}% OFF</span><br>
+                        <strong>${currentSymbol} ${item.PriceafterApplysalediscount.toFixed(2)}</strong>
+                    </div>` : ''}
+
+                ${item.DiscountPricebyCoupon > 0 ? `
+                    <div class="mt-1">
+                        <span class="badge bg-success" style="font-size: 0.65rem;">COUPON APPLIED</span><br>
+                        <small class="text-success fw-bold">Saved ${currentSymbol}${item.DiscountPricebyCoupon.toFixed(2)}</small>
+                    </div>` : ''}
+            </div>`;
 
                 const row = `
-                    <tr>
-                        <td class="product-thumbnail">
-                            <img src="${imageSrc}" alt="Image" class="img-fluid" style="max-height: 80px; object-fit: contain;">
-                        </td>
-                        <td class="product-name">
-                            <h2 class="h5 text-black">${nameDisplay}</h2>
-                        </td>
-                        <td>${currentSymbol} ${item.Price.toFixed(2)}</td>
-                        <td>
-                            <div class="input-group mb-3 d-flex align-items-center quantity-container" style="max-width: 120px;">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-outline-black decrease" type="button" onclick="changeQty(${item.ProductId}, ${item.VariantId || 0}, -1)">&minus;</button>
-                                </div>
-                                <input type="text" id="qty-${item.ProductId}-${item.VariantId || 0}"
-                                       class="form-control text-center quantity-amount"
-                                       value="${item.Quantity}"
-                                       data-stock="${item.ActualStockQuantity}" readonly>
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-black increase" type="button" onclick="changeQty(${item.ProductId}, ${item.VariantId || 0}, 1)">&plus;</button>
-                                </div>
-                            </div>
-                        </td>
-                        <td>${currentSymbol} ${item.Total.toFixed(2)}</td>
-                        <td><a href="javascript:void(0)" onclick="removeItem(${item.ProductId}, ${item.VariantId || 0})" class="btn btn-black btn-sm">X</a></td>
-                    </tr>`;
+            <tr>
+                <td class="product-name">${productDetailsHtml}</td>
+                <td>${priceHtml}</td>
+                <td>
+                    <div class="input-group mb-1 d-flex align-items-center justify-content-center" style="max-width: 120px; margin: auto;">
+                        <button class="btn btn-outline-black btn-sm" onclick="changeQty(${item.ProductId}, ${item.VariantId || 0}, -1)">&minus;</button>
+                        <input type="text" class="form-control text-center quantity-amount border-0" value="${item.Quantity}" readonly>
+                        <button class="btn btn-outline-black btn-sm" onclick="changeQty(${item.ProductId}, ${item.VariantId || 0}, 1)">&plus;</button>
+                    </div>
+                    <small class="text-muted" style="font-size: 0.7rem;">Stock: ${item.StockQty}</small>
+                </td>
+                <td class="product-total">
+                    <strong class="text-black">${currentSymbol} ${item.Total1UnitPrice.toFixed(2)}</strong>
+                </td>
+                <td><button onclick="removeItem(${item.ProductId}, ${item.VariantId || 0})" class="btn btn-sm text-danger"><i class="fa fa-trash"></i></button></td>
+            </tr>`;
                 tbody.append(row);
             });
         }
 
-        function updateTotals(subtotal) {
-            // Update all total spans with the correct symbol and amount
-            $('.text-right strong.text-black, #cart-subtotal').text(currentSymbol + ' ' + subtotal.toFixed(2));
-        }
+        function updateTotals(rawSubtotal, discount, finalTotal, couponCode) {
+            $('#cart-raw-subtotal').text(`${currentSymbol} ${rawSubtotal.toFixed(2)}`);
+            $('#cart-final-total').text(`${currentSymbol} ${finalTotal.toFixed(2)}`);
 
+            if (discount > 0) {
+                $('#discount-row').show();
+                $('#applied-coupon-label').text(couponCode);
+                $('#cart-discount-amount').text(`-${currentSymbol} ${discount.toFixed(2)}`);
+            } else {
+                $('#discount-row').hide();
+            }
+        }
         function changeQty(productId, variantId, change) {
             // Fixed ID selector to include variantId
             const input = $(`#qty-${productId}-${variantId}`);
@@ -215,51 +329,60 @@
         }
 
          function proceedToCheckout() {
-    $.ajax({
-        url: '@Url.Action("PrepareCheckout", "Checkout", new { area = "EndUser" })',
-        type: 'POST',
-        success: function (response) {
-            if (response.success) {
-                window.location.href = response.redirectUrl;
-            }
-        }
-    });
+
+                window.location.href = '@Url.Action("Checkout", "Checkout", new { area = "EndUser" })';
+
         }
 
-        $('#varifyCoupen').click(function () {
+        let tempCouponData = null; // Store data temporarily before confirmation
+
+function applyCoupen() {
     const code = $('#coupon').val();
     if (!code) {
-        alert("Please enter a code");
+        Swal.fire('Error', "Please enter a coupon code", 'error');
         return;
     }
 
     $.ajax({
-        url: "@Url.Action("VarifyCouponCode", "Coupens")",
+        url: '@Url.Action("VarifyCouponCode", "Cart", new { area = "EndUser"})',
         type: "GET",
         data: { code: code },
         success: function (res) {
             if (res.success) {
+                tempCouponData = res.CoupenData;
+
+                // Construct details for the Modal
+                let benefit = tempCouponData.DiscountRate > 0
+                    ? `${tempCouponData.DiscountRate}% Off`
+                    : `${currentSymbol} ${tempCouponData.DiscountPrice} Off`;
+
+                // Show Modal with Details
                 Swal.fire({
-                    title: 'Coupon Valid!',
-                    text: res.message,
-                    icon: 'success',
+                    title: 'Coupon Details',
+                    html: `
+                        <div class="text-start">
+                            <p><strong>Code:</strong> <span class="badge bg-dark">${tempCouponData.CouponCode}</span></p>
+                            <p><strong>Type:</strong> ${tempCouponData.CouponType}</p>
+                            <p><strong>Benefit:</strong> <span class="text-success fw-bold">${benefit}</span></p>
+                            <p class="small text-muted">Click continue to apply this to your current cart.</p>
+                        </div>`,
+                    icon: 'info',
                     showCancelButton: true,
                     confirmButtonText: 'Continue',
                     cancelButtonText: 'Cancel',
                     confirmButtonColor: '#000'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Apply discount to the total in your UI
-                        applyDiscountToTotal(res.discount);
-                    } else {
-                        $('#coupon').val(''); // Reset if cancelled
+                        // RE-LOAD cart with the code now that user confirmed
+                        loadCart(tempCouponData.CouponCode);
+                        $('#coupon').val('');
                     }
                 });
             } else {
-                Swal.fire('Error', res.message, 'error');
+                Swal.fire('Invalid', res.message, 'error');
             }
         }
     });
-});
+}
     </script>
 }

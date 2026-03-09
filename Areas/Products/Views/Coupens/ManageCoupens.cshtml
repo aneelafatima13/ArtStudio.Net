@@ -27,11 +27,27 @@
 
                     <div class="col-xl-6">
                         <label class="form-label fw-bold">Coupon Type</label>
-                        <select class="form-select" id="couponType">
-                            <option value="Discount">Discount</option>
-                            <option value="Free Shipping">Free Shipping</option>
-                            <option value="BOGO">Buy One Get One</option>
-                            <option value="Private Access">Private Access</option>
+                        <select class="form-select select2" id="couponType">
+                            <optgroup label="Standard Discounts">
+                                <option value="Discount">Percentage/Fixed Discount (Full Order)</option>
+                                <option value="DiscountWithoutSaleItems">Discount (Excluding Sale Items)</option>
+                                <option value="FirstPurchase">First Purchase Discount</option>
+                            </optgroup>
+
+                            <optgroup label="Quantity & Item Based">
+                                <option value="Discount1stItem">Discount on 1st Item</option>
+                                <option value="Discount1st2Items">Discount on 1st 2 Items</option>
+                                <option value="BOGO">Buy 1 Get 1 Free </option>
+                                <option value="BTGO">Buy 2 Get 1 Free</option>
+                                <option value="BTGT">Buy 2 Get 2 Free</option>
+                            </optgroup>
+
+                            <optgroup label="Shipping & Loyalty">
+                                <option value="Free Shipping">Free Shipping</option>
+                                <option value="FreeShippingMinOrder">Free Shipping (Min. Order Required)</option>
+                                <option value="Cashback">Wallet Cashback</option>
+                                <option value="Private Access">Private/VIP Event Access</option>
+                            </optgroup>
                         </select>
                     </div>
 
@@ -74,6 +90,10 @@
                     <div class="col-xl-6 discount-fields">
                         <label class="form-label fw-bold">Max Discount Price</label>
                         <input type="number" class="form-control" id="maxDiscount" placeholder="Flat amount cap" />
+                    </div>
+                    <div class="col-xl-6 min-order-fields">
+                        <label class="form-label fw-bold">Min Order Price</label>
+                        <input type="number" class="form-control" id="minorderprice" placeholder="Flat amount cap" />
                     </div>
 
                     <div class="col-12 text-end mt-4">
@@ -172,12 +192,6 @@
                 ]
             });
 
-            // --- 2. CORE CRUD ACTIONS ---
-
-            // EDIT: Fetch data, fill form, and scroll up
-
-            // --- 3. FORM INTERACTION ---
-
             $('#btnGenerate').click(function () {
                 const code = "BIZ-" + Math.random().toString(36).substring(2, 8).toUpperCase();
                 $('#couponCode').val(code);
@@ -203,10 +217,30 @@
                     .removeClass('text-success text-danger');
             });
 
+            
             $('#couponType').change(function () {
-                $(this).val() === 'Discount' ? $('.discount-fields').fadeIn() : $('.discount-fields').hide();
-            });
+                var type = $(this).val();
 
+                // Reset fields first
+                $('.discount-fields').hide();
+                $('.min-order-fields').hide();
+
+                if (type.includes('Discount') || type === 'Cashback') {
+                    $('.discount-fields').fadeIn();
+                    $('#discountLabel').text('Discount Percentage/Amount');
+                }
+                else if (type === 'FreeShippingMinOrder') {
+                    $('.min-order-fields').fadeIn();
+                }
+                else if (type.startsWith('B')) { // BOGO, BTGO, etc.
+                    // You might show a "Select Product" dropdown here
+                    alert("Note: This will apply a 100% discount to the free item.");
+                }
+
+                $('#discountRate').val('');
+                $('#maxDiscount').val('');
+                $('#minorderprice').val('');
+            });
             $('#btnVerifyEmail').click(function () {
                 const email = $('#customerEmail').val();
                 if (!email) return;
@@ -229,7 +263,9 @@
                     CustomerId: $('#customerId').val(),
                     ExpiryDate: $('#expiryDate').val(),
                     UsageLimit: $('#usageLimit').val(),
-                    DiscountRate: $('#discountRate').val()
+                    DiscountRate: $('#discountRate').val(),
+                    DiscountPrice: $('#maxDiscount').val(),
+                    minorderprice: $('#minorderprice').val()
                 };
 
                 $.ajax({
@@ -271,6 +307,8 @@
                         $('#purpose').val(res.Purpose).trigger('change');
                         $('#usageLimit').val(res.UsageLimit);
                         $('#discountRate').val(res.DiscountRate);
+                        $('#maxDiscount').val(res.DiscountPrice);
+                        $('#minorderprice').val(res.minorderprice);
 
                         if (res.ExpiryDate) {
                             // Extract date if it comes in /Date(ms)/ format or ISO string
@@ -305,6 +343,8 @@
                 <div class="list-group-item"><strong>Type:</strong> ${res.CouponType}</div>
                 <div class="list-group-item"><strong>Purpose:</strong> ${res.Purpose}</div>
                 <div class="list-group-item"><strong>Discount Rate:</strong> ${res.DiscountRate ? res.DiscountRate + '%' : 'N/A'}</div>
+              <div class="list-group-item"><strong>Discount Price:</strong> ${res.DiscountPrice ? res.DiscountPrice + '%' : 'N/A'}</div>
+              <div class="list-group-item"><strong>Min Order Price:</strong> ${res.minorderprice ? res.minorderprice + '%' : 'N/A'}</div>
                 <div class="list-group-item"><strong>Usage Limit:</strong> ${res.UsageLimit}</div>
                 <hr class="my-2">
                 <div class="list-group-item"><strong>Customer:</strong> ${res.CustomerName || 'All Customers (Public)'}</div>

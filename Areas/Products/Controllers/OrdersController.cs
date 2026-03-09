@@ -41,7 +41,7 @@ namespace BizOne.Areas.Products.Controllers
         [HttpPost]
         public JsonResult FinalizeOrder(OrderModel model)
         {
-            var cartData = Session["CheckoutData"] as CheckoutSessionModel;
+            var cartData = Session["Cart"] as CartDetailViewModel;
             if (cartData == null || cartData.Items.Count == 0)
                 return Json(new { success = false, message = "Cart is empty" });
             try
@@ -49,7 +49,7 @@ namespace BizOne.Areas.Products.Controllers
                 foreach(var data in cartData.Items)
                 {
                     string archivedImgPath = ArchiveOrderImage(data.ImgPath);
-                    data.ImgPath = archivedImgPath;
+                    data.CopyImgPath = archivedImgPath;
 
                 }
                 long orderId = dal.ExecuteFinalizeOrder(model, cartData);
