@@ -134,7 +134,11 @@
                                 <tbody id="checkoutOrderTable">
                                     <tr>
                                         <td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
-                                        <td class="text-black" id="checkoutSubtotal">$0.00</td>
+                                        <td class="text-black" id="checkoutSubtotal">0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-black font-weight-bold"><strong>Shipping Amount</strong></td>
+                                        <td class="text-black" id="shippingAmount">200</td>
                                     </tr>
                                     <tr>
                                         <td class="text-black font-weight-bold"><strong>Order Total</strong></td>
@@ -317,27 +321,43 @@ function loadCheckoutDetails() {
 }
 
 
-function renderOrderTable(cartData) {
-    if (!cartData || !cartData.Items) return;
+        function renderOrderTable(cartData) {
+            if (!cartData || !cartData.Items) return;
 
-    const tableBody = $('#checkoutOrderTable');
-    let rows = '';
+            const tableBody = $('#checkoutOrderTable');
+            let rows = '';
 
-    // Clear existing rows except the subtotal/total rows
-    tableBody.find('tr:not(:has(#checkoutSubtotal)):not(:has(#checkoutTotal))').remove();
+            // Clear product rows, keeping totals
+            tableBody.find('tr:not(:has(#checkoutSubtotal)):not(:has(#checkoutTotal)):not(:has(#shippingAmount))').remove();
 
-    cartData.Items.forEach(item => {
-        rows += `
+            cartData.Items.forEach(item => {
+                rows += `
             <tr>
                 <td>${item.Name} <strong class="mx-2">x</strong> ${item.Quantity}</td>
-                <td>${checkoutSymbol} ${item.Total.toFixed(2)}</td>
+                <td>${checkoutSymbol} ${item.ConvertedUnitPrice.toFixed(2)}</td>
             </tr>`;
-    });
+            });
 
-    tableBody.prepend(rows);
-    $('#checkoutSubtotal').text(checkoutSymbol + ' ' + cartData.GrandTotal.toFixed(2));
-    $('#checkoutTotal').text(checkoutSymbol + ' ' + cartData.GrandTotal.toFixed(2));
-}
+            tableBody.prepend(rows);
+
+            // Update Totals
+            $('#checkoutSubtotal').text(checkoutSymbol + ' ' + cartData.Subtotal.toFixed(2));
+
+            // Manage Shipping Display
+            const shippingTarget = $('#shippingAmount');
+            if (cartData.HasFreeShipping) {
+                // Show "Free" instead of 0.00 and add a reason
+                shippingTarget.html(`<span class="text-success">Free</span> 
+                             <br><small class="text-success" style="font-size: 0.75rem;">
+                             (Free shipping coupon applied as your otder is greater then ${cartData.CoupenData.minorderprice})
+                             </small>`);
+            } else {
+                shippingTarget.text(checkoutSymbol + ' ' + cartData.ShippingAmount.toFixed(2));
+            }
+
+            $('#checkoutTotal').text(checkoutSymbol + ' ' + cartData.GrandTotal.toFixed(2));
+        }
+
    function placeOrder() {
 
        const orderDetails = {
@@ -387,7 +407,7 @@ function renderOrderTable(cartData) {
                 badge.hide();
 
                 setTimeout(function () {
-                window.location.href = '@Url.Action("Orders", "LocalHome", new { area = "EndUser", returnType = 1 })';
+                window.location.href = '@Url.Action("Orders", "Orders", new { area = "Products", returnType = 1 })';
 
                 }, 1000);    }
             else {

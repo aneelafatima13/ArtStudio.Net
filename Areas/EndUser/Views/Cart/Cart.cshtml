@@ -7,6 +7,7 @@
 <div class="untree_co-section before-footer-section">
     <div class="container">
         <div class="row mb-5">
+            <div id="coupensList"></div>
             <form class="col-md-12" method="post">
                 <div id="activeCouponContainer" class="mb-4" style="display:none;">
                     <div class="alert alert-success d-flex justify-content-between align-items-center">
@@ -98,17 +99,66 @@
         </div>
     </div>
 </div>
+<input type="hidden" id="appliedCouponToken" value="" />
 @section Scripts {
     <script>
         let currentSymbol = "Rs."; // Global variable for the cart
 
         $(document).ready(function () {
             loadCart();
-        });
 
-// Update loadCart to pass the coupon data
-// Update loadCart to pass the coupon data and manage UI state
-function loadCart(couponCode = "") {
+
+        });
+function loadCoupens() {
+    $.ajax({
+        url: '@Url.Action("GetCoupens", "Cart", new { area = "EndUser" })',
+        type: 'GET',
+        success: function (res) {
+            if (res.success && res.data.length > 0) {
+                // Get the list of codes already in the cart from our hidden field or a global array
+                // We'll populate this in loadCart
+                const appliedCodes = $('#appliedCouponTokens').val().split(',');
+
+                var html = '<div class="row g-3">';
+                res.data.forEach(function (coupon) {
+                    var benefit = "";
+                    if (coupon.DiscountRate > 0) {
+                        benefit = coupon.DiscountRate + "% OFF";
+                    } else if (coupon.DiscountPrice > 0) {
+                        benefit = "Flat " + coupon.DiscountPrice + " OFF";
+                    } else if (coupon.CouponType.includes("FreeShipping")) {
+                        benefit = "FREE SHIPPING";
+                    } else {
+                        benefit = "SPECIAL OFFER";
+                    }
+                    const isApplied = appliedCodes.includes(coupon.CouponCode);
+                    const btnAttr = isApplied ? 'disabled' : '';
+                    const btnText = isApplied ? 'Applied' : 'Use';
+                    const btnClass = isApplied ? 'btn-success' : 'btn-primary';
+
+                    html += `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-dashed shadow-none" style="border: 2px dashed #666cff; background-color: ${isApplied ? '#e8fadf' : '#f4f5ff'};">
+                                <div class="card-body p-3 text-center">
+                                    <div class="badge bg-primary mb-2">${coupon.CouponType}</div>
+                                    <h4 class="mb-1 text-primary fw-bold">${benefit}</h4>
+                                    <p class="small text-muted mb-2">Min. Order: ${coupon.minorderprice || 0}</p>
+                                    <div class="d-flex justify-content-between small">
+                                        <span class="text-danger"><i class="mdi mdi-calendar-clock"></i> ${expiry}</span>
+                                        <button class="btn btn-xs ${btnClass}" ${btnAttr} onclick="loadCart('${coupon.CouponCode}')">${btnText}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+                $('#coupensList').html(html + '</div>');
+            }
+        }
+    });
+}
+
+
+        function loadCart(couponCode = "") {
     const appliedCode = couponCode || ""; // If removing, pass empty string
     $.ajax({
         url: '@Url.Action("GetCartItems", "Cart", new { area = "EndUser" })',
@@ -116,21 +166,13 @@ function loadCart(couponCode = "") {
         data: { code: appliedCode },
         success: function (res) {
             if (res.success) {
+                // Store applied codes in a hidden field as a comma-separated string
+                $('#appliedCouponTokens').val(res.appliedCodes.join(','));
+
                 currentSymbol = res.symbol;
-                renderCartTable(res.data.Items, res.data.CoupenData);
-                updateTotals(res.rawSubtotal, res.discount, res.subtotal, res.data.CoupenCode);
-
-                // --- NEW LOGIC: Manage Apply Button State ---
-                const applyBtn = $('#varifyCoupen');
-                const couponInput = $('#coupon');
-
-                if (res.data.HasCoupon) {
-                    applyBtn.prop('disabled', true).text('Coupon Applied');
-                    couponInput.prop('disabled', true).val(res.data.CoupenCode);
-                } else {
-                    applyBtn.prop('disabled', false).text('Apply Coupon');
-                    couponInput.prop('disabled', false).val('');
-                }
+                renderCartTable(res.data.Items, res.data.AppliedCoupons); // Note: You might need to update renderCartTable to handle a list
+                updateTotals(res.rawSubtotal, res.discount, res.subtotal, res.appliedCodes.join(', '));
+                loadCoupens(); // Refresh the card buttons
             }
         }
     });
@@ -162,52 +204,54 @@ function removeCoupon() {
 }
 
 
-        function renderCartTable(items, couponData) {
+        function renderCartTable(items, couponslist) {
             const tbody = $('#cartItems tbody');
             tbody.empty();
 
             // 1. Handle Active Coupon UI and Implementation Summary
-            if (couponData && couponData.CouponCode) {
-                let implementationDetail = "";
-                const discountVal = couponData.DiscountRate > 0
-                    ? `${couponData.DiscountRate}%`
-                    : `${currentSymbol}${couponData.DiscountPrice}`;
+            couponslist.forEach(couponData => {
+                if (couponData && couponData.CouponCode) {
+                    let implementationDetail = "";
+                    const discountVal = couponData.DiscountRate > 0
+                        ? `${couponData.DiscountRate}%`
+                        : `${currentSymbol}${couponData.DiscountPrice}`;
 
-                // Generate dynamic summary based on CouponType
-                switch (couponData.CouponType) {
-                    case "Discount":
-                        implementationDetail = `Applied ${discountVal} discount on the total order value.`;
-                        break;
-                    case "DiscountWithoutSaleItems":
-                        implementationDetail = `Applied ${discountVal} discount only on non-sale items.`;
-                        break;
-                    case "Discount1stItem":
-                        implementationDetail = `Applied ${discountVal} discount on the first unit of each product.`;
-                        break;
-                    case "BOGO":
-                        implementationDetail = `Buy 1 Get 1 Free: 100% discount applied to every second unit of a product.`;
-                        break;
-                    case "BTGO":
-                        implementationDetail = `Buy 2 Get 1 Free: Every third unit is free.`;
-                        break;
-                    case "Free Shipping":
-                        implementationDetail = `Standard shipping charges have been waived.`;
-                        break;
-                    default:
-                        implementationDetail = `Coupon applied successfully to your cart.`;
-                }
+                    // Generate dynamic summary based on CouponType
+                    switch (couponData.CouponType) {
+                        case "Discount":
+                            implementationDetail = `Applied ${discountVal} discount on the total order value.`;
+                            break;
+                        case "DiscountWithoutSaleItems":
+                            implementationDetail = `Applied ${discountVal} discount only on non-sale items.`;
+                            break;
+                        case "Discount1stItem":
+                            implementationDetail = `Applied ${discountVal} discount on the first unit of each product.`;
+                            break;
+                        case "BOGO":
+                            implementationDetail = `Buy 1 Get 1 Free: 100% discount applied to every second unit of a product.`;
+                            break;
+                        case "BTGO":
+                            implementationDetail = `Buy 2 Get 1 Free: Every third unit is free.`;
+                            break;
+                        case "Free Shipping":
+                            implementationDetail = `Standard shipping charges have been waived.`;
+                            break;
+                        default:
+                            implementationDetail = `Coupon applied successfully to your cart.`;
+                    }
 
-                $('#activeCouponContainer').fadeIn();
-                $('#displayCouponCode').text(couponData.CouponCode);
+                    $('#activeCouponContainer').fadeIn();
+                    $('#displayCouponCode').text(couponData.CouponCode);
 
-                // Show the Type and the Implementation Explanation
-                $('#couponShortDesc').html(`
+                    // Show the Type and the Implementation Explanation
+                    $('#couponShortDesc').html(`
             <br><small class="text-primary fw-bold">Type: ${couponData.CouponType}</small>
             <br><small class="text-dark"><strong>How it works:</strong> ${implementationDetail}</small>
         `);
-            } else {
-                $('#activeCouponContainer').hide();
-            }
+                } else {
+                    $('#activeCouponContainer').hide();
+                }
+            });
 
             // 2. Render Items
             items.forEach(item => {
@@ -329,7 +373,6 @@ function removeCoupon() {
         }
 
          function proceedToCheckout() {
-
                 window.location.href = '@Url.Action("Checkout", "Checkout", new { area = "EndUser" })';
 
         }
@@ -337,50 +380,62 @@ function removeCoupon() {
         let tempCouponData = null; // Store data temporarily before confirmation
 
 function applyCoupen() {
-    const code = $('#coupon').val();
+    const code = $('#coupon').val().trim();
+    
     if (!code) {
         Swal.fire('Error', "Please enter a coupon code", 'error');
         return;
     }
 
     $.ajax({
-        url: '@Url.Action("VarifyCouponCode", "Cart", new { area = "EndUser"})',
+        // Updated 'Varify' to 'Verify' to match C# Controller
+        url: '@Url.Action("VerifyCouponCode", "Cart", new { area = "EndUser"})',
         type: "GET",
         data: { code: code },
         success: function (res) {
             if (res.success) {
-                tempCouponData = res.CoupenData;
+                const tempCouponData = res.CoupenData;
 
-                // Construct details for the Modal
-                let benefit = tempCouponData.DiscountRate > 0
-                    ? `${tempCouponData.DiscountRate}% Off`
-                    : `${currentSymbol} ${tempCouponData.DiscountPrice} Off`;
+                // 1. Dynamic Benefit Text
+                let benefitText = "";
+                if (tempCouponData.CouponType.includes("Shipping")) {
+                    benefitText = "Free Shipping";
+                } else if (tempCouponData.DiscountValue > 0) {
+                    // Best practice: Show actual money saved
+                    benefitText = `${currentSymbol} ${tempCouponData.DiscountValue.toFixed(2)} Off`;
+                } else {
+                    benefitText = `${tempCouponData.DiscountRate}% Off`;
+                }
 
-                // Show Modal with Details
+                // 2. Show Modal
                 Swal.fire({
-                    title: 'Coupon Details',
+                    title: 'Coupon Applied!',
                     html: `
-                        <div class="text-start">
-                            <p><strong>Code:</strong> <span class="badge bg-dark">${tempCouponData.CouponCode}</span></p>
-                            <p><strong>Type:</strong> ${tempCouponData.CouponType}</p>
-                            <p><strong>Benefit:</strong> <span class="text-success fw-bold">${benefit}</span></p>
-                            <p class="small text-muted">Click continue to apply this to your current cart.</p>
+                        <div class="text-start border-top pt-3">
+                            <p class="mb-2"><strong>Code:</strong> <span class="badge bg-dark">${tempCouponData.CouponCode}</span></p>
+                            <p class="mb-2"><strong>Offer:</strong> ${tempCouponData.CouponType}</p>
+                            <p class="mb-0"><strong>Your Savings:</strong> <span class="text-success fw-bold">${benefitText}</span></p>
+                            <hr>
+                            <p class="small text-muted italic">Click continue to update your order total.</p>
                         </div>`,
-                    icon: 'info',
+                    icon: 'success', // Changed to success because the code is valid
                     showCancelButton: true,
                     confirmButtonText: 'Continue',
                     cancelButtonText: 'Cancel',
                     confirmButtonColor: '#000'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // RE-LOAD cart with the code now that user confirmed
+                        // RE-LOAD cart with the code
                         loadCart(tempCouponData.CouponCode);
                         $('#coupon').val('');
                     }
                 });
             } else {
-                Swal.fire('Invalid', res.message, 'error');
+                Swal.fire('Invalid Coupon', res.message, 'error');
             }
+        },
+        error: function() {
+            Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
         }
     });
 }

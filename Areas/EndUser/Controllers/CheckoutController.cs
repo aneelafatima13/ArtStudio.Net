@@ -23,8 +23,6 @@ namespace BizOne.Areas.EndUser.Controllers
         {
             string symbol = Request.Cookies["SelectedSymbol"]?.Value ?? "1";
             var cartData = Session["Cart"] as CartDetailViewModel;
-
-            // 2. Check for Logged-in User via Cookie
             var userCookie = Request.Cookies["CustomerAuth"];
             object userData = null;
 

@@ -31,7 +31,6 @@
                             <optgroup label="Standard Discounts">
                                 <option value="Discount">Percentage/Fixed Discount (Full Order)</option>
                                 <option value="DiscountWithoutSaleItems">Discount (Excluding Sale Items)</option>
-                                <option value="FirstPurchase">First Purchase Discount</option>
                             </optgroup>
 
                             <optgroup label="Quantity & Item Based">
@@ -45,8 +44,6 @@
                             <optgroup label="Shipping & Loyalty">
                                 <option value="Free Shipping">Free Shipping</option>
                                 <option value="FreeShippingMinOrder">Free Shipping (Min. Order Required)</option>
-                                <option value="Cashback">Wallet Cashback</option>
-                                <option value="Private Access">Private/VIP Event Access</option>
                             </optgroup>
                         </select>
                     </div>
@@ -94,6 +91,10 @@
                     <div class="col-xl-6 min-order-fields">
                         <label class="form-label fw-bold">Min Order Price</label>
                         <input type="number" class="form-control" id="minorderprice" placeholder="Flat amount cap" />
+                    </div>
+                    <div class="col-xl-6 min-order-fields">
+                        <label class="form-label fw-bold">Show On Cart View</label>
+                        <input type="checkbox" class="form-control" id="ShowOnCartView" placeholder="Show On User Cart View" />
                     </div>
 
                     <div class="col-12 text-end mt-4">
@@ -265,7 +266,8 @@
                     UsageLimit: $('#usageLimit').val(),
                     DiscountRate: $('#discountRate').val(),
                     DiscountPrice: $('#maxDiscount').val(),
-                    minorderprice: $('#minorderprice').val()
+                    minorderprice: $('#minorderprice').val(),
+                    ShowOnCartView: $('#ShowOnCartView').is(':checked')
                 };
 
                 $.ajax({
@@ -309,6 +311,7 @@
                         $('#discountRate').val(res.DiscountRate);
                         $('#maxDiscount').val(res.DiscountPrice);
                         $('#minorderprice').val(res.minorderprice);
+                        $('#ShowOnCartView').prop('checked', res.ShowOnCartView === 1);
 
                         if (res.ExpiryDate) {
                             // Extract date if it comes in /Date(ms)/ format or ISO string
@@ -343,12 +346,14 @@
                 <div class="list-group-item"><strong>Type:</strong> ${res.CouponType}</div>
                 <div class="list-group-item"><strong>Purpose:</strong> ${res.Purpose}</div>
                 <div class="list-group-item"><strong>Discount Rate:</strong> ${res.DiscountRate ? res.DiscountRate + '%' : 'N/A'}</div>
-              <div class="list-group-item"><strong>Discount Price:</strong> ${res.DiscountPrice ? res.DiscountPrice + '%' : 'N/A'}</div>
-              <div class="list-group-item"><strong>Min Order Price:</strong> ${res.minorderprice ? res.minorderprice + '%' : 'N/A'}</div>
+              <div class="list-group-item"><strong>Discount Price:</strong> ${res.DiscountPrice ? res.DiscountPrice : 'N/A'}</div>
+              <div class="list-group-item"><strong>Min Order Price:</strong> ${res.minorderprice ? res.minorderprice : 'N/A'}</div>
                 <div class="list-group-item"><strong>Usage Limit:</strong> ${res.UsageLimit}</div>
                 <hr class="my-2">
                 <div class="list-group-item"><strong>Customer:</strong> ${res.CustomerName || 'All Customers (Public)'}</div>
                 <div class="list-group-item"><strong>Expiry Date:</strong> ${res.ExpiryDate || 'No Expiry'}</div>
+                <div class="list-group-item"><strong>ShowOnCartView:</strong> ${res.ShowOnCartView == 1 ? 'Yes' : 'No'
+}</div>
                 <hr class="my-2">
                 <div class="list-group-item small text-muted">
                     <i class="mdi mdi-account-plus-outline"></i> <strong>Created By:</strong> ${res.CreatedBy || 'System'}<br>

@@ -46,9 +46,8 @@
             loadOrders(currentPage);
         }
 
-      function loadOrders(page) {
+    function loadOrders(page) {
     var customerId = $('#c_id').val();
-    var lastOrderId = 0; // Track the previous order to handle grouping
 
     $.ajax({
         url: '@Url.Action("GetCustomerOrders", "Orders", new { area = "Products" })',
@@ -61,98 +60,118 @@
             if (response.data && response.data.length > 0) {
                 var html = "";
 
-                $.each(response.data, function (key, item) {
-                    var date = new Date(parseInt(item.OrderDate.substr(6)));
+                $.each(response.data, function (key, order) {
+                    // 1. Date formatting
+                    var date = new Date(parseInt(order.OrderDate.substr(6)));
 
-                    // --- GROUPING LOGIC: Start a new Card if OrderId changes ---
-                    if (item.OrderId !== lastOrderId) {
-                        // Close previous table and card if it's not the first record
-                        if (lastOrderId !== 0) {
-                            html += '</tbody></table></div></div>';
-                        }
-
-                        // Open New Card
-                        html += `
-                        <div class="card mb-4 shadow-sm">
-                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="mb-0 text-primary">Order #${item.OrderId}</h5>
-                                    <small class="text-muted">Placed on: ${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
-                                </div>
-                                <div class="text-end">
-                                    <span class="badge bg-info text-dark">Total: $${item.GrandTotal.toFixed(2)}</span>
-                                </div>
-                            </div>
-                            <div class="card-body p-0">
-                                <table class="table table-hover mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Product</th>
-                                            <th class="text-center">Qty</th>
-                                            <th>Price</th>
-                                            <th>Item Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>`;
-
-                        lastOrderId = item.OrderId;
+                    // 2. Logic: Define Coupon Badge BEFORE the header HTML
+                    // We check if order.CouponCode exists and if there was an actual discount
+                    let couponHeaderBadge = "";
+                    if (order.CouponCode) {
+                        couponHeaderBadge = `
+                    <span class="badge rounded-pill bg-success ms-2" style="font-size: 0.8rem;">
+                        <i class="fa fa-tag me-1"></i> Coupon: ${order.CouponCode} (-Rs. ${order.CouponDiscount.toFixed(0)})
+                    </span>`;
                     }
 
-                    // --- TABLE ROWS (Items) ---
-                    const imageSrc = item.ProductImage
-                        ? `/Products/Shop/GetImg?path=${encodeURIComponent(item.ProductImage)}`
-                        : '/FurniAssets/images/product-1.png';
+                    // 3. Build Header with the Badge
+                    html += `
+            <div class="card mb-5 shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h5 class="mb-0 text-dark fw-bold d-inline-block">Order #${order.OrderNo}</h5>
+                            ${couponHeaderBadge} 
+                            <div class="mt-1">
+                                <small class="text-muted">Placed on: ${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-dark px-3 py-2">Status: Paid</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Product</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Unit Price</th>
+                                <th class="text-end pe-4">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+                    // 4. Nested Items Loop
+                    $.each(order.Items, function (i, product) {
+                        const imageSrc = product.ImgPath
+                            ? `/Products/Shop/GetImg?path=${encodeURIComponent(product.ImgPath)}`
+                            : '/FurniAssets/images/product-1.png';
+
+                        html += `
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center">
+                            <img src="${imageSrc}" class="rounded border" style="width: 50px; height: 50px; object-fit: cover; margin-right:15px;">
+                            <div>
+                                <span class="d-block fw-bold">${product.Name}</span>
+                                <small class="text-muted">${product.ItemDetails || ''}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-center align-middle">${product.Quantity}</td>
+                    <td class="text-end align-middle">Rs. ${product.Price.toFixed(2)}</td>
+                    <td class="text-end align-middle pe-4">Rs. ${(product.Price * product.Quantity).toFixed(2)}</td>
+                </tr>`;
+                    });
+
+                    html += `</tbody></table></div>`;
+
+                    // 5. Footer with detailed breakdown
+                    let couponRow = (order.CouponCode)
+                        ? `<div class="d-flex justify-content-between mb-1 text-success fw-bold">
+                        <span>Coupon Savings (${order.CouponCode}):</span>
+                        <span>- Rs. ${order.CouponDiscount.toFixed(2)}</span>
+                   </div>`
+                        : '';
 
                     html += `
-                    <tr>
-                        <td class="align-middle">
-                            <div class="d-flex align-items-center">
-                                <img src="${imageSrc}" class="rounded border" style="width: 50px; height: 50px; object-fit: cover; margin-right:15px;">
-                                <div>
-                                    <span class="d-block fw-bold text-dark">${item.ProductName}</span>
-                                    <small class="text-muted">Unit Price: $${item.UnitPrice.toFixed(2)}</small>
-                                </div>
+                <div class="card-footer bg-light border-top-0 py-3">
+                    <div class="row justify-content-end text-end">
+                        <div class="col-md-5 col-12 pe-4">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">Subtotal:</span>
+                                <span>Rs. ${order.Subtotal.toFixed(2)}</span>
                             </div>
-                        </td>
-                        <td class="align-middle text-center">${item.Quantity}</td>
-                        <td class="align-middle font-weight-bold">$${(item.UnitPrice * item.Quantity).toFixed(2)}</td>
-                        <td class="align-middle">${getItemStatusBadge(item.ItemStatus)}</td>
-                    </tr>`;
+                            ${couponRow}
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">Shipping:</span>
+                                <span>Rs. ${order.ShippingAmount.toFixed(2)}</span>
+                            </div>
+                            <hr class="my-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong class="text-dark">Grand Total:</strong>
+                                <strong class="text-primary fs-4">Rs. ${order.GrandTotal.toFixed(2)}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`; // Close Card
                 });
 
-                // Close the very last card
-                html += '</tbody></table></div></div>';
-
                 $('#OrdersList').html(html);
-
-                // Pagination logic
-                $('#currentPageDisplay').text("Page " + page);
-                $('#prevPage').prop('disabled', page === 1);
-                $('#nextPage').prop('disabled', response.data.length < pageSize);
-                $('#pagination-controls').show();
-
-            } else {
-                // Handle empty state
-                if (page === 1) {
-                    $('#OrdersList').html('<div class="alert alert-info text-center">You have no order history yet.</div>');
-                    $('#pagination-controls').hide();
-                }
+                updatePaginationControls(response.data.length, page);
             }
         }
     });
-                }
+}
 
-                function getItemStatusBadge(status) {
-                    // Customize these IDs based on your OrderStatusTrack table values
-                    switch (status) {
-                        case 1: return '<span class="badge bg-warning text-dark">Pending</span>';
-                        case 2: return '<span class="badge bg-primary">Processing</span>';
-                        case 3: return '<span class="badge bg-info">Shipped</span>';
-                        case 4: return '<span class="badge bg-success">Delivered</span>';
-                        case 5: return '<span class="badge bg-danger">Cancelled</span>';
-                        default: return '<span class="badge bg-secondary">Unknown</span>';
-
-                   }
-                }
+function updatePaginationControls(count, page) {
+    $('#currentPageDisplay').text("Page " + page);
+    $('#prevPage').prop('disabled', page === 1);
+    $('#nextPage').prop('disabled', count < pageSize);
+    $('#pagination-controls').show();
+}
     </script>
 }

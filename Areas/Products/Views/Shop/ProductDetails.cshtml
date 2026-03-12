@@ -121,6 +121,16 @@
 
             let target = variantId ? currentProduct.varients.find(v => v.Id == variantId) : currentProduct;
             let isVariant = !!variantId;
+            let stock = target.StockQuantity || 0;
+
+            let badgeHtml = "";
+            if (stock <= 0) {
+                badgeHtml = '<span class="badge bg-danger">Out of Stock</span>';
+            } else if (target.OnSale) {
+                let discount = target.DiscountRate > 0 ? target.DiscountRate + "% Off" : "Sale";
+                badgeHtml = `<span class="badge bg-primary">Sale ${discount}</span>`;
+            }
+            $("#pBadges").html(badgeHtml);
 
             // Update Info
             $("#pName").text(currentProduct.Name + (isVariant ? ` (${target.Colour} - ${target.Size})` : ""));
@@ -135,9 +145,12 @@
                 priceHtml = `<span>${currentSymbol} ${target.ConvertedPrice}</span>`;
             }
             $("#pPrice").html(priceHtml);
-
+            if (stock <= 0) {
+                $("#carouselInner").css("filter", "grayscale(0.8)");
+            } else {
+                $("#carouselInner").css("filter", "none");
+            }
             // Update Stock & Quantity
-            let stock = target.StockQuantity || 0;
             renderQuantitySelector(stock);
 
             // Update Cart Button
@@ -150,20 +163,31 @@
 
         function renderQuantitySelector(stock) {
             let html = `
-                <div class="qty-container d-flex align-items-center mb-4">
-                    <div class="d-flex align-items-center border rounded">
-                        <button class="btn btn-light px-3" type="button" onclick="localQtyChange(-1)">&minus;</button>
-                        <input type="text" id="txtQty" class="text-center border-0" style="width:50px; background:transparent;" value="1" data-stock="${stock}" readonly>
-                        <button class="btn btn-light px-3" type="button" onclick="localQtyChange(1)">&plus;</button>
-                    </div>
-                    <small class="ms-3 ${stock > 0 ? 'text-muted' : 'text-danger'}">
-                        ${stock > 0 ? '(' + stock + ' available)' : 'Out of Stock'}
-                    </small>
-                </div>`;
-            $("#quntityClock").html(html);
-            $("#btnAddToCart").prop('disabled', stock <= 0);
-        }
+        <div class="qty-container d-flex align-items-center mb-4">
+            <div class="d-flex align-items-center border rounded ${stock <= 0 ? 'bg-light opacity-50' : ''}">
+                <button class="btn btn-light px-3" type="button" onclick="localQtyChange(-1)" ${stock <= 0 ? 'disabled' : ''}>&minus;</button>
+                <input type="text" id="txtQty" class="text-center border-0" style="width:50px; background:transparent;" value="${stock > 0 ? 1 : 0}" data-stock="${stock}" readonly>
+                <button class="btn btn-light px-3" type="button" onclick="localQtyChange(1)" ${stock <= 0 ? 'disabled' : ''}>&plus;</button>
+            </div>
+            <small class="ms-3 ${stock > 0 ? 'text-muted' : 'text-danger font-weight-bold'}">
+                ${stock > 0 ? '(' + stock + ' available)' : 'Out of Stock'}
+            </small>
+        </div>`;
 
+            $("#quntityClock").html(html);
+
+            // Update the main Add to Cart button appearance
+            const btn = $("#btnAddToCart");
+            if (stock <= 0) {
+                btn.prop('disabled', true)
+                    .addClass('btn-secondary').removeClass('btn-primary')
+                    .html('<i class="mdi mdi-cart-off"></i> Out of Stock');
+            } else {
+                btn.prop('disabled', false)
+                    .addClass('btn-primary').removeClass('btn-secondary')
+                    .html('<i class="mdi mdi-cart"></i> Add to Cart');
+            }
+        }
         function localQtyChange(change) {
             const input = $("#txtQty");
             let curr = parseInt(input.val());

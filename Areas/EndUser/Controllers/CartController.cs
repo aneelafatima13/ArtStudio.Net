@@ -44,36 +44,40 @@ namespace BizOne.Areas.EndUser.Controllers
             return Json(new { success = true, newCount = cart.Items.Sum(x => x.Quantity) });
         }
 
+       public JsonResult GetCoupens()
+        {
+            List<CouponModel> coupons = productDal.GetCoupons();
+            return Json(new { success = true, data = coupons }, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpGet]
         public JsonResult GetCartItems(string code)
         {
-            // 1. Get Currency Info from Cookies
-            string currency = Request.Cookies["SelectedCurrency"]?.Value ?? "PKR";
+            // 1. Get Currency Info
             string symbol = Request.Cookies["SelectedSymbol"]?.Value ?? "Rs.";
             string rateStr = Request.Cookies["SelectedRate"]?.Value ?? "1";
             decimal exchangeRate = decimal.TryParse(rateStr, out decimal r) ? r : 1.0m;
 
-            var cart = Session["Cart"] as CartDetailViewModel ?? new CartDetailViewModel(); ;
+            var cart = Session["Cart"] as CartDetailViewModel ?? new CartDetailViewModel();
 
-            if (cart.Items.Count == 0)
+            if (cart.Items == null || cart.Items.Count == 0)
                 return Json(new { success = true, data = new List<object>(), subtotal = 0, symbol = symbol }, JsonRequestBehavior.AllowGet);
 
-            bool hasCoupon = false;
-            CouponModel coupendata = null;
+            // 2. Add New Coupon if provided
             if (!string.IsNullOrEmpty(code))
             {
-                coupendata = productDal.GetCouponByIdorCode(null, 7, code);
-            }
-            else if (cart.HasCoupon)
-            {
-                coupendata = cart.CoupenData;
+                // Check if coupon is already applied to prevent duplicates
+                if (!cart.AppliedCoupons.Any(c => c.CouponCode.Equals(code, StringComparison.OrdinalIgnoreCase)))
+                {
+                    var newCoupon = productDal.GetCouponByIdorCode(null, 7, code);
+                    if (newCoupon != null)
+                    {
+                        cart.AppliedCoupons.Add(newCoupon);
+                    }
+                }
             }
 
-            if (coupendata != null)
-            {
-                hasCoupon = true;
-            }
-            
+            // 3. Refresh Product Data (Price/Sale/Stock)
             foreach (var item in cart.Items)
             {
                 var fullProduct = productDal.GetProductDetailsById(item.ProductId);
@@ -111,7 +115,7 @@ namespace BizOne.Areas.EndUser.Controllers
 
                         item.StockQty = v.StockQuantity;
                         item.Final1UnitPrice = v.OnSale ? item.PriceafterApplysalediscount : item.ActualPrice;
-                        
+
 
                     }
                 }
@@ -138,113 +142,104 @@ namespace BizOne.Areas.EndUser.Controllers
                         item.DiscountRate = (fullProduct.DiscountPrice / fullProduct.Price) * 100;
                         item.PriceafterApplysalediscount = fullProduct.Price - fullProduct.DiscountPrice;
                     }
-                    
+
                     item.Final1UnitPrice = fullProduct.OnSale ? item.PriceafterApplysalediscount : item.ActualPrice;
                     item.StockQty = fullProduct.StockQuantity;
-                    
+
                 }
 
-                
+
                 item.Total1UnitPrice = item.Quantity * item.Final1UnitPrice;
                 item.ConvertedUnitPrice = (decimal?)Math.Round((double)(item.Total1UnitPrice / exchangeRate), 2);
 
             }
 
-            // 3. Apply Coupon Types Logic
-            decimal orderDiscount = 0;
-            if (hasCoupon)
-            {
-                decimal couponRate = coupendata.DiscountRate ?? 0;
-                decimal couponFixed = coupendata.DiscountPrice ?? 0;
+            // 4. Calculate Coupon Discounts (Loop through all applied coupons)
+            decimal totalOrderDiscount = 0;
+            bool hasFreeShipping = false;
+            decimal currentRawSubtotal = cart.Items.Sum(x => x.Total1UnitPrice ?? 0);
 
-                switch (coupendata.CouponType)
+
+
+            foreach (var coupon in cart.AppliedCoupons)
+            {
+                decimal couponRate = coupon.DiscountRate ?? 0;
+                decimal couponFixed = coupon.DiscountPrice ?? 0;
+
+                switch (coupon.CouponType)
                 {
-                    case "Discount": // Percentage or Fixed on Full Order
-                        decimal currentSub = cart.Items.Sum(x => x.Quantity * (x.Final1UnitPrice ?? 0));
-                        orderDiscount = (couponRate > 0) ? (currentSub * (couponRate / 100)) : couponFixed;
+                    case "Discount":
+                        totalOrderDiscount += (couponRate > 0) ? (currentRawSubtotal * (couponRate / 100)) : couponFixed;
+                        
                         break;
 
                     case "DiscountWithoutSaleItems":
                         foreach (var item in cart.Items.Where(i => !i.OnSale))
                         {
-                            decimal itemTotal = item.Quantity * (item.Final1UnitPrice ?? 0);
-                            item.DiscountPricebyCoupon = (couponRate > 0) ? (itemTotal * (couponRate / 100)) : couponFixed;
-                            orderDiscount += item.DiscountPricebyCoupon ?? 0;
+                            totalOrderDiscount += (couponRate > 0) ? ((item.Total1UnitPrice ?? 0) * (couponRate / 100)) : couponFixed;
                         }
                         break;
 
-                    case "Discount1stItem":
-                        foreach (var item in cart.Items)
-                        {
-                            decimal discountOnOne = (couponRate > 0) ? ((item.Final1UnitPrice ?? 0) * (couponRate / 100)) : couponFixed;
-                            item.DiscountPricebyCoupon = discountOnOne; // Only applies once per unique product line
-                            orderDiscount += discountOnOne;
-                        }
-                        break;
-
-                    case "BOGO": // Buy 1 Get 1 (100% off the second item)
+                    case "BOGO":
                         foreach (var item in cart.Items.Where(i => i.Quantity >= 2))
                         {
-                            int freeQty = item.Quantity / 2;
-                            orderDiscount += freeQty * (item.Final1UnitPrice ?? 0);
+                            totalOrderDiscount += (item.Quantity / 2) * (item.Final1UnitPrice ?? 0);
                         }
                         break;
-
-                    case "BTGO": // Buy 2 Get 1
+                    case "BTGO":
                         foreach (var item in cart.Items.Where(i => i.Quantity >= 3))
                         {
-                            int freeQty = item.Quantity / 3;
-                            orderDiscount += freeQty * (item.Final1UnitPrice ?? 0);
+                            totalOrderDiscount += (item.Quantity / 2) * (item.Final1UnitPrice ?? 0);
                         }
                         break;
-
-                    case "BTGT": // Buy 2 Get 2
+                   case "BTGT":
                         foreach (var item in cart.Items.Where(i => i.Quantity >= 4))
                         {
-                            int freeQty = (item.Quantity / 4) * 2;
-                            orderDiscount += freeQty * (item.Final1UnitPrice ?? 0);
+                            totalOrderDiscount += (item.Quantity / 2) * (item.Final1UnitPrice ?? 0);
                         }
                         break;
 
                     case "Free Shipping":
-                        // Handled at Grand Total level (Shipping = 0)
+                        hasFreeShipping = true;
                         break;
+
+                    case "FreeShippingMinOrder":
+                        if (currentRawSubtotal >= coupon.minorderprice)
+                            hasFreeShipping = true;
+                        break;
+
+                        // Add other cases (BTGO, Discount1stItem) similarly...
                 }
             }
 
-            // 4. Calculate Final Totals & Converted Values
-            foreach (var item in cart.Items)
-            {
-                item.Total1UnitPrice = item.Quantity * item.Final1UnitPrice;
-                // Subtotal after internal item-level adjustments if any
-                item.ConvertedUnitPrice = (decimal?)Math.Round((double)(item.Total1UnitPrice / exchangeRate), 2);
-            }
+            // 5. Final Totals & Currency Conversion
+            decimal baseShipping = hasFreeShipping ? 0 : 200;
 
-            decimal rawSubtotal = cart.Items.Sum(x => x.Quantity * (x.Final1UnitPrice ?? 0));
-            decimal finalSubtotal = (rawSubtotal - orderDiscount) / exchangeRate;
+            // Convert to selected currency
+            decimal convertedSubtotal = (currentRawSubtotal - totalOrderDiscount) / exchangeRate;
+            decimal convertedShipping = baseShipping / exchangeRate;
+            decimal convertedGrandTotal = convertedSubtotal + convertedShipping;
 
-            CartDetailViewModel cartData = new CartDetailViewModel
-            {
-                Items = cart.Items,
-                Subtotal = (decimal?)Math.Round(finalSubtotal, 2),
-                HasCoupon = hasCoupon,
-                CoupenCode = coupendata?.CouponCode,
-                CoupenData = coupendata
-            };
+            // 6. Update Session Object
+            cart.Subtotal = Math.Round(convertedSubtotal, 2);
+            cart.ShippingAmount = Math.Round(convertedShipping, 2);
+            cart.GrandTotal = Math.Round(convertedGrandTotal, 2);
+            cart.TotalCouponDiscount = Math.Round(totalOrderDiscount / exchangeRate, 2);
+            cart.HasFreeShipping = hasFreeShipping;
 
-            Session["Cart"] = cartData;
-            // Inside GetCartItems after calculating everything:
+            Session["Cart"] = cart;
+
             return Json(new
             {
                 success = true,
-                data = cartData,
-                subtotal = cartData.Subtotal, // This is the final total
-                rawSubtotal = Math.Round(rawSubtotal / exchangeRate, 2), // The price before coupon
-                discount = Math.Round(orderDiscount / exchangeRate, 2), // The coupon savings
+                data = cart,
+                appliedCodes = cart.AppliedCoupons.Select(c => c.CouponCode).ToList(),
+                subtotal = cart.Subtotal,
+                rawSubtotal = Math.Round(currentRawSubtotal / exchangeRate, 2),
+                discount = cart.TotalCouponDiscount,
                 symbol = symbol
             }, JsonRequestBehavior.AllowGet);
         }
-
         [HttpPost]
         public JsonResult UpdateQuantity(long id,long? VariantId, int change)
         {
@@ -278,40 +273,43 @@ namespace BizOne.Areas.EndUser.Controllers
             return Json(new { success = true });
         }
 
+
         [HttpGet]
-        public JsonResult VarifyCouponCode(string code)
+        public JsonResult VerifyCouponCode(string code)
         {
-            // 1. Fetch Coupon Data
+            // Standardize input to handle case-sensitivity and whitespace
+            code = code?.Trim().ToUpper();
+
             CouponModel coupon = productDal.GetCouponByIdorCode(null, 7, code);
+            var cart = Session["Cart"] as CartDetailViewModel;
 
             if (coupon == null || coupon.Id == 0)
             {
                 return Json(new { success = false, message = "Invalid coupon code." }, JsonRequestBehavior.AllowGet);
             }
 
-            // 2. Check if Active
             if (!coupon.IsActive)
             {
                 return Json(new { success = false, message = "This coupon is no longer active." }, JsonRequestBehavior.AllowGet);
             }
 
-            // 3. Check Expiry Date
+            // 4. Expiry Validation
             if (!string.IsNullOrEmpty(coupon.ExpiryDate))
             {
-                DateTime expiry = DateTime.Parse(coupon.ExpiryDate);
-                if (DateTime.Now.Date > expiry.Date)
+                if (DateTime.TryParse(coupon.ExpiryDate, out DateTime expiry))
                 {
-                    return Json(new { success = false, message = "This coupon has expired." }, JsonRequestBehavior.AllowGet);
+                    if (DateTime.Now.Date > expiry.Date)
+                        return Json(new { success = false, message = "This coupon has expired." }, JsonRequestBehavior.AllowGet);
                 }
             }
 
-            // 4. Check Usage Limit
-            if (coupon.UsageLimit <= 0) // Assuming usage limit decrements or is compared against a count
+            // 5. Usage Limit Validation
+            if (coupon.UsageLimit <= coupon.UsedNos || coupon.UsageLimit != -1)
             {
                 return Json(new { success = false, message = "Usage limit reached for this coupon." }, JsonRequestBehavior.AllowGet);
             }
 
-            // 5. Check Customer Ownership (if Purpose is 'Specific')
+            // 6. Specific Customer Validation
             if (coupon.Purpose == "Specific")
             {
                 var userCookie = Request.Cookies["CustomerAuth"];
@@ -327,41 +325,130 @@ namespace BizOne.Areas.EndUser.Controllers
                 }
             }
 
-            CouponModel showCoupenData = new CouponModel();
-            showCoupenData.Purpose = coupon.Purpose;
-            showCoupenData.CouponType = coupon.CouponType;
-            showCoupenData.DiscountRate = coupon.DiscountRate;
-            showCoupenData.DiscountPrice = coupon.DiscountPrice;
-            showCoupenData.CouponCode = coupon.CouponCode;
+            // 7. Cart Context Validation
+            if (cart == null || !cart.Items.Any())
+            {
+                return Json(new { success = false, message = "Your cart is empty." }, JsonRequestBehavior.AllowGet);
+            }
 
-            // All checks passed
+            decimal currentSubtotal = cart.Items.Sum(x => x.Quantity * (x.Final1UnitPrice ?? 0));
+            decimal calculatedDiscount = 0;
+            string successMsg = "Coupon applied!";
+
+            // 8. Logic for Advanced Coupon Types
+            switch (coupon.CouponType)
+            {
+                case "Discount":
+                case "Cashback":
+                case "FirstPurchase":
+                    calculatedDiscount = (currentSubtotal * (coupon.DiscountRate ?? 0)) / 100;
+                    break;
+
+                case "DiscountWithoutSaleItems":
+                    decimal eligibleSubtotal = cart.Items.Where(i => !i.OnSale).Sum(i => i.Quantity * (i.Final1UnitPrice ?? 0));
+                    if (eligibleSubtotal <= 0)
+                        return Json(new { success = false, message = "Coupon only applies to non-sale items." }, JsonRequestBehavior.AllowGet);
+
+                    calculatedDiscount = (eligibleSubtotal * (coupon.DiscountRate ?? 0)) / 100;
+                    break;
+
+                case "Discount1stItem":
+                    // Applies discount only to the first item in the list
+                    var firstItem = cart.Items.FirstOrDefault();
+                    if (firstItem != null)
+                        calculatedDiscount = (firstItem.Final1UnitPrice ?? 0) * (coupon.DiscountRate ?? 0) / 100;
+                    break;
+
+                case "BOGO": // Buy 1 Get 1 (Free)
+                    var bogoItem = cart.Items.FirstOrDefault(i => i.Quantity >= 2);
+                    if (bogoItem == null)
+                        return Json(new { success = false, message = "Add at least 2 of the same item for BOGO." }, JsonRequestBehavior.AllowGet);
+
+                    calculatedDiscount = (bogoItem.Final1UnitPrice ?? 0);
+                    break;
+
+                case "BTGO": // Buy 2 Get 1 (Free)
+                    var btgoItem = cart.Items.FirstOrDefault(i => i.Quantity >= 3);
+                    if (btgoItem == null)
+                        return Json(new { success = false, message = "Add 3 of the same item for Buy 2 Get 1." }, JsonRequestBehavior.AllowGet);
+
+                    calculatedDiscount = (btgoItem.Final1UnitPrice ?? 0);
+                    break;
+
+                case "BTGT": // Buy 2 Get 2 (Free)
+                    var btgtItem = cart.Items.FirstOrDefault(i => i.Quantity >= 4);
+                    if (btgtItem == null)
+                        return Json(new { success = false, message = "Add 4 of the same item for Buy 2 Get 2." }, JsonRequestBehavior.AllowGet);
+
+                    calculatedDiscount = (btgtItem.Final1UnitPrice ?? 0) * 2;
+                    break;
+
+                case "Free Shipping":
+                case "FreeShippingMinOrder":
+                    if (coupon.CouponType == "FreeShippingMinOrder" && currentSubtotal < (coupon.minorderprice ?? 0))
+                        return Json(new { success = false, message = $"Spend {coupon.minorderprice} for free shipping." }, JsonRequestBehavior.AllowGet);
+
+                    successMsg = "Free shipping applied!";
+                    calculatedDiscount = 0; // Usually handled by making Shipping = 0 in the total calculation
+                    break;
+
+                default:
+                    calculatedDiscount = 0;
+                    break;
+            }
+            // 9. Apply Max Discount Cap (DiscountPrice)
+            // Example: 10% discount but capped at 500 PKR
+            if (coupon.DiscountPrice > 0 && calculatedDiscount > coupon.DiscountPrice)
+            {
+                calculatedDiscount = coupon.DiscountPrice ?? 0;
+            }
+
+            // 10. Prepare final data for Frontend
+            var returnData = new
+            {
+                coupon.CouponCode,
+                coupon.CouponType,
+                coupon.DiscountRate,
+                MaxDiscountCap = coupon.DiscountPrice,
+                DiscountValue = calculatedDiscount // The actual money saved
+            };
+
             return Json(new
             {
                 success = true,
-                message = $"Coupon available!",
-                CoupenData = showCoupenData
+                message = successMsg,
+                CoupenData = returnData
             }, JsonRequestBehavior.AllowGet);
         }
 
+
+
         [HttpPost]
-        public JsonResult RemoveCoupon()
+        public JsonResult RemoveCoupon(string couponCode)
         {
             var cart = Session["Cart"] as CartDetailViewModel;
-            if (cart != null)
+            if (cart != null && !string.IsNullOrEmpty(couponCode))
             {
-                cart.HasCoupon = false;
-                cart.CoupenCode = null;
-                cart.CoupenData = null;
+                // Remove the specific coupon from the list
+                var couponToRemove = cart.AppliedCoupons
+                    .FirstOrDefault(c => c.CouponCode.Equals(couponCode, StringComparison.OrdinalIgnoreCase));
 
-                // Clear item-level coupon discounts
-                foreach (var item in cart.Items)
+                if (couponToRemove != null)
                 {
-                    item.DiscountPricebyCoupon = 0;
-                }
+                    cart.AppliedCoupons.Remove(couponToRemove);
 
-                Session["Cart"] = cart;
+                    // Reset item-level coupon discounts so they can be recalculated
+                    foreach (var item in cart.Items)
+                    {
+                        item.DiscountPricebyCoupon = 0;
+                    }
+
+                    Session["Cart"] = cart;
+                    return Json(new { success = true, message = "Coupon removed successfully" });
+                }
             }
-            return Json(new { success = true });
+            return Json(new { success = false, message = "Coupon not found" });
         }
+
     }
 }

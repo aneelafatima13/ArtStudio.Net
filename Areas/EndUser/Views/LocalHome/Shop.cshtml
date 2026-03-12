@@ -275,7 +275,7 @@ function loadProducts(page) {
                 let priceHtml = '';
                 // If ConvertedDiscountPrice exists and is lower than the regular price
                 if (item.OnSale && item.ConvertedDiscountPrice && item.ConvertedDiscountPrice < item.ConvertedPrice) {
-                    priceHtml = `<del class="text-muted me-2">${symbol}${item.ConvertedPrice.toFixed(2)}</del> 
+                    priceHtml = `<del class="text-muted me-2">${symbol}${item.ConvertedPrice.toFixed(2)}</del>
                          <span class="text-danger">${symbol}${item.ConvertedDiscountPrice.toFixed(2)}</span>`;
                 } else {
                     priceHtml = `${symbol}${item.ConvertedPrice.toFixed(2)}`;
@@ -283,34 +283,40 @@ function loadProducts(page) {
 
                 // --- 3. Badge Logic ---
                 let badgeHtml = '';
-                if (item.StockQuantity <= 0 || !item.InStock) {
+                const isOutOfStock = (item.StockQuantity <= 0 || !item.InStock); // Boolean check
+
+                if (isOutOfStock) {
                     badgeHtml = '<span class="badge bg-danger position-absolute" style="top:10px; left:10px; z-index:2;">Out of Stock</span>';
                 } else if (item.OnSale) {
                     let saleText = item.DiscountRate > 0 ? `Sale ${item.DiscountRate}% Off` : "On Sale";
                     badgeHtml = `<span class="badge bg-primary position-absolute" style="top:10px; left:10px; z-index:2;">${saleText}</span>`;
                 }
-
                 // --- 4. Render HTML ---
                 const productHtml = `
-            <div class="col-12 col-md-4 col-lg-3 mb-5">
-                <div class="product-item position-relative">
-                    ${badgeHtml}
-                    <div style="width: 100%; height: 250px; overflow: hidden; background: #f9f9f9; display: flex; align-items: center; justify-content: center; border-radius: 10px;">
-                        <img src="${imageSource}" class="img-fluid product-thumbnail" style="max-height: 100%; max-width: 100%;">
-                    </div>
+    <div class="col-12 col-md-4 col-lg-3 mb-5">
+        <div class="product-item position-relative ${isOutOfStock ? 'out-of-stock-item' : ''}">
+            ${badgeHtml}
+            <div style="width: 100%; height: 250px; overflow: hidden; background: #f9f9f9; display: flex; align-items: center; justify-content: center; border-radius: 10px;">
+                <img src="${imageSource}" class="img-fluid product-thumbnail" style="${isOutOfStock ? 'filter: grayscale(1); opacity: 0.6;' : ''} max-height: 100%; max-width: 100%;">
+            </div>
 
-                    <h3 class="product-title mt-3" style="cursor:pointer" onclick="viewItem(event,${item.Id},${item.VariantId || 0})">${item.Name}</h3>
+            <h3 class="product-title mt-3" style="cursor:pointer" onclick="viewItem(event,${item.Id},${item.VariantId || 0})">${item.Name}</h3>
 
-                    <strong class="product-price">
-                        ${priceHtml}
-                    </strong>
+            <strong class="product-price">
+                ${priceHtml}
+            </strong>
 
-                    <span class="icon-cross" onclick="addToCart(event,${item.Id},${item.VariantId || 0})" title="Add to Cart">
-                        <img src="/FurniAssets/images/cross.svg" class="img-fluid">
-                    </span>
-                </div>
-            </div>`;
-
+            ${/* Disable Click if Out of Stock */
+                    isOutOfStock
+                        ? `<span class="icon-cross disabled-btn" style="background: #ccc; cursor: not-allowed;" title="Out of Stock">
+                    <img src="/FurniAssets/images/cross.svg" class="img-fluid" style="filter: brightness(0.5);">
+                 </span>`
+                        : `<span class="icon-cross" onclick="addToCart(event,${item.Id},${item.VariantId || 0})" title="Add to Cart">
+                    <img src="/FurniAssets/images/cross.svg" class="img-fluid">
+                 </span>`
+                    }
+        </div>
+    </div>`;
                 container.append(productHtml);
             });
         }
@@ -328,8 +334,7 @@ function loadProducts(page) {
             }
         }
 
-        function addToCart(event, productId, VariantId) {
-            debugger;
+       function addToCart(event, productId, VariantId) {
     event.preventDefault();
     event.stopPropagation();
 
@@ -339,25 +344,49 @@ function loadProducts(page) {
         data: { id: productId, quantity: 1, VariantId: VariantId },
         success: function (response) {
             if (response.success) {
-                // 1. Update the text with the new total count
+                // 1. Update Badge Logic
                 const badge = $('#cart-badge');
                 badge.text(response.newCount);
 
-                // 2. Show the badge if it was hidden
                 if (response.newCount > 0) {
                     badge.show();
                 }
 
-                // Optional: A small "pop" animation to notify the user
                 badge.fadeOut(100).fadeIn(100);
-                alert("Item added to cart.");
+
+                // 2. SweetAlert2 Success Toast
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Item added to cart'
+                });
+
             } else {
-                alert(response.message || "Error adding to cart.");
+                // Error Popup
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: response.message || "Error adding to cart.",
+                    confirmButtonColor: '#3085d6'
+                });
             }
+        },
+        error: function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Connection Error',
+                text: 'Could not reach the server. Please try again.'
+            });
         }
     });
-        }
-
+}
         function viewItem(event, id, VariantId) {
             // Prevent default behavior if nested in other clickable elements
             if (event) event.stopPropagation();

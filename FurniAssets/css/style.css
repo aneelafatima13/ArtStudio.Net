@@ -1102,3 +1102,13 @@ textarea {
     letter-spacing: 1px;
     border-radius: 4px;
 }
+
+.icon-cross.disabled-btn {
+    background: #bdc3c7 !important; /* Greyed out */
+    pointer-events: none; /* Prevents any clicking */
+    opacity: 0.7;
+}
+
+.out-of-stock-item .product-title {
+    color: #888; /* Dim the title */
+}

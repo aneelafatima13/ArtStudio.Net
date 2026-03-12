@@ -16,11 +16,6 @@ namespace BizOne.Areas.Products.Controllers
     {
         private readonly static ProductsDAL dal = new ProductsDAL();
 
-
-
-
-
-
         public ActionResult Orders(int returnType = 0)
         {
             ViewBag.ReturnType = returnType;
@@ -52,6 +47,37 @@ namespace BizOne.Areas.Products.Controllers
                     data.CopyImgPath = archivedImgPath;
 
                 }
+                foreach (var c in cartData.AppliedCoupons)
+                {
+                    List<string> detailParts = new List<string>();
+
+                    // 1. Handle Type-Specific Logic
+                    switch (c.CouponType)
+                    {
+                        case "Discount":
+                        case "DiscountWithoutSaleItems":
+                        case "Discount1stItem":
+                            detailParts.Add($"Rate: {c.DiscountRate}%");
+                            detailParts.Add($"Fixed: {c.DiscountPrice}");
+                            break;
+
+                        case "FreeShippingMinOrder":
+                            detailParts.Add($"Min Order Req: {c.minorderprice}");
+                            break;
+
+                        
+                    }
+
+                    // 2. Handle Common Metadata
+                    if (c.ExpiryDate != null)
+                        detailParts.Add($"Expires: {c.ExpiryDate:yyyy-MM-dd}");
+
+                    if (c.Purpose == "specific" && c.CustomerId != null)
+                        detailParts.Add($"User Specific (ID: {c.CustomerId})");
+
+                    // 3. Join with a separator for clean database storage
+                    c.Details = string.Join(" | ", detailParts);
+                }
                 long orderId = dal.ExecuteFinalizeOrder(model, cartData);
 
                 if (orderId > 0)
@@ -71,6 +97,7 @@ namespace BizOne.Areas.Products.Controllers
             return Json(new { success = false, message = "Could not process order." });
         }
 
+        
         private string ArchiveOrderImage(string sourceRelativePath)
         {
             if (string.IsNullOrEmpty(sourceRelativePath)) return "/Uploads/no-image.png";
