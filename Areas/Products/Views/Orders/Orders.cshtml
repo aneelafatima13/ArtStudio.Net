@@ -32,6 +32,47 @@
 @* Use @ViewBag.CustomerId directly in the hidden field *@
 <input type="hidden" id="c_id" value="@ViewBag.CustomerId" />
 
+<div class="modal fade" id="trackingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">Tracking History: <span id="modalOrderNo"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="trackingTimeline" class="position-relative">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Simple vertical timeline style */
+    #trackingTimeline {
+        border-left: 2px solid #e9ecef;
+        margin-left: 20px;
+        padding-left: 20px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            left: -29px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #0d6efd;
+        }
+</style>
+
+
 @section scripts{
     <script>
         var currentPage = 1;
@@ -59,36 +100,50 @@
         success: function (response) {
             if (response.data && response.data.length > 0) {
                 var html = "";
-
+                let constsymbol = 'Rs.';
                 $.each(response.data, function (key, order) {
-                    // 1. Date formatting
                     var date = new Date(parseInt(order.OrderDate.substr(6)));
 
-                    // 2. Logic: Define Coupon Badge BEFORE the header HTML
-                    // We check if order.CouponCode exists and if there was an actual discount
-                    let couponHeaderBadge = "";
-                    if (order.CouponCode) {
-                        couponHeaderBadge = `
-                    <span class="badge rounded-pill bg-success ms-2" style="font-size: 0.8rem;">
-                        <i class="fa fa-tag me-1"></i> Coupon: ${order.CouponCode} (-Rs. ${order.CouponDiscount.toFixed(0)})
-                    </span>`;
+                    // 1. Build multiple Coupon Badges
+                    let couponBadgesHtml = "";
+                    if (order.Coupens && order.Coupens.length > 0) {
+                        $.each(order.Coupens, function(index, cp) {
+                            // Only show if CouponCode is not empty/null
+                            if (cp.CouponCode && cp.CouponCode.trim() !== "") {
+                                couponBadgesHtml += `
+    <div class="d-inline-flex flex-column align-items-start ms-3 border-start ps-3">
+        <span class="badge rounded-pill bg-success mb-1" style="font-size: 0.7rem;">
+            <i class="fa fa-tag me-1"></i> ${cp.CouponCode}
+        </span>
+        <small class="text-muted" style="font-size: 0.65rem; line-height: 1.1;">
+            <strong>${cp.CouponType}:</strong> ${cp.Details || 'Discount applied'}
+        </small>
+    </div>`;
+                            }
+                        });
                     }
 
-                    // 3. Build Header with the Badge
+                    // 2. Build Header
                     html += `
             <div class="card mb-5 shadow-sm border-0">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
                         <div>
-                            <h5 class="mb-0 text-dark fw-bold d-inline-block">Order #${order.OrderNo}</h5>
-                            ${couponHeaderBadge} 
+                            <div class="d-flex align-items-center flex-wrap">
+                                <h5 class="mb-0 text-dark fw-bold">Order #${order.OrderNo}</h5>
+
+                            </div>
                             <div class="mt-1">
                                 <small class="text-muted">Placed on: ${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
                             </div>
+                            <div class="mt-1">
+                                 ${couponBadgesHtml}
+                            </div>
+
                         </div>
                     </div>
                     <div class="text-end">
-                        <span class="badge bg-dark px-3 py-2">Status: Paid</span>
+                        <span class="badge bg-dark px-3 py-2">Payment Status: Paid</span>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -96,44 +151,76 @@
                         <thead class="table-light">
                             <tr>
                                 <th class="ps-4">Product</th>
-                                <th class="text-center">Qty</th>
-                                <th class="text-end">Unit Price</th>
-                                <th class="text-end pe-4">Total</th>
+
+                                <th class="text-center">Price</th>
+        <th class="text-center">Qty</th>
+                                <th class="text-center">Total</th>
+                                <th class="text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody>`;
 
-                    // 4. Nested Items Loop
+                    // 3. Nested Items Loop
                     $.each(order.Items, function (i, product) {
                         const imageSrc = product.ImgPath
                             ? `/Products/Shop/GetImg?path=${encodeURIComponent(product.ImgPath)}`
                             : '/FurniAssets/images/product-1.png';
 
+                        constsymbol = product.CurrencySymbol;
+
+                        let priceHtml = `
+<div class="text-start">
+    <div class="text-muted" style="text-decoration: ${product.OnSale ? 'line-through' : 'none'}; font-size: 0.85rem;">
+        ${constsymbol} ${product.ActualPrice.toFixed(2)}
+    </div>
+    ${product.OnSale ? `
+        <div class="mb-1">
+            <span class="badge bg-danger" style="font-size: 0.65rem;">SALE ${product.DiscountRate}% OFF</span><br>
+            <strong>Discount Amount is: ${constsymbol} ${product.DiscountPrice.toFixed(2)}</strong>
+            <strong>${constsymbol} ${product.Price.toFixed(2)}</strong>
+        </div>` : ''}
+
+
+</div>`;
+
                         html += `
-                <tr>
-                    <td class="ps-4">
-                        <div class="d-flex align-items-center">
-                            <img src="${imageSrc}" class="rounded border" style="width: 50px; height: 50px; object-fit: cover; margin-right:15px;">
-                            <div>
-                                <span class="d-block fw-bold">${product.Name}</span>
-                                <small class="text-muted">${product.ItemDetails || ''}</small>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="text-center align-middle">${product.Quantity}</td>
-                    <td class="text-end align-middle">Rs. ${product.Price.toFixed(2)}</td>
-                    <td class="text-end align-middle pe-4">Rs. ${(product.Price * product.Quantity).toFixed(2)}</td>
-                </tr>`;
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <img src="${imageSrc}" class="rounded border" style="width: 50px; height: 50px; object-fit: cover; margin-right:15px;">
+                                    <div>
+                                        <span class="d-block fw-bold">${product.Name}</span>
+                                        <small class="text-muted">${product.ItemDetails || ''}</small>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="text-start align-middle">${priceHtml}</td>
+                             <td class="text-center align-middle">${product.Quantity}</td>
+                            <td class="text-start align-middle pe-4">${constsymbol} ${(product.Price * product.Quantity).toFixed(2)}</td>
+                      <td class="text-center align-middle">
+    <div class="d-flex flex-column align-items-center">
+        <span class="badge ${product.ItemStatus === 'Delivered' ? 'bg-success' : 'bg-warning text-dark'} mb-1">
+            ${product.ItemStatus}
+        </span>
+        <button class="btn btn-sm btn-outline-primary py-0 px-2"
+                onclick="viewTracking(${product.OrderItemId}, '${order.OrderNo}')"
+                style="font-size: 0.7rem;">
+            <i class="fa fa-truck me-1"></i> Track
+        </button>
+    </div>
+</td>
+                        </tr>`;
                     });
 
                     html += `</tbody></table></div>`;
 
-                    // 5. Footer with detailed breakdown
-                    let couponRow = (order.CouponCode)
+                    // 4. Footer Summary
+                    let savingsRow = (order.CouponDiscount > 0)
                         ? `<div class="d-flex justify-content-between mb-1 text-success fw-bold">
-                        <span>Coupon Savings (${order.CouponCode}):</span>
-                        <span>- Rs. ${order.CouponDiscount.toFixed(2)}</span>
-                   </div>`
+                                <span>Total Savings:</span>
+                                <span>- ${constsymbol} ${order.CouponDiscount.toFixed(2)}</span>
+                           </div>`
                         : '';
 
                     html += `
@@ -142,36 +229,103 @@
                         <div class="col-md-5 col-12 pe-4">
                             <div class="d-flex justify-content-between mb-1">
                                 <span class="text-muted">Subtotal:</span>
-                                <span>Rs. ${order.Subtotal.toFixed(2)}</span>
+                                <span>${constsymbol} ${order.Subtotal.toFixed(2)}</span>
                             </div>
-                            ${couponRow}
+                            ${savingsRow}
                             <div class="d-flex justify-content-between mb-1">
                                 <span class="text-muted">Shipping:</span>
-                                <span>Rs. ${order.ShippingAmount.toFixed(2)}</span>
+                                <span>${constsymbol} ${order.ShippingAmount.toFixed(2)}</span>
                             </div>
                             <hr class="my-2">
                             <div class="d-flex justify-content-between align-items-center">
                                 <strong class="text-dark">Grand Total:</strong>
-                                <strong class="text-primary fs-4">Rs. ${order.GrandTotal.toFixed(2)}</strong>
+                                <strong class="text-primary fs-4">${constsymbol} ${order.GrandTotal.toFixed(2)}</strong>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>`; // Close Card
+            </div>`;
                 });
 
                 $('#OrdersList').html(html);
-                updatePaginationControls(response.data.length, page);
+                updatePaginationControls(response.totalCount, page); // Assuming server returns totalCount
+            } else {
+                 $('#OrdersList').html('<div class="text-center p-5"><h4>No orders found.</h4></div>');
             }
         }
     });
-}
+        }
 
 function updatePaginationControls(count, page) {
     $('#currentPageDisplay').text("Page " + page);
     $('#prevPage').prop('disabled', page === 1);
     $('#nextPage').prop('disabled', count < pageSize);
     $('#pagination-controls').show();
-}
+        }
+
+        function viewTracking(orderItemId, orderNo) {
+            // 1. Setup Initial UI State
+            $('#modalOrderNo').text(orderNo);
+            $('#trackingModal').modal('show');
+            $('#trackingTimeline').html(`
+        <div class="text-center p-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <div class="mt-2 text-muted small">Fetching latest updates...</div>
+        </div>
+    `);
+
+            // 2. Perform Ajax Call
+            $.ajax({
+                url: '@Url.Action("GetTrackingHistory", "Orders", new { area = "Products" })',
+                type: 'GET',
+                data: { orderItemId: orderItemId },
+                dataType: 'json',
+                cache: false, // Prevents IE/Edge from caching the response
+                success: function (response) {
+                    if (response.success && response.data && response.data.length > 0) {
+                        let html = '<ul class="list-group list-group-flush">';
+
+                        $.each(response.data, function (i, item) {
+                            const isLatest = (i === 0);
+                            const isLast = (i === response.data.length - 1);
+
+                            html += `
+                    <li class="list-group-item border-0 ps-0 pb-0">
+                        <div class="d-flex">
+                            <div class="me-3 text-center d-flex flex-column align-items-center" style="width: 24px;">
+                                <i class="fa ${isLatest ? 'fa-dot-circle text-primary fs-5' : 'fa-check-circle text-muted'}"></i>
+                                ${!isLast ? '<div class="vr flex-grow-1 my-1" style="min-height: 30px; width: 2px; background-color: #dee2e6;"></div>' : ''}
+                            </div>
+                            <div class="pb-4">
+                                <h6 class="mb-0 fw-bold ${isLatest ? 'text-primary' : 'text-dark'}">${item.Status}</h6>
+                                <small class="text-muted d-block">${item.UpdatedStatusDate}</small>
+                                ${item.Remarks ? `<p class="small text-secondary mt-1 mb-0 pe-2 italic" style="line-height:1.2;">${item.Remarks}</p>` : ''}
+                            </div>
+                        </div>
+                    </li>`;
+                        });
+
+                        html += '</ul>';
+                        $('#trackingTimeline').hide().html(html).fadeIn(300);
+                    } else {
+                        $('#trackingTimeline').html(`
+                    <div class="text-center p-4">
+                        <i class="fa fa-info-circle text-info mb-2 fs-3"></i>
+                        <p class="text-muted mb-0">No tracking history found for this item.</p>
+                    </div>
+                `);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Tracking Ajax Error:", error);
+                    $('#trackingTimeline').html(`
+                <div class="alert alert-danger d-flex align-items-center mx-2" role="alert">
+                    <i class="fa fa-exclamation-triangle me-2"></i>
+                    <div>Unable to load tracking data. Please try again.</div>
+                </div>
+            `);
+                }
+            });
+        }
     </script>
 }

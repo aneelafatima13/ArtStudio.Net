@@ -1,0 +1,239 @@
+﻿
+@{
+    ViewBag.Title = "OrderDetails";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+<input type="hidden" value="@ViewBag.ReturnType" id="mode" />
+<input type="hidden" value="@ViewBag.Email" id="Email" />
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-pills mb-3" role="tablist" id="tabsbuttons">
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="nav-link waves-effect waves-light active" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-top-list" aria-controls="navs-pills-top-list" aria-selected="true">
+                        Orders List
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="nav-link waves-effect waves-light" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-top-form" aria-controls="navs-pills-top-form" aria-selected="false" tabindex="-1">
+                        Custome Orders List
+                    </button>
+                </li>
+
+            </ul>
+            <div class="tab-content">
+
+                <div class="tab-pane fade active show" id="navs-pills-top-list" role="tabpanel">
+                    <div class="card mb-4">
+
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="search" class="form-control" placeholder="Search.." id="search" />
+                                </div>
+                            </div>
+                            <br />
+                            <div id="orders"></div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="navs-pills-top-form" role="tabpanel">
+                    <div class="card mb-4">
+
+                        <div class="card-body">
+                            <div id="customeorders"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            // Extract email from URL parameters
+            const email = $("#Email").val();
+
+            if (email) {
+                loadAllData(email);
+            }
+        });
+
+        function loadAllData(email) {
+            // Show loading spinners
+            const loader = '<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>';
+            $('#orders').html(loader);
+            $('#customeorders').html(loader);
+
+            $.ajax({
+                url: '@Url.Action("GetCustomerOrderData", "AdminOrders")',
+                type: 'GET',
+                data: { email: email },
+                success: function (res) {
+                    if (res.success) {
+                        renderStandardOrders(res.data.StandardOrders);
+                        renderCustomOrders(res.data.CustomOrders);
+                    }
+                }
+            });
+        }
+
+        function renderStandardOrders(data) {
+            if (!data || data.length === 0) {
+                $('#orders').html('<div class="text-center p-5"><h4>No orders found.</h4></div>');
+                return;
+            }
+
+            var html = "";
+            let constsymbol = 'Rs.';
+
+            $.each(data, function (key, order) {
+                // Handle .NET JSON Date format /Date(12345678)/
+                var date = "N/A";
+                if (order.OrderDate && typeof order.OrderDate === 'string') {
+                    var dateTicks = parseInt(order.OrderDate.substr(6));
+                    if (!isNaN(dateTicks)) {
+                        var dateObj = new Date(dateTicks);
+                        dateDisplay = dateObj.toLocaleDateString() + " " +
+                            dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    }
+                }
+                // 1. Build Coupon Badges
+                let couponBadgesHtml = "";
+                // Note: Check if property is 'Coupens' or 'Coupons' based on your DTO/DAL
+                if (order.Coupens && order.Coupens.length > 0) {
+                    $.each(order.Coupens, function (index, cp) {
+                        if (cp.Code && cp.Code.trim() !== "") {
+                            couponBadgesHtml += `
+                    <div class="d-inline-flex flex-column align-items-start ms-3 border-start ps-3">
+                        <span class="badge rounded-pill bg-success mb-1" style="font-size: 0.7rem;">
+                            <i class="fa fa-tag me-1"></i> ${cp.Code}
+                        </span>
+                        <small class="text-muted" style="font-size: 0.65rem; line-height: 1.1;">
+                            ${cp.Details || 'Discount applied'}
+                        </small>
+                    </div>`;
+                        }
+                    });
+                }
+
+                // 2. Build Card Header & Table Start
+                html += `
+        <div class="card mb-5 shadow-sm border-0">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0 text-dark fw-bold">Order #${order.OrderNo}</h5>
+                    <small class="text-muted">Placed on: ${date}</small>
+                    ${couponBadgesHtml}
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-dark px-3 py-2">Payment Status: ${order.PaymentStatus || 'Paid'}</span>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Product</th>
+                            <th class="text-center">Price</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-center">Total</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+                // 3. Nested Items Loop
+                $.each(order.Items, function (i, product) {
+                    const imageSrc = product.ItemImgPath
+                        ? `/Products/Shop/GetImg?path=${encodeURIComponent(product.ItemImgPath)}`
+                        : '/FurniAssets/images/product-1.png';
+
+                    html += `
+            <tr>
+                <td class="ps-4">
+                    <div class="d-flex align-items-center">
+                        <img src="${imageSrc}" class="rounded border" style="width: 50px; height: 50px; object-fit: cover; margin-right:15px;">
+                        <div>
+                            <span class="d-block fw-bold">${product.ProductName}</span>
+                            <small class="text-muted">${product.ItemDetails || ''}</small>
+                        </div>
+                    </div>
+                </td>
+                <td class="text-center align-middle">${constsymbol} ${product.UnitPrice}</td>
+                <td class="text-center align-middle">${product.Quantity}</td>
+                <td class="text-center align-middle">${constsymbol} ${(product.UnitPrice * product.Quantity)}</td>
+                <td class="text-center align-middle">
+                    <span class="badge bg-label-primary mb-1">Active</span>
+                </td>
+            </tr>`;
+                });
+
+                html += `</tbody></table></div>`;
+
+                // 4. Footer Summary
+                html += `
+            <div class="card-footer bg-light border-top-0 py-3">
+                <div class="row justify-content-end text-end">
+                    <div class="col-md-5 col-12 pe-4">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Subtotal:</span>
+                            <span>${constsymbol} ${order.GrandTotal.toFixed(2)}</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong class="text-dark">Grand Total:</strong>
+                            <strong class="text-primary fs-4">${constsymbol} ${order.GrandTotal.toFixed(2)}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+            });
+
+            $('#orders').html(html);
+        }
+        function renderCustomOrders(data) {
+            if (!data || data.length === 0) {
+                $('#customeorders').html('<div class="alert alert-info">No custom design orders found.</div>');
+                return;
+            }
+
+            let html = '<div class="row">';
+            data.forEach(order => {
+                // Get main image or placeholder
+                let mainImg = (order.Images && order.Images.length > 0) ? order.Images[0].Path : '/assets/img/no-image.png';
+
+                html += `
+                <div class="col-md-6 mb-3">
+                    <div class="card border shadow-none">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start border-bottom pb-3 mb-3">
+                                <img src="${mainImg}" class="rounded me-3" width="80" height="80" style="object-fit:cover" />
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold">${order.OrderNo}</h6>
+                                    <p class="small text-muted mb-0">${order.DesignInfo ? order.DesignInfo.Desc : 'No Description'}</p>
+                                    <span class="badge bg-label-info mt-2">${order.DesignInfo ? order.DesignInfo.Days : '??'} Days Est.</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted small">Total: <strong>${order.GrandTotal.toFixed(2)}</strong></span>
+                                <button class="btn btn-xs btn-outline-primary" onclick="viewTracking(${order.CustomeOrderId})">Track Status</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            html += '</div>';
+            $('#customeorders').html(html);
+        }
+    </script>
+}
+

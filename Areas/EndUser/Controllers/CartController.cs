@@ -149,9 +149,16 @@ namespace BizOne.Areas.EndUser.Controllers
                 }
 
 
+                
+                // If your Model has these properties, convert them for the UI:
+                item.ActualPrice = Math.Round(item.ActualPrice / exchangeRate, 2);
+                if (item.DiscountPrice.HasValue)
+                    item.DiscountPrice = Math.Round(item.DiscountPrice.Value / exchangeRate, 2);
+                if (item.PriceafterApplysalediscount.HasValue)
+                    item.PriceafterApplysalediscount = Math.Round(item.PriceafterApplysalediscount.Value / exchangeRate, 2);
+                if (item.Final1UnitPrice.HasValue)
+                    item.Final1UnitPrice = Math.Round(item.Final1UnitPrice.Value / exchangeRate, 2);
                 item.Total1UnitPrice = item.Quantity * item.Final1UnitPrice;
-                item.ConvertedUnitPrice = (decimal?)Math.Round((double)(item.Total1UnitPrice / exchangeRate), 2);
-
             }
 
             // 4. Calculate Coupon Discounts (Loop through all applied coupons)
@@ -210,13 +217,15 @@ namespace BizOne.Areas.EndUser.Controllers
 
                         // Add other cases (BTGO, Discount1stItem) similarly...
                 }
+
+                totalOrderDiscount = Math.Round(totalOrderDiscount / exchangeRate, 2);
             }
 
             // 5. Final Totals & Currency Conversion
             decimal baseShipping = hasFreeShipping ? 0 : 200;
 
             // Convert to selected currency
-            decimal convertedSubtotal = (currentRawSubtotal - totalOrderDiscount) / exchangeRate;
+            decimal convertedSubtotal = (currentRawSubtotal - totalOrderDiscount);
             decimal convertedShipping = baseShipping / exchangeRate;
             decimal convertedGrandTotal = convertedSubtotal + convertedShipping;
 
@@ -224,8 +233,9 @@ namespace BizOne.Areas.EndUser.Controllers
             cart.Subtotal = Math.Round(convertedSubtotal, 2);
             cart.ShippingAmount = Math.Round(convertedShipping, 2);
             cart.GrandTotal = Math.Round(convertedGrandTotal, 2);
-            cart.TotalCouponDiscount = Math.Round(totalOrderDiscount / exchangeRate, 2);
+            cart.TotalCouponDiscount = totalOrderDiscount;
             cart.HasFreeShipping = hasFreeShipping;
+            
 
             Session["Cart"] = cart;
 

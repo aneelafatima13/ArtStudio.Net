@@ -331,11 +331,13 @@ function loadCheckoutDetails() {
             tableBody.find('tr:not(:has(#checkoutSubtotal)):not(:has(#checkoutTotal)):not(:has(#shippingAmount))').remove();
 
             cartData.Items.forEach(item => {
+                // Use Final1UnitPrice for consistency with the cart totals
+                const unitPrice = item.Final1UnitPrice || 0;
                 rows += `
-            <tr>
-                <td>${item.Name} <strong class="mx-2">x</strong> ${item.Quantity}</td>
-                <td>${checkoutSymbol} ${item.ConvertedUnitPrice.toFixed(2)}</td>
-            </tr>`;
+        <tr>
+            <td>${item.Name} <strong class="mx-2">x</strong> ${item.Quantity}</td>
+            <td>${checkoutSymbol} ${(unitPrice).toFixed(2)}</td>
+        </tr>`;
             });
 
             tableBody.prepend(rows);
@@ -345,19 +347,30 @@ function loadCheckoutDetails() {
 
             // Manage Shipping Display
             const shippingTarget = $('#shippingAmount');
+
+            // Check the boolean flag set in your GetCartItems C# logic
             if (cartData.HasFreeShipping) {
-                // Show "Free" instead of 0.00 and add a reason
-                shippingTarget.html(`<span class="text-success">Free</span> 
-                             <br><small class="text-success" style="font-size: 0.75rem;">
-                             (Free shipping coupon applied as your otder is greater then ${cartData.CoupenData.minorderprice})
-                             </small>`);
+                // Find the specific coupon that granted free shipping for the description
+                const fsCoupon = cartData.AppliedCoupons.find(c =>
+                    c.CouponType === "Free Shipping" || c.CouponType === "FreeShippingMinOrder"
+                );
+
+                let reason = "Free shipping coupon applied";
+                if (fsCoupon && fsCoupon.CouponType === "FreeShippingMinOrder") {
+                    reason = `Free shipping as order is > ${fsCoupon.minorderprice}`;
+                }
+
+                shippingTarget.html(`
+            <span class="text-success">Free</span> 
+            <br><small class="text-success" style="font-size: 0.75rem;">
+            (${reason})
+            </small>`);
             } else {
                 shippingTarget.text(checkoutSymbol + ' ' + cartData.ShippingAmount.toFixed(2));
             }
 
             $('#checkoutTotal').text(checkoutSymbol + ' ' + cartData.GrandTotal.toFixed(2));
         }
-
    function placeOrder() {
 
        const orderDetails = {

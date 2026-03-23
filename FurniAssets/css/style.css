@@ -1112,3 +1112,21 @@ textarea {
 .out-of-stock-item .product-title {
     color: #888; /* Dim the title */
 }
+
+.border-dashed {
+    border-style: dashed !important;
+}
+
+.btn-xs {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+    border-radius: 4px;
+}
+
+#coupensList .card {
+    transition: transform 0.2s;
+}
+
+    #coupensList .card:hover {
+        transform: translateY(-5px);
+    }

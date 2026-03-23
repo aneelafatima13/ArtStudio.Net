@@ -1,0 +1,98 @@
+﻿
+@{
+    ViewBag.Title = "ManageOrders";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="card mb-4">
+        <h5 class="card-header d-flex justify-content-between align-items-center">
+            Orders List
+            <div class="d-flex align-items-center">
+                <input type="text" id="customSearch" class="form-control form-control-sm" placeholder="Search orders...">
+            </div>
+        </h5>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="ordersTable" class="table table-hover" style="width:100%">
+                    <thead>
+                        <tr>
+                           
+                            <th>Customer Name</th>
+                            <th>Email</th>
+                            <th>Date</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" value="@ViewBag.ReturnType" id="mode" />
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            var table = $('#ordersTable').DataTable({
+                "processing": true,
+                "serverSide": true, // Enable server-side pagination
+                "ordering": false,   // SP handles ordering
+                "ajax": {
+                    "url": "@Url.Action("GetOrders", "AdminOrders", new { Area = "Products"})",
+                    "type": "GET",
+                    "data": function (d) {
+                        // Map DataTables parameters to your Controller parameters
+                        return {
+                            search: d.search.value,
+                            page: (d.start / d.length) + 1,
+                            mode: $('#mode').val() // Pass the mode from hidden input
+                        };
+                    },
+                    "dataSrc": function (json) {
+                        // DataTables expects 'recordsTotal' and 'recordsFiltered'
+                        json.recordsTotal = json.total;
+                        json.recordsFiltered = json.total;
+                        return json.data;
+                    }
+                },
+                "columns": [
+                    { "data": "FullName" },
+                    { "data": "Email" },
+                    { "data": "OrderDate" },
+                    {
+                        "data": "Email",
+                        "render": function (data, type, row) {
+                            return `
+                                <div class="text-center">
+                                    <button class="btn btn-sm btn-icon btn-primary" title="View Details" onclick="viewOrder('${data}')">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+
+                                </div>`;
+                        }
+                    }
+                ],
+                "dom": '<"top"rt><"bottom d-flex justify-content-between"ip><"clear">' // Removes default search box
+            });
+
+            // Sync custom search input with DataTable
+            $('#customSearch').on('keyup', function () {
+                table.search(this.value).draw();
+            });
+        });
+
+        function viewOrder(email) {
+    var mode = $('#mode').val();
+
+    // Generate the base URL using Razor, then append parameters via JS
+    var baseUrl = '@Url.Action("OrderDetails", "AdminOrders", new { area = "Products" })';
+
+    // Construct the full URL with query parameters
+            var finalUrl = baseUrl + '?Email=' + encodeURIComponent(email) + '&returnType=' + encodeURIComponent(mode);
+
+    window.location.href = finalUrl;
+        }
+
+    </script>
+}

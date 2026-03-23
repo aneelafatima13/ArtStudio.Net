@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace BizOne.Areas.Products.Controllers
@@ -36,6 +34,9 @@ namespace BizOne.Areas.Products.Controllers
         [HttpPost]
         public JsonResult FinalizeOrder(OrderModel model)
         {
+            string symbol = Request.Cookies["SelectedCurrency"]?.Value ?? "PKR";
+            string SelectedRate = Request.Cookies["SelectedRate"]?.Value ?? "1";
+
             var cartData = Session["Cart"] as CartDetailViewModel;
             if (cartData == null || cartData.Items.Count == 0)
                 return Json(new { success = false, message = "Cart is empty" });
@@ -45,6 +46,8 @@ namespace BizOne.Areas.Products.Controllers
                 {
                     string archivedImgPath = ArchiveOrderImage(data.ImgPath);
                     data.CopyImgPath = archivedImgPath;
+                    data.CurrencyType = symbol;
+                    data.ExchangeRate = Convert.ToInt64(SelectedRate);
 
                 }
                 foreach (var c in cartData.AppliedCoupons)
@@ -97,7 +100,13 @@ namespace BizOne.Areas.Products.Controllers
             return Json(new { success = false, message = "Could not process order." });
         }
 
-        
+        [HttpGet]
+        public JsonResult GetTrackingHistory(long orderItemId)
+        {
+            var history = new List<dynamic>();
+            history = dal.GetTrackingHistory(orderItemId);
+            return Json(new { success = true, data = history }, JsonRequestBehavior.AllowGet);
+        }
         private string ArchiveOrderImage(string sourceRelativePath)
         {
             if (string.IsNullOrEmpty(sourceRelativePath)) return "/Uploads/no-image.png";
