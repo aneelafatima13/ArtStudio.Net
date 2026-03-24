@@ -1,4 +1,5 @@
 ﻿@using BizOne.Common;
+@using BizOne.Models
 <!DOCTYPE html>
 
 <html lang="en"
@@ -52,14 +53,9 @@
 
 <body>
     @{
-        string username = Session["EmpUsername"] as string;
-        string role = Session["EmpRole"] as string;
-        List<string> empRightslist = Session["EmpRightsList"] as List<string>;
-        //if (string.IsNullOrEmpty(username) || empRightslist == null)
-        //{
-        //    Response.Redirect(Url.Action("Login", "Authentication", new { area = "BizOneUsers" }));
-        //    return;
-        //}
+        string username = LoginUser.EmpUsername;
+        string role = LoginUser.EmpRole;
+       
     }
     <input type="hidden" id="username" value="@username" />
     <!-- Layout wrapper -->
@@ -82,141 +78,159 @@
                     </a>
                 </div>
                 <div class="menu-inner-shadow"></div>
-                @if (empRightslist != null)
-                {
-                    <ul class="menu-inner py-1">
-                        <!-- Dashboards -->
-                        <li class="menu-item"
-                            data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Dashboard">
-                            <a href="@Url.Action("Dashboard", "Authentication", new { area = "BizOneUsers" })" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-home-outline"></i>
-                                <div data-i18n="dashboard">Dashboard</div>
-                            </a>
-                        </li>
+                
+                <ul class="menu-inner py-1">
+                    <!-- Dashboards -->
+                    <li class="menu-item"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="right"
+                        title="Dashboard">
+                        <a href="@Url.Action("Dashboard", "Authentication", new { area = "BizOneUsers" })" class="menu-link">
+                            <i class="menu-icon tf-icons mdi mdi-home-outline"></i>
+                            <div data-i18n="dashboard">Dashboard</div>
+                        </a>
+                    </li>
+
+
+                    @if (role == "Admin" || LoginUser.Rights.PRODUCT_ADD)
+                    {
                         <li class="menu-header fw-medium mt-4">
                             <span class="menu-header-text">Products Controls</span>
                         </li>
+                        <li class="menu-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Add Rights">
+                            <a href="@Url.Action("ManageProducts", "Products", new { area = "Products" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
+                                <div>Manage Products</div>
+                            </a>
 
-                        @if (empRightslist.Contains("Add Product"))
-                        {
-                            <li class="menu-item"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Add Rights">
-                                <a href="@Url.Action("ManageProducts", "Products", new { area = "Products" })" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
-                                    <div>Manage Products</div>
-                                </a>
-
-                            </li>
-                            <li class="menu-item"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Add Rights">
-                                <a href="@Url.Action("ExchangeRateForms", "Products", new { area = "Products" })" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
-                                    <div>Manage Exchange Rates</div>
-                                </a>
-
-                            </li>
-                            <li class="menu-item"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Add Rights">
-                                <a href="@Url.Action("ManageCoupens", "Coupens", new { area = "Products" })" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
-                                    <div>Manage Coupens</div>
-                                </a>
-
-                            </li>
-                            <li class="menu-item"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Add Rights">
-                                <a href="@Url.Action("ManageOrders", "AdminOrders", new { area = "Products", returnType = 1})" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
-                                    <div>Orders List</div>
-                                </a>
-
-                            </li>
-                            <li class="menu-item"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Add Rights">
-                                <a href="@Url.Action("ManageOrders", "AdminOrders", new { area = "Products", returnType = 2 })" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
-                                    <div>Custome Orders List</div>
-                                </a>
-
-                            </li>
-                        }
-                        <!-- Employee Controls -->
-                        <li class="menu-header fw-medium mt-4">
-                            <span class="menu-header-text">Employee Controls</span>
                         </li>
+                        <li class="menu-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Add Rights">
+                            <a href="@Url.Action("ExchangeRateForms", "Products", new { area = "Products" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
+                                <div>Manage Exchange Rates</div>
+                            </a>
 
-                        @if (empRightslist.Contains("Manage Roles Rights"))
-                        {
-                            <li class="menu-item"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Add Rights">
-                                <a href="@Url.Action("ManageRights", "Rights", new { area = "Admin" })" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
-                                    <div>Manage Rights</div>
-                                </a>
+                        </li>
+                        <li class="menu-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Add Rights">
+                            <a href="@Url.Action("ManageCoupens", "Coupens", new { area = "Products" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
+                                <div>Manage Coupens</div>
+                            </a>
 
-                            </li>
-                            <li class="menu-item"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Add Roles">
-                                <a href="@Url.Action("ManageRoles", "Roles", new { area = "Admin" })" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-briefcase-outline"></i>
-                                    <div>Manage Roles</div>
-                                </a>
-                            </li>
-                        }
-                        @if (empRightslist.Contains("Assign Rights"))
-                        {
-                            <li class="menu-item"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Assign Rights to Roles">
-                                <a href="@Url.Action("AssignRights", "Rights", new { area = "Admin" })" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-badge-account-outline"></i>
-                                    <div>Assign Rights</div>
-                                </a>
-                            </li>
-                        }
-                        @if (empRightslist.Contains("Manage Departments Rights"))
-                        {
-                            <li class="menu-item"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Add Deaprtments data">
-                                <a href="@Url.Action("ManageDeaprtments", "Departments", new { area = "Admin" })" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-account-multiple-outline"></i>
-                                    <div>Manage Departments</div>
-                                </a>
-                            </li>
-                        }
+                        </li>
+                    }
+                    @if (role == "Admin" || LoginUser.Rights.CATEGORY_MANAGE)
+                    {
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Add Categories">
+                            <a href="@Url.Action("ManageCategories", "Categories", new { area = "Products" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-shape-outline"></i>
+                                <div>Manage Categories</div>
+                            </a>
+                        </li>
+                    }
+                    @if (role == "Admin" || LoginUser.Rights.ORDER_VIEW)
+                    {
+
+                        <li class="menu-header fw-medium mt-4">
+                            <span class="menu-header-text">Orders Controls</span>
+                        </li>
+                        <li class="menu-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Add Rights">
+                            <a href="@Url.Action("ManageOrders", "AdminOrders", new { area = "Products", returnType = 1})" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
+                                <div>Orders List</div>
+                            </a>
+
+                        </li>
+                        <li class="menu-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Add Rights">
+                            <a href="@Url.Action("ManageOrders", "AdminOrders", new { area = "Products", returnType = 2 })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
+                                <div>Custome Orders List</div>
+                            </a>
+
+                        </li>
+                    }
+                    <!-- Employee Controls -->
 
 
-                        @if (empRightslist.Contains("Add Employee"))
-                        {
-                            <li class="menu-item"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Add Employee data">
-                                <a href="@Url.Action("ManageEmployees", "Employees", new { area = "EMS" })" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-account-multiple-outline"></i>
-                                    <div>Manage Employees</div>
-                                </a>
-                            </li>
-                        }
+                    @if (role == "Admin" || LoginUser.Rights.ROLES_MANAGE)
+                    {
+                        <li class="menu-header fw-medium mt-4">
+                            <span class="menu-header-text">Roles/Rights Controls</span>
+                        </li>
+                        <li class="menu-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Add Rights">
+                            <a href="@Url.Action("ManageRights", "Rights", new { area = "Admin" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
+                                <div>Manage Rights</div>
+                            </a>
+
+                        </li>
+                        <li class="menu-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Add Roles">
+                            <a href="@Url.Action("ManageRoles", "Roles", new { area = "Admin" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-briefcase-outline"></i>
+                                <div>Manage Roles</div>
+                            </a>
+                        </li>
+                    }
+                    @if (role == "Admin" || LoginUser.Rights.RIGHTS_MANAGE)
+                    {
+                        <li class="menu-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Assign Rights to Roles">
+                            <a href="@Url.Action("AssignRights", "Rights", new { area = "Admin" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-badge-account-outline"></i>
+                                <div>Assign Rights</div>
+                            </a>
+                        </li>
+                    }
+                    @if (role == "Admin" || LoginUser.Rights.DEPARTMENTS_MANAGE)
+                    {
+                        <li class="menu-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Add Deaprtments data">
+                            <a href="@Url.Action("ManageDeaprtments", "Departments", new { area = "Admin" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-account-multiple-outline"></i>
+                                <div>Manage Departments</div>
+                            </a>
+                        </li>
+                    }
+
+
+                    @if (role == "Admin" || LoginUser.Rights.EMPLOYEE_VIEW)
+                    {
+                        <li class="menu-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Add Employee data">
+                            <a href="@Url.Action("ManageEmployees", "Employees", new { area = "EMS" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-account-multiple-outline"></i>
+                                <div>Manage Employees</div>
+                            </a>
+                        </li>
                         <li class="menu-item"
                             data-bs-toggle="tooltip"
                             data-bs-placement="right"
@@ -235,198 +249,72 @@
                                 <div>Set Shift Timmings</div>
                             </a>
                         </li>
+                    }
 
-                        <!-- Attendance Controls -->
+
+                    <!-- Attendance Controls -->
+
+                    @if (role == "Admin" || LoginUser.Rights.ATTENDANCE_VIEW)
+                    {
                         <li class="menu-header fw-medium mt-4">
                             <span class="menu-header-text">Attendance Controls</span>
                         </li>
-                        @if (empRightslist.Contains("Attendance"))
-                        {
-                            <li class="menu-item" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Mark Attendance">
-                                <a href="@Url.Action("AttendanceSheet", "Attendance", new { area = "EMS" })" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-fingerprint"></i>
-                                    <div>Mark Attendance</div>
-                                </a>
-                            </li>
-                        }
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Mark Attendance">
+                            <a href="@Url.Action("AttendanceSheet", "Attendance", new { area = "EMS" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-fingerprint"></i>
+                                <div>Mark Attendance</div>
+                            </a>
+                        </li>
+                    }
 
-                        @if (empRightslist.Contains("Leave Form"))
-                        {
-                            <li class="menu-item"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Leave Form">
-                                <a href="@Url.Action("LeaveForm", "Leaves", new { area = "EMS" })" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-calendar-edit-outline"></i>
-                                    <div>Leave Form</div>
-                                </a>
-                            </li>
-                        }
+                    @if (role == "Admin" || LoginUser.Rights.LEAVES_APPROVE)
+                    {
+                        <li class="menu-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Leave Form">
+                            <a href="@Url.Action("LeaveForm", "Leaves", new { area = "EMS" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-calendar-edit-outline"></i>
+                                <div>Leave Form</div>
+                            </a>
+                        </li>
+                    }
 
-                        @if (empRightslist.Contains("Approve Leaves"))
-                        {
-                            <li class="menu-item"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Leave Form">
-                                <a href="@Url.Action("ApproveLeaves", "Leaves", new { area = "EMS" })" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-calendar-edit-outline"></i>
-                                    <div>Approve Leaves</div>
-                                </a>
-                            </li>
-                        }
+                    @if (role == "Admin" || LoginUser.Rights.LEAVES_APPROVE)
+                    {
+                        <li class="menu-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Leave Form">
+                            <a href="@Url.Action("ApproveLeaves", "Leaves", new { area = "EMS" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-calendar-edit-outline"></i>
+                                <div>Approve Leaves</div>
+                            </a>
+                        </li>
+                    }
 
+
+                    @if (role == "Admin" || LoginUser.Rights.DOCUMENT_UPLOAD)
+                    {
                         <li class="menu-header fw-medium mt-4">
                             <span class="menu-header-text">DMS Controls</span>
                         </li>
-                        @if (empRightslist.Contains("Upload Document"))
-                        {
-                            <li class="menu-item" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Add Categories">
-                                <a href="@Url.Action("ManageDocuments", "Documents", new { area = "DMS" })" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-shape-outline"></i>
-                                    <div>Manage Documents</div>
-                                </a>
-                            </li>
-                        }
+                        <li class="menu-item" data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="Add Categories">
+                            <a href="@Url.Action("ManageDocuments", "Documents", new { area = "DMS" })" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-shape-outline"></i>
+                                <div>Manage Documents</div>
+                            </a>
+                        </li>
+                    }
 
-                        <!-- Products Controls -->
-                        <li class="menu-header fw-medium mt-4">
-                            <span class="menu-header-text">Products Controls</span>
-                        </li>
-                        @if (empRightslist.Contains("Add Category"))
-                        {
-                            <li class="menu-item" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Add Categories">
-                                <a href="@Url.Action("ManageCategories", "Categories", new { area = "Products" })" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-shape-outline"></i>
-                                    <div>Manage Categories</div>
-                                </a>
-                            </li>
-                        }
-                        @if (empRightslist.Contains("Add Category"))
-                        {
-                            <li class="menu-item" data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                title="Add Products">
-                                <a href="@Url.Action("ManageProducts", "Products", new { area = "Products" })" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-cube-outline"></i>
-                                    <div>Manage Products</div>
-                                </a>
-                            </li>
-                        }
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="View Orders">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-cart-outline"></i>
-                                <div>Manage Orders</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Orders List assign to me">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-clipboard-check-outline"></i>
-                                <div>Orders Assigned to Me</div>
-                            </a>
-                        </li>
 
-                        <!-- Leads Controls -->
-                        <li class="menu-header fw-medium mt-4">
-                            <span class="menu-header-text">Leads Controls</span>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Leads & Generate Quotations">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-account-search-outline"></i>
-                                <div>Manage Leads</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Quotations & Upload POs">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-file-document-edit-outline"></i>
-                                <div>Manage Quotations</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage POs & Generate Invoices">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-file-sign"></i>
-                                <div>Manage POs</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Invoices & Generate Receipts">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-credit-card-outline"></i>
-                                <div>Manage Invoices</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Receipts">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-receipt-outline"></i>
-                                <div>Manage Receipts</div>
-                            </a>
-                        </li>
 
-                        <!-- Vendor Controls -->
-                        <li class="menu-header fw-medium mt-4">
-                            <span class="menu-header-text">Vendor Controls</span>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Vendors & Upload Quotations">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-store-outline"></i>
-                                <div>Manage Vendors</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Quotations & Generate POs">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-file-document-multiple-outline"></i>
-                                <div>Manage Quotations</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage POs & Upload Invoices">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-file-send-outline"></i>
-                                <div>Manage POs</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Invoices & Upload Receipts">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-credit-card-outline"></i>
-                                <div>Manage Invoices</div>
-                            </a>
-                        </li>
-                        <li class="menu-item" data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            title="Manage Receipts">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-receipt-text-outline"></i>
-                                <div>Manage Receipts</div>
-                            </a>
-                        </li>
-                    </ul>
-                }
+                </ul>
+                
             </aside>
             <!-- / Menu -->
             <!-- Layout container -->

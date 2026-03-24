@@ -11,46 +11,40 @@ namespace BizOne.Areas.Admin.Controllers
 {
     public class RightsController : BaseController
     {
+        public static AdminDAL dal = new AdminDAL();
         // GET: Admin/Rights
         public ActionResult ManageRights()
         {
-            AdminDAL dal = new AdminDAL();
+            
             string userId = Session["EmpId"] as string;
             string username = Session["EmpUsername"] as string;
             dal.AddActivityLog(long.Parse(userId), username + " has redirect to View Manage Rights.");
-
             return View();
         }
 
         [HttpPost]
-        public ActionResult SaveRights(List<Rights> rights)
+        public ActionResult SaveRights(List<Rights> rights, int mode)
         {
             if (rights != null && rights.Count > 0)
             {
-                AdminDAL dal = new AdminDAL();
-
                 foreach (var right in rights)
                 {
-                    dal.AddRight(right.Name, right.Type);
+                    dal.AddupdateRights(right, mode);
                 }
-
                 return Json(new { success = true });
             }
-
             return Json(new { success = false });
         }
 
         [HttpGet]
         public ActionResult GetRights()
         {
-            AdminDAL dal = new AdminDAL();
             var rights = dal.GetAllRights(); // this should return List<Rights>
             return Json(rights, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult AssignRights()
         {
-            AdminDAL dal = new AdminDAL();
             string userId = Session["EmpId"] as string;
             string username = Session["EmpUsername"] as string;
             dal.AddActivityLog(long.Parse(userId), username + " has redirect to Assign Rights.");
@@ -60,7 +54,6 @@ namespace BizOne.Areas.Admin.Controllers
         [HttpGet]
         public JsonResult GetRolesDropdown()
         {
-            AdminDAL dal = new AdminDAL();
             var roles = dal.GetRolesList();  // Your method
             return Json(roles, JsonRequestBehavior.AllowGet);
         }
@@ -68,8 +61,7 @@ namespace BizOne.Areas.Admin.Controllers
         [HttpGet]
         public JsonResult GetAssignedRights(long roleId)
         {
-            AdminDAL dal = new AdminDAL();
-            var rights = dal.GetRightsByRole(roleId);
+           var rights = dal.GetRightsByRole(roleId);
             return Json(rights, JsonRequestBehavior.AllowGet);
         }
 
@@ -78,8 +70,7 @@ namespace BizOne.Areas.Admin.Controllers
         {
             string userId = Session["EmpId"] as string;
             string username = Session["EmpUsername"] as string; // replace with actual logged-in user id
-            AdminDAL dal = new AdminDAL();
-
+            
             // First, get all existing rights for role
             var existingRights = dal.GetRightsByRole(roleId);
             var existingRightIds = new HashSet<long>();
