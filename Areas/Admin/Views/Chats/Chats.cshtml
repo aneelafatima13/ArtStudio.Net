@@ -1,0 +1,306 @@
+﻿@{
+    ViewBag.Title = "Admin Support Center";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+
+<style>
+    /* Chat Layout Container */
+    .chat-wrapper {
+        height: 80vh;
+        display: flex;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    /* Sidebar Styling */
+    #customersList {
+        border-right: 1px solid #eee;
+        overflow-y: auto;
+        background: #f8f9fa;
+    }
+
+    .customer-chat-item {
+        border-left: 4px solid transparent;
+        transition: all 0.2s;
+    }
+
+        .customer-chat-item.active {
+            background-color: #e9ecef;
+            border-left-color: #3b5d50;
+        }
+
+    /* Ensure the main area is a fixed-height flex container */
+    #chatMainArea {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; /* Prevent the whole column from scrolling */
+    }
+
+    /* Fix the Chat History scrolling */
+    #chatHistory {
+        flex: 1 1 auto; /* Take up all available space */
+        overflow-y: scroll; /* Force scrollbar */
+        padding: 20px;
+        background-color: #f9f9f9;
+        /* Custom Scrollbar for cleaner look */
+    }
+
+        #chatHistory::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #chatHistory::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+
+    /* Ensure footer stays at bottom and doesn't shrink */
+    .chat-footer {
+        flex-shrink: 0;
+        padding: 15px;
+        background: #fff;
+        border-top: 1px solid #eee;
+        z-index: 10;
+    }
+
+    /* Fix for the textarea to prevent weird sizing */
+    #userMessage {
+        max-height: 150px;
+        overflow-y: auto;
+    }
+
+    /* Bubble Styling */
+    .chat-bubble {
+        max-width: 75%;
+        padding: 10px 15px;
+        border-radius: 15px;
+        position: relative;
+        margin-bottom: 5px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .customer-bubble {
+        background: #fff;
+        color: #333;
+        border: 1px solid #eee;
+        border-top-left-radius: 2px;
+    }
+
+    .admin-bubble {
+        background: #3b5d50;
+        color: #fff;
+        border-top-right-radius: 2px;
+    }
+
+    .chat-time {
+        font-size: 10px;
+        opacity: 0.7;
+        margin-top: 5px;
+    }
+
+    .msg-selector {
+        margin-right: 10px;
+        transform: scale(1.1);
+        cursor: pointer;
+    }
+
+    /* Footer / Input Area */
+    .chat-footer {
+        padding: 15px;
+        background: #fff;
+        border-top: 1px solid #eee;
+    }
+
+    .attachment-preview {
+        font-size: 11px;
+        color: #3b5d50;
+        font-weight: 600;
+    }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="card overflow-hidden">
+        <div class="row g-0 chat-wrapper">
+
+            <div class="col-md-4 col-lg-3 d-flex flex-column" id="customersList">
+                <div class="p-3 border-bottom bg-light">
+                    <h5 class="mb-0">Recent Inquiries</h5>
+                </div>
+                <div class="list-container overflow-auto">
+                </div>
+            </div>
+
+            <div class="col-md-8 col-lg-6 d-flex flex-column" id="chatMainArea">
+                <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0" id="activeChatName">Select a conversation</h6>
+                        <small class="text-success" id="activeChatStatus"></small>
+                    </div>
+                </div>
+
+                <div id="chatHistory">
+                    <div class="text-center mt-5 text-muted">
+                        <i class="fas fa-comments fa-3x mb-3"></i>
+                        <p>Click on a customer to view conversation</p>
+                    </div>
+                </div>
+
+                <div class="chat-footer">
+                    <form id="supportForm" enctype="multipart/form-data">
+                        <input type="hidden" id="currentCustomerId" name="customerId" value="" />
+
+                        <div class="input-group">
+                            <label class="input-group-text bg-white border-end-0" for="fileAttach" style="cursor:pointer">
+                                <i class="fas fa-paperclip text-muted"></i>
+                                <input type="file" id="fileAttach" name="attachments" multiple hidden>
+                            </label>
+
+                            <textarea class="form-control border-start-0 border-end-0" id="userMessage" name="message" rows="1" placeholder="Write a reply..." required style="resize: none;"></textarea>
+
+                            <button class="btn btn-primary" type="submit" id="btnSendSupport">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        <div id="fileNameDisplay" class="attachment-preview mt-1"></div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-3 d-none d-lg-flex flex-column border-start bg-light" id="cLatestOrder">
+                <div class="p-3 border-bottom">
+                    <h6 class="mb-0">Customer Details</h6>
+                </div>
+                <div class="p-3 text-center" id="customerQuickInfo">
+                    <small class="text-muted">Select a customer to see history</small>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            loadCustomersList();
+
+            // File display
+            $('#fileAttach').on('change', function() {
+                let files = Array.from(this.files).map(f => f.name).join(', ');
+                $('#fileNameDisplay').html(files ? `<i class="fas fa-file"></i> Attached: ${files}` : "");
+            });
+
+            // Send Message
+            $('#supportForm').on('submit', function (e) {
+                e.preventDefault();
+                const custId = $('#currentCustomerId').val();
+                if (!custId) { alert("Please select a customer first."); return; }
+
+                var formData = new FormData(this);
+                formData.append("customerIdStr", custId); // Ensure backend knows which customer
+
+                // Handle Reply ID if a checkbox is checked
+                const replyId = $('.msg-selector:checked').data('id');
+                if (replyId) formData.append("replyToId", replyId);
+
+                $.ajax({
+                    url: '@Url.Action("SendMessage", "Chats", new { area = "Admin" })',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (res) {
+                        if (res.success) {
+                            $('#supportForm')[0].reset();
+                            $('#fileNameDisplay').text("");
+                            loadChatHistory(custId); // Refresh
+                        }
+                    }
+                });
+            });
+        });
+
+        function loadCustomersList() {
+            $.get('@Url.Action("GetCustomersList", "Chats", new { area = "Admin" })', function (response) {
+                let html = '';
+                $.each(response, function (i, cust) {
+                    html += `
+                    <a href="javascript:void(0);" class="list-group-item list-group-item-action customer-chat-item p-3"
+                       onclick="loadSpecificChat(${cust.CustomerId}, '${cust.CustomerName}')" data-id="${cust.CustomerId}">
+                        <div class="d-flex justify-content-between">
+                            <strong class="mb-1">${cust.CustomerName}</strong>
+                            <small class="text-muted">${cust.createatString || ''}</small>
+                        </div>
+                        <div class="text-truncate small text-muted">${cust.LastMessage || 'No messages'}</div>
+                        ${cust.UnreadCount > 0 ? `<span class="badge bg-danger rounded-pill float-end mt-1">${cust.UnreadCount}</span>` : ''}
+                    </a>`;
+                });
+                $('#customersList .list-container').html(html);
+            });
+        }
+
+        function loadSpecificChat(id, name) {
+            $('#currentCustomerId').val(id);
+            $('#activeChatName').text(name);
+            $('#activeChatStatus').text("Online");
+            $('.customer-chat-item').removeClass('active');
+            $(`[data-id="${id}"]`).addClass('active');
+            loadChatHistory(id);
+        }
+
+       function loadChatHistory(id) {
+    // 'id' is the CustomerId
+    $.get('@Url.Action("GetChatHistory", "Chats", new { area = "Admin" })', { id: id }, function (res) {
+        let html = '';
+        if (res.data && res.data.length > 0) {
+            res.data.forEach(chat => {
+                const isFromAdmin = chat.IsFromAdmin;
+
+                // Alignment: Admin is on the RIGHT, Customer is on the LEFT
+                const alignmentClass = isFromAdmin ? 'justify-content-end' : 'justify-content-start';
+                const bubbleClass = isFromAdmin ? 'admin-bubble' : 'customer-bubble';
+
+                // "Seen" Logic: Admin wants to know if the CUSTOMER saw the Admin's message
+                let statusIcon = '';
+                if (isFromAdmin) {
+                    statusIcon = chat.CustomerReadAt
+                        ? '<i class="fas fa-check-double text-primary" title="Seen by Customer"></i>'
+                        : '<i class="fas fa-check text-muted" title="Sent"></i>';
+                }
+
+                html += `
+                <div class="d-flex ${alignmentClass} mb-3 align-items-center">
+                    ${!isFromAdmin ? `
+                        <div class="me-2">
+                            <input type="checkbox" class="msg-selector form-check-input" data-id="${chat.ChatId}">
+                        </div>` : ''}
+
+                    <div class="chat-bubble ${bubbleClass}">
+                        <div class="msg-text">${chat.MessageBody || ''}</div>
+
+                        ${chat.Attachments && chat.Attachments.length > 0 ? `
+                            <div class="mt-2 border-top pt-1">
+                                ${chat.Attachments.map(f => `
+                                    <a href="${f.AttachmentPath}" target="_blank" class="d-block small text-inherit">
+                                        <i class="fas fa-paperclip"></i> ${f.FileName}
+                                    </a>`).join('')}
+                            </div>` : ''}
+
+                        <div class="chat-time text-end" style="font-size:10px;">
+                            ${chat.createatString} ${statusIcon}
+                        </div>
+                    </div>
+                </div>`;
+            });
+        }
+
+        $('#chatHistory').html(html).scrollTop($('#chatHistory')[0].scrollHeight);
+
+        // Refresh the sidebar counts since we just marked these as "Read"
+        loadCustomersList();
+    });
+}
+    </script>
+}

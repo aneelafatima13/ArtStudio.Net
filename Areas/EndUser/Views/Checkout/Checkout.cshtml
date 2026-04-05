@@ -298,20 +298,24 @@ function loadCheckoutDetails() {
 
                 // 2. Auto-fill User Data if logged in
                 if (response.user) {
-                    $('#c_id').val(response.user.UserId);
-                    $('#c_fullname').val(response.user.FullName);
-                    $('#c_email_address').val(response.user.Email);
+                    // Fill the values
+                    $('#c_id').val(response.user.UserId).prop('readonly', true);
+                    $('#c_fullname').val(response.user.FullName).prop('readonly', true);
+                    $('#c_email_address').val(response.user.Email).prop('readonly', true);
+
+                    // 1. Handle the checkbox and account creation logic
                     $('#c_create_account').prop('disabled', true);
-                    // 1. Uncheck the checkbox so the backend knows NOT to create an account
                     $('#c_create_account').prop('checked', false);
 
-                    // 2. Collapse the password section (if it was open)
+                    // 2. UI Cleanup: Collapse and Hide containers
                     $('#create_an_account').collapse('hide');
-
-                    // 3. Hide the entire outer container so the "Create an account?" option disappears
                     $('#c_create_account').closest('.form-group').hide();
+
                     $('#loginDiv').hide();
                     $('.alert-info').closest('.row').hide();
+
+                    // Optional: Add a CSS class to visually indicate the fields are locked
+                    $('#c_fullname, #c_email_address').css('background-color', '#e9ecef');
                 }
             } else {
                 window.location.href = '@Url.Action("Cart", "LocalHome", new { area = "EndUser" })'; // Redirect if session expired

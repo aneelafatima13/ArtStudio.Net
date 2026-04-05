@@ -1,5 +1,5 @@
 ﻿@using BizOne.Common;
-@using BizOne.Models
+@using BizOne.Models;
 <!DOCTYPE html>
 
 <html lang="en"
@@ -52,10 +52,11 @@
 </head>
 
 <body>
+
     @{
         string username = LoginUser.EmpUsername;
         string role = LoginUser.EmpRole;
-       
+
     }
     <input type="hidden" id="username" value="@username" />
     <!-- Layout wrapper -->
@@ -78,7 +79,7 @@
                     </a>
                 </div>
                 <div class="menu-inner-shadow"></div>
-                
+
                 <ul class="menu-inner py-1">
                     <!-- Dashboards -->
                     <li class="menu-item"
@@ -88,6 +89,15 @@
                         <a href="@Url.Action("Dashboard", "Authentication", new { area = "BizOneUsers" })" class="menu-link">
                             <i class="menu-icon tf-icons mdi mdi-home-outline"></i>
                             <div data-i18n="dashboard">Dashboard</div>
+                        </a>
+                    </li>
+                    <li class="menu-item"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="right"
+                        title="Dashboard">
+                        <a href="@Url.Action("Chats", "Chats", new { area = "Admin" })" class="menu-link">
+                            <i class="menu-icon tf-icons mdi mdi-home-outline"></i>
+                            <div data-i18n="chats">Chats</div>
                         </a>
                     </li>
 
@@ -314,7 +324,7 @@
 
 
                 </ul>
-                
+
             </aside>
             <!-- / Menu -->
             <!-- Layout container -->
@@ -328,67 +338,366 @@
                             <i class="mdi mdi-menu mdi-24px"></i>
                         </a>
                     </div>
+                    <style>
+                        /* Styling the Chat Icon to match professional dashboards */
+                        .nav-icon-wrap {
+                            position: relative;
+                            padding: 0 15px;
+                            transition: color 0.2s;
+                        }
 
+                            .nav-icon-wrap:hover .mdi-chat {
+                                color: #0d6efd; /* Primary blue on hover */
+                            }
+
+                        .mdi-chat {
+                            font-size: 24px;
+                            color: #566a7f;
+                        }
+
+                        /* Badge positioning */
+                        #mainUnreadBadge {
+                            position: absolute;
+                            top: 2px;
+                            right: 8px;
+                            padding: 4px 6px;
+                            font-size: 10px;
+                            border: 2px solid #fff; /* "Cut-out" effect against background */
+                        }
+
+                        /* Avatar styling */
+                        .avatar-online img {
+                            border: 2px solid transparent;
+                            transition: border-color 0.2s;
+                        }
+
+                        .avatar-online:hover img {
+                            border-color: #0d6efd;
+                        }
+
+                        /* Aligning the dropdown menu correctly */
+                        .dropdown-menu-end {
+                            box-shadow: 0 0.25rem 1rem rgba(161, 172, 184, 0.45);
+                            border: none;
+                        }
+                    </style>
+                    <style>
+                        #aiSuggestionsWrapper {
+                            position: absolute;
+                            bottom: 10px;
+                            right: 10px;
+                            width: 250px;
+                            z-index: 2000; /* Ensure it is above chat bubbles */
+                            background: #ffffff;
+                            border-radius: 12px;
+                            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                            border: 1px solid #ddd;
+                            display: none; /* Hidden by default */
+                        }
+
+                        .suggestion-pill {
+                            background: #f8f9fa;
+                            border-radius: 6px;
+                            padding: 8px 12px;
+                            margin: 5px;
+                            font-size: 12px;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                            border: 1px solid #eee;
+                            display: block; /* Stack them vertically */
+                            line-height: 1.4;
+                        }
+
+                            .suggestion-pill:hover {
+                                background: #e7f3ff;
+                                border-color: #0d6efd;
+                                color: #0d6efd;
+                                transform: translateX(-3px); /* Small slide effect on hover */
+                            }
+
+                        .suggestion-item:hover {
+                            background-color: #f0f7ff;
+                            color: #0d6efd;
+                        }
+
+                        #aiSuggestionsList::-webkit-scrollbar {
+                            width: 4px;
+                        }
+
+                        #aiSuggestionsList::-webkit-scrollbar-thumb {
+                            background: #ccc;
+                            border-radius: 10px;
+                        }
+
+                        /* Styling for the date and unread badge alignment */
+                        .group-item h4 {
+                            max-width: 180px;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                        }
+
+                        .group-item .badge {
+                            font-size: 10px;
+                            padding: 4px 7px;
+                        }
+
+                        .group-item small.text-muted {
+                            white-space: nowrap;
+                        }
+                        /* Container styling */
+                        #loadChat {
+                            display: flex;
+                            flex-direction: column;
+                            background-color: #e5ddd5; /* WhatsApp-style light grey/beige background */
+                        }
+
+                        /* Sent Messages (Right side) */
+                        .chat-sent {
+                            background-color: #d1dff9 !important; /* WhatsApp light green */
+                            color: #303030;
+                            border-bottom-right-radius: 2px !important; /* Sharp corner for sent */
+                            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+                            margin-right: 5px;
+                        }
+
+                        /* Received Messages (Left side) */
+                        .chat-received {
+                            background-color: #4a76ce !important; /* White */
+                            color: #ffffff;
+                            border-bottom-left-radius: 2px !important; /* Sharp corner for received */
+                            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+                            margin-left: 5px;
+                        }
+
+                        /* Specific small text tweaks */
+                        .chat-bubble small {
+                            user-select: none;
+                        }
+
+                        /* 1. Ensure the dropdown opens BELOW the icon and aligns to the right */
+                        #chatbotDiv {
+                            top: 100% !important;
+                            right: 0 !important;
+                            left: auto !important;
+                            transform: none !important;
+                            margin-top: 10px !important; /* Spacing from the icon */
+                            padding: 0;
+                            min-height: 200px;
+                            width: 400px !important;
+                            box-shadow: 0px 5px 20px rgba(1, 41, 112, 0.15);
+                            border: none;
+                            z-index: 1000;
+                        }
+
+                            /* 2. Show the div when the .show class is toggled by your JS */
+                            #chatbotDiv.show {
+                                display: block !important;
+                            }
+
+                        /* 3. Room List specific height and scroll */
+                        #chatbotRooms {
+                            max-height: 400px;
+                            overflow-y: auto;
+                            width: 100%;
+                        }
+
+                            /* 4. Fix Sticky Header/Footer inside the dropdown */
+                            #chatbotRooms .dropdown-header,
+                            #chatbotRooms .dropdown-footer {
+                                position: sticky;
+                                background-color: #fff;
+                                z-index: 2;
+                            }
+
+                            #chatbotRooms .dropdown-header {
+                                top: 0;
+                                border-bottom: 1px solid #f1f1f1;
+                            }
+
+                            #chatbotRooms .dropdown-footer {
+                                bottom: 0;
+                                border-top: 1px solid #f1f1f1;
+                            }
+
+                        /* Add a hover effect so rooms feel clickable */
+                        .message-item.group-item:hover {
+                            background-color: #f1f3f8;
+                            cursor: pointer;
+                        }
+
+                        /* Optional: Make the scrollbar look clean like the chat one */
+                        #chatbotRooms::-webkit-scrollbar {
+                            width: 5px;
+                        }
+
+                        #chatbotRooms::-webkit-scrollbar-thumb {
+                            background: #ccc;
+                            border-radius: 10px;
+                        }
+
+                        /* Keep the headers and footers sticky so they don't scroll away */
+                        #chatbotRooms .dropdown-header {
+                            position: sticky;
+                            top: 0;
+                            background-color: white;
+                            z-index: 10;
+                        }
+
+                        /* Update this block in your style tag */
+                        #chatbotRooms .dropdown-footer {
+                            position: sticky;
+                            bottom: 0;
+                            background-color: white;
+                            z-index: 10;
+                            border-top: 1px solid #ebeef5;
+                            display: flex; /* Helps align "Show all" and the "Plus" button */
+                            justify-content: space-between;
+                            align-items: center;
+                        }
+
+
+                        /* Ensure the floating plus button doesn't get cut off */
+                        #private {
+                            padding-bottom: 10px;
+                        }
+
+                        #userListItems .list-group-item {
+                            border-left: none;
+                            border-right: none;
+                            transition: background 0.2s;
+                        }
+
+                            #userListItems .list-group-item:hover {
+                                background-color: #f8f9fa;
+                            }
+
+                        #userListItems .form-check-input {
+                            width: 1.2em;
+                            height: 1.2em;
+                            cursor: pointer;
+                        }
+
+
+                        /* Ensure both menus have the same width for consistency */
+                        #chatbotRooms, #chatbotArea {
+                            width: 400px !important;
+                            min-width: 400px !important;
+                            border: none;
+                            box-shadow: 0px 0px 20px rgba(1, 41, 112, 0.1);
+                        }
+
+                        /* Ensure the flexbox header uses the full available width */
+                        #chatTitle .d-flex {
+                            width: 100%;
+                        }
+
+                        /* Remove default padding from dropdown-header to give more space to the title */
+                        #chatbotArea .dropdown-header {
+                            padding: 10px 15px !important;
+                        }
+
+                        /* Style for the scrollbar to keep it clean */
+                        #loadChat::-webkit-scrollbar {
+                            width: 5px;
+                        }
+
+                        #loadChat::-webkit-scrollbar-thumb {
+                            background: #ccc;
+                            border-radius: 10px;
+                        }
+                    </style>
                     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-                        @*<div class="navbar-collapse collapse" id="navbarSupportedContent" style="">
-                                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                                    <li class="nav-item dropdown">
-                                        <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            Profucts control
-                                        </a>
-                                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                            <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Action</a></li>
-                                            <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Another action</a></li>
-                                            <li>
-                                                <hr class="dropdown-divider">
-                                            </li>
-                                            <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Something else here</a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="nav-item dropdown">
-                                        <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            Employees Controls
-                                        </a>
-                                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                            <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Action</a></li>
-                                            <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Another action</a></li>
-                                            <li>
-                                                <hr class="dropdown-divider">
-                                            </li>
-                                            <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Something else here</a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="nav-item dropdown">
-                                        <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            Dropdown
-                                        </a>
-                                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                            <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Action</a></li>
-                                            <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Another action</a></li>
-                                            <li>
-                                                <hr class="dropdown-divider">
-                                            </li>
-                                            <li><a class="dropdown-item waves-effect" href="javascript:void(0)">Something else here</a></li>
-                                        </ul>
-                                    </li>
-
-                                </ul>
-
-                            </div>*@
-                        <!-- Search -->
-                        <div class="navbar-nav align-items-center">
-                            <div class="nav-item d-flex align-items-center">
-                                <i class="mdi mdi-magnify mdi-24px lh-0"></i>
-                                <input type="text"
-                                       class="form-control border-0 shadow-none bg-body"
-                                       placeholder="Search..."
-                                       aria-label="Search..." />
-                            </div>
-                        </div>
-                        <!-- /Search -->
 
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
+
+                            <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                                <a id="chatboticon" class="nav-link nav-icon" href="javascript:void(0)">
+                                    <span class="mdi mdi-chat" style="font-size: 50px"></span>
+                                    <span id="mainUnreadBadge" class="badge bg-success badge-number" style="display:none;"></span>
+                                </a>
+
+                                <div id="chatbotDiv" class="dropdown-menu dropdown-menu-end dropdown-menu-arrow messages">
+
+                                    <ul id="chatbotRooms" style="list-style: none; padding: 0; margin: 0;">
+                                        <li class="dropdown-header">
+                                            <span id="headerUnreadText">You have no new messages</span>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+
+                                        <div id="ChatRoomsList"></div>
+
+                                        <li class="dropdown-footer d-flex justify-content-end p-2">
+                                            @if (LoginUser.Rights.CAN_CHAT_SINGLE_IN_ALL || LoginUser.Rights.CAN_CHAT_SINGLE_IN_TEAM)
+                                            {
+                                                <button id="privateChatBtn" class="btn btn-primary rounded-circle shadow-sm"
+                                                        style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                                  <span class="mdi mdi-plus"></span>
+                                                   
+                                                </button>
+                                            }
+                                        </li>
+                                    </ul>
+
+                                    <div id="chatbotArea" style="display:none; position: relative;">
+                                        <div class="dropdown-header p-2">
+                                            <div id="chatTitle"></div>
+                                        </div>
+                                        <hr class="dropdown-divider">
+
+                                        <div id="loadChat" style="height: 300px; overflow-y: auto; background: #f8f9fa;"></div>
+                                        <div id="userSelectList" style="height: 300px; overflow-y: auto; background: #f8f9fa; padding: 15px 5px; ">
+                                            <input type="text" id="userSearch" class="form-control" placeholder="Search User" />
+                                            <div id="userListItems">
+
+                                            </div>
+                                        </div>
+
+
+                                        <div id="aiSuggestionsWrapper">
+                                            <div class="p-2 border-bottom d-flex justify-content-between align-items-center bg-light" style="border-radius: 12px 12px 0 0;">
+                                                <small class="fw-bold text-primary" style="font-size: 10px;"><i class="bi bi-stars"></i> AI SUGGESTIONS</small>
+                                                <button type="button" class="btn-close" style="font-size: 8px;" onclick="$('#aiSuggestionsWrapper').fadeOut()"></button>
+                                            </div>
+                                            <div id="aiSuggestionsList" class="p-1" style="max-height: 180px; overflow-y: auto;">
+                                            </div>
+                                        </div>
+
+                                        <div class="p-2" id="chatfooter" style="position: relative;">
+                                            <button id="btnViewLast" class="btn btn-sm btn-light text-primary shadow-sm"
+                                                    style="display:none; position: absolute; top: -35px; right: 10px; border-radius: 20px; font-size: 11px; border: 1px solid #ddd; z-index: 10;"
+                                                    title="View last generated suggestions">
+                                                <span class="mdi mdi-clock-fast"></span>Last Suggestions
+                                            </button>
+
+                                            <div class="input-group">
+                                                <textarea id="msgInput" class="form-control" rows="2" placeholder="Enter Your msg"></textarea>
+                                                <button class="btn btn-outline-secondary" id="btnSuggest" title="Get AI Suggestions">
+                                                    <span class="mdi mdi-creation"></span>
+                                                </button>
+                                                <button class="btn btn-primary" id="btnSend"><span class="mdi mdi-send"></span></button>
+                                            </div>
+                                        </div>
+
+                                        <div class="p-2" id="userslistfooter" style="position: relative;display:none">
+                                            <button id="btnStartSelectedChat" class="btn btn-md btn-primary text-light shadow-sm"
+                                                    style="position: absolute; top: -35px; right: 10px; border-radius: 20px; font-size: 11px; border: 1px solid #ddd; z-index: 10;"
+                                                    title="Start Conversation">
+                                                <i class="bi bi-users"></i> Start Conversation
+                                            </button>
+
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </li>
+
+                        </ul>
+                        <ul class="navbar-nav flex-row align-items-center ms-2">
+
+
                             <!-- Place this tag where you want the button to render. -->
                             <!-- User -->
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
@@ -511,10 +820,618 @@
         <!-- Overlay -->
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>
+    <script src="~/Scripts/jquery-3.7.0.min.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.4.3.min.js"></script>
+    <script src="~/signalr/hubs"></script>
+    <script>
+        let lastAiResponse = []; // Store the array of strings
+
+        $(document).ready(function () {
+            // 1. New Suggestion Call
+            $('#btnSuggest').on('click', function () {
+                var userText = $('#msgInput').val().trim();
+                if (userText.length < 3) {
+                    alert("Type at least 3 characters for AI to help.");
+                    return;
+                }
+
+                $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+                $.ajax({
+                    url: '@Url.Action("GetAISuggestions", "Chat", new { area = "BizOneUsers" })',
+                    type: 'POST',
+                    data: { text: userText },
+                    success: function (response) {
+                        if (response.error) {
+                            alert("AI Error: " + response.error);
+                            return;
+                        }
+
+                        if (response.suggestions && response.suggestions.length > 0) {
+                            // SAVE TO CACHE
+                            lastAiResponse = response.suggestions;
+
+                            // SHOW THE HISTORY BUTTON
+                            $('#btnViewLast').fadeIn();
+
+                            // SHOW THE BUBBLE
+                            renderSuggestions(lastAiResponse);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Server Error: " + error);
+                    },
+                    complete: function () {
+                        $('#btnSuggest').prop('disabled', false).html('<i class="bi bi-stars"></i>');
+                    }
+                });
+            });
+
+            // 2. View Last Suggestions (The History Button)
+            $('#btnViewLast').on('click', function () {
+                if (lastAiResponse.length > 0) {
+                    renderSuggestions(lastAiResponse);
+                }
+            });
+
+            // 3. Clear suggestions when user types or sends
+            $('#msgInput').on('input', function () {
+                $('#aiSuggestionsWrapper').fadeOut();
+            });
+
+            $('#btnSend').on('click', function () {
+                // Optional: Hide history button after sending if you want a clean slate
+                // $('#btnViewLast').fadeOut();
+                $('#aiSuggestionsWrapper').fadeOut();
+            });
+        });
+
+        // Helper to render the bubble
+        function renderSuggestions(suggestions) {
+            $('#aiSuggestionsList').empty();
+            suggestions.forEach((s) => {
+                $('#aiSuggestionsList').append(`
+            <div class="suggestion-pill" onclick="selectAiText('${s.replace(/'/g, "\\'")}')">
+                ${s}
+            </div>
+        `);
+            });
+            $('#aiSuggestionsWrapper').stop(true, true).fadeIn(300);
+        }
+
+        function selectAiText(val) {
+            $('#msgInput').val(val);
+            $('#aiSuggestionsWrapper').fadeOut();
+            $('#msgInput').focus();
+        }
+
+        // Function to append selected suggestions to the textarea
+        function useSelectedSuggestions() {
+            let selectedText = [];
+            $('.ai-check:checked').each(function () {
+                selectedText.push($(this).val());
+            });
+
+            if (selectedText.length > 0) {
+                let currentMsg = $('#msgInput').val();
+                // Append suggestions at the end or replace
+                $('#msgInput').val(currentMsg + " " + selectedText.join(" ")).focus();
+                $('#aiSuggestionsWrapper').hide();
+            }
+        }
+        function updateMainUnreadCount() {
+            $.get('@Url.Action("GetTotalUnreadCount", "Chat", new { area = "BizOneUsers" })', function (data) {
+                var badge = $('#mainUnreadBadge');
+                var headerText = $('#headerUnreadText');
+
+                // 1. Update the Icon Badge
+                if (data.count > 0) {
+                    badge.text(data.count > 99 ? "99+" : data.count);
+                    badge.show();
+                } else {
+                    badge.hide();
+                }
+
+                // 2. Update the Dropdown Header Message
+                if (data.count > 0) {
+                    headerText.text("You have " + data.count + " new message" + (data.count > 1 ? "s" : ""));
+                } else {
+                    headerText.text("You have no new messages");
+                }
+            });
+        }
+        function loadChatRooms() {
+            debugger;
+            $.ajax({
+                url: '@Url.Action("GetChatGroups", "Chat", new { area = "BizOneUsers" })',
+                type: 'GET',
+                cache: false, // Prevents the browser from showing old data
+                success: function (groups) {
+                    $("#ChatRoomsList").empty();
+
+                    if (!groups || groups.length === 0) {
+                        $("#ChatRoomsList").html('<li class="p-3 text-center text-muted">No conversations yet</li>');
+                        return;
+                    }
+
+                    let listHtml = "";
+                    groups.forEach(g => {
+                        // Determine Subtitle scope
+                        const typeMap = {
+                            'Leading': 'My Team',
+                            'Member': 'Working Teams',
+                            'Private': 'Private Chat',
+                            'Global': 'Global Group',
+                            'Custom Group': 'Custom Group'
+                        };
+                        let subTitle = typeMap[g.Type] || 'Chat';
+
+                        // Handle Date/Time (Backend should provide g.LastMsgDateString)
+                        let displayDate = g.LastMsgDateString || "";
+                        let greenDot = g.HasUnseen
+                            ? `<div class="bg-success rounded-circle ms-auto mt-1" style="width: 8px; height: 8px; border: 1px solid white;"></div>`
+                            : `<div style="height: 8px; margin-top: .25rem;"></div>`; // Empty space to maintain alignment
+                        // Encode participants for the View Participants dropdown in openConversation
+                        let encodedParticipants = "";
+                        if (g.ParticipantsJson) {
+                            encodedParticipants = btoa(unescape(encodeURIComponent(g.ParticipantsJson)));
+                        }
+
+                        // Unread Badge
+                        let unreadBadge = g.UnreadCount > 0
+                            ? `<span class="badge bg-success rounded-pill animate__animated animate__bounceIn" style="font-size: 10px;">${g.UnreadCount}</span>`
+                            : "";
+
+                        listHtml += `
+<li class="message-item group-item" onclick="openConversation('${g.RoomId}', '${g.RoomName}', '${encodedParticipants}')" style="cursor:pointer;">
+    <a href="javascript:void(0)" class="d-flex align-items-center p-2">
+        <img src="/BizOneAssets/img/BLACK NO IMG.png" alt="" class="rounded-circle me-2" style="width:40px; height:40px; border: 1px solid #eee;">
+        <div class="w-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0" style="font-size: 14px; color: #444; font-weight: 600;">${g.RoomName}</h4>
+                <div class="text-end">
+                    <small class="text-muted" style="font-size: 10px;">${displayDate}</small>
+
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <p class="mb-0" style="font-size: 11px;">
+                    <small class="${g.UnreadCount > 0 ? 'fw-bold text-dark' : 'text-muted'}">${subTitle}</small>
+                </p>
+                ${unreadBadge}
+            </div>
+        </div>
+    </a>
+</li>
+<li><hr class="dropdown-divider m-0"></li>`;
+                    });
+
+                    $("#ChatRoomsList").append(listHtml);
+                },
+                error: function () {
+                    console.error("Failed to load chat rooms.");
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            updateMainUnreadCount();
+
+             $(document).on('click', function (e) {
+                if (!$(e.target).closest('#chatbotDiv, #chatboticon').length) {
+                    $('#chatbotDiv').removeClass('show');
+                }
+            });
+        });
+
+        var currentRoomId = "";
+
+           $(function () {
+var chat = $.connection.chatHub;
+
+$.connection.hub.start();
+
+               $('#chatboticon').on('click', function (e) {
+                   e.preventDefault();
+                   e.stopPropagation(); // Prevents Bootstrap from interfering
+
+                   // Close other Bootstrap dropdowns manually if needed
+                   $('.dropdown-menu').not('#chatbotDiv').removeClass('show');
+
+                   $('#chatbotDiv').toggleClass('show');
+
+                   // Always reset to Room List when opening
+                   $('#chatbotRooms').show();
+                   $('#chatbotArea').hide();
+
+                   loadChatRooms();
+               });
+
+               // Prevent Chat from closing when clicking INSIDE the chat window
+               $('#chatbotDiv').on('click', function (e) {
+                   e.stopPropagation();
+               });
+
+
+               $('#privateChatBtn').on('click', function (e) {
+                   e.preventDefault();
+                   e.stopPropagation();
+
+                   // Hide the Rooms UI
+                   $('#chatbotRooms').hide();
+
+                   // Show the Area UI (the container)
+                   $('#chatbotArea').show().addClass('show');
+
+                   // Show Selection specifically, hide Chat window
+                   $('#userSelectList').show();
+
+                   $('#loadChat, #chatfooter').hide();
+                  // Update the Header (matches your previous WhatsApp style)
+                   $('#chatTitle').html(`
+        <div class="d-flex align-items-center">
+            <div onclick="backToRooms()" style="cursor:pointer;" class="me-2 text-secondary">
+                <i class="bi bi-arrow-left fs-5"></i>
+            </div>
+            <h6 class="mb-0 fw-bold">Select Users</h6>
+        </div>
+    `);
+
+                   loadIndividualUsers();
+               });
+
+               function loadIndividualUsers() {
+                   const relationshipColors = {
+                       'TeamLeader': 'bg-danger',
+                       'Teammember': 'bg-success',
+                       'Teammate': 'bg-primary',
+                       'Rolemate': 'bg-info text-dark',
+                       'Collegue': 'bg-secondary'
+                   };
+
+                   $('#userListItems').html('<div class="text-center p-3"><small class="text-muted">Loading users...</small></div>');
+
+                   $.ajax({
+                       url: '@Url.Action("GetIndividualUsers", "Chat", new { area = "BizOneUsers" })',
+                       type: 'GET',
+                       dataType: 'json',
+                       success: function (users) {
+                           $("#userListItems").empty();
+
+                           if (!users || users.length === 0) {
+                               $("#userListItems").html('<li class="list-group-item text-center">No users found</li>');
+                               return;
+                           }
+
+                           // Get the base URL for images to replace the ~/ problem
+                           // If images are in /assets/img/..., just use a relative path starting with /
+                           const defaultImg = "/assets/img/messages-1.jpg";
+
+                           let listHtml = ""; // Build string first for better performance
+                           users.forEach(u => {
+                               let badgeClass = relationshipColors[u.Relationship] || 'bg-secondary';
+                               let roleDisplay = u.RoleName || 'Staff';
+                               let designationDisplay = u.Designation ? `(${u.Designation})` : '';
+
+                               listHtml += `
+                <li class="list-group-item d-flex align-items-center py-2 border-0 border-bottom">
+                    <div class="form-check m-0">
+                        <input class="form-check-input user-checkbox" type="checkbox" value="${u.Id}" id="user_${u.Id}" data-name="${u.Username}">
+                    </div>
+                    <label class="form-check-label d-flex align-items-center ms-2 w-100" for="user_${u.Id}" style="cursor:pointer;">
+                        <img src="${defaultImg}" class="rounded-circle me-2" style="width:38px; height:38px; object-fit: cover; border: 1px solid #eee;">
+                        <div class="w-100">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-0 fw-bold" style="font-size: 14px; color: #333;">${u.Username}</h6>
+                                    <small class="text-dark" style="font-size: 11px;">
+                                        ${roleDisplay} <span class="text-muted" style="font-weight: normal;">${designationDisplay}</span>
+                                    </small>
+                                </div>
+                                <span class="badge ${badgeClass}" style="font-size: 9px; padding: 4px 8px; border-radius: 4px;">
+                                    ${u.Relationship}
+                                </span>
+                            </div>
+                        </div>
+                    </label>
+                </li>`;
+                           });
+                           $("#userListItems").append(listHtml);
+                       },
+                       error: function (xhr, status, error) {
+                           console.error("User Load Error:", error);
+                           $("#userListItems").html('<li class="list-group-item text-danger text-center">Failed to load users</li>');
+                       }
+                   });
+               }
+
+               $('#userSearch').on('keyup', function () {
+                   var value = $(this).val().toLowerCase().trim();
+
+                   // Target only the list items that represent users
+                   $("#userListItems li").each(function () {
+                       // Get all text inside this specific LI (Username + Role + Designation)
+                       var rowText = $(this).text().toLowerCase();
+
+                       if (rowText.indexOf(value) > -1) {
+                           // Use 'd-flex' because our list items use flexbox for alignment
+                           $(this).attr('style', 'display: flex !important');
+                       } else {
+                           $(this).attr('style', 'display: none !important');
+                       }
+                   });
+               });
+
+               chat.client.updateGlobalUnreadCount = function () {
+                   console.log("Refreshing global unread count...");
+                   updateMainUnreadCount(); // This calls your AJAX function to get the new count from DB
+               };
+
+chat.client.receiveMessage = function (sendingDate, senderId, senderName, message, roomId) {
+    // Only append if the message belongs to the room we are currently looking at
+    if (currentRoomId == roomId) {
+        let currentCount = parseInt($('#notifCount').text()) || 0;
+        $('#notifCount').text(currentCount + 1);
+        // Compare senderId with the logged-in User ID
+        var side = (senderId == "@LoginUser.EmpId") ? "sent" : "received";
+
+        appendMessage(sendingDate, senderName, message, side);
+
+        // Auto-scroll to bottom
+        var chatDiv = document.getElementById("loadChat");
+        if (chatDiv) {
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+        }
+    } else {
+        // New message in a closed room -> Increment Global Count
+        updateMainUnreadCount();
+    }
+               };
+
+
+               // Monitor checkbox changes
+               $(document).on('change', '.user-checkbox', function () {
+                   var selectedCount = $('.user-checkbox:checked').length;
+                   $('#selectedCount').text(selectedCount);
+
+                   if (selectedCount > 0) {
+                       $('#userslistfooter').show();
+                   } else {
+                       $('#userslistfooter').hide();
+                   }
+               });
+
+              $(document).ready(function() {
+    // Attach directly to the ID since it's already in the DOM
+    $('#btnStartSelectedChat').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation(); // Prevents the click from bubbling to parent divs
+
+        console.log("Click detected!");
+
+        var selectedUsers = [];
+        $('.user-checkbox:checked').each(function () {
+            selectedUsers.push({
+                Id: $(this).val(),
+                Username: $(this).data('name')
+            });
+        });
+
+        if (selectedUsers.length === 0) {
+            alert("Select users first");
+            return;
+        }
+
+        // Logic for room creation
+        var myId = "@LoginUser.EmpId";
+        selectedUsers.push({ Id: myId, Username: "Me" });
+
+        let roomId = (selectedUsers.length === 2)
+            ? "SUser_" + selectedUsers[0].Id + "_" + myId
+            : "TeamByMe_" + selectedUsers.map(u => u.Id).join('_');
+
+        let title = (selectedUsers.length === 2) ? selectedUsers[0].Username : "TeamByMe";
+
+        let encoded = btoa(unescape(encodeURIComponent(JSON.stringify(selectedUsers))));
+
+        // Hide selection, show chat
+        $('#userSelectList').hide();
+        $('#userslistfooter').hide();
+
+        openConversation(roomId, title, encoded);
+    });
+});
+               $('#btnSend').on('click', function () {
+    sendMessage();
+});
+
+
+function sendMessage() {
+    var message = $('#msgInput').val().trim();
+
+    // 1. Validation Check: Ensure message and room are selected
+    if (message === "") {
+        alert("Please enter a message.");
+        return;
+    }
+    if (currentRoomId === "") {
+        alert("Please select a chat room first.");
+        return;
+    }
+
+    // 2. Connection Check: Ensure SignalR is actually connected
+    if ($.connection.hub.state !== $.signalR.connectionState.connected) {
+        alert("You are currently offline. Trying to reconnect...");
+        $.connection.hub.start(); // Attempt to reconnect
+        return;
+    }
+
+    try {
+        // 3. Send Message
+        chat.server.sendMessage("@LoginUser.EmpId", "@LoginUser.EmpUsername", message, currentRoomId)
+            .done(function () {
+                // Success: Clear input and focus
+                $('#msgInput').val('').focus();
+                // Optional: scroll to bottom of chat
+                var chatDiv = document.getElementById("loadChat");
+                chatDiv.scrollTop = chatDiv.scrollHeight;
+            })
+            .fail(function (error) {
+                // 4. Server-Side Failure (Hub error)
+                console.error("SignalR Error: " + error);
+                alert("Message failed to send. Please try again.");
+            });
+    } catch (err) {
+        // 5. Catch-all for unexpected JS errors
+        alert("An unexpected error occurred while sending.");
+    }
+}
+
+   });
+
+        function openConversation(roomId, title, encodedParticipants = "") {
+            currentRoomId = roomId;
+
+            // Decode the Base64 string back to JSON
+            let ParticipantsJson = "[]";
+            if (encodedParticipants && encodedParticipants !== "") {
+                try {
+                    // atob() decodes the base-64 string
+                    ParticipantsJson = decodeURIComponent(escape(atob(encodedParticipants)));
+                } catch (e) {
+                    console.error("Base64 Decode Error:", e);
+                }
+            }
+
+            // Hide Rooms, Show Area
+            $('#chatbotRooms').hide().removeClass('show');
+            $('#chatbotArea').show().addClass('show');
+            $('#loadChat, #chatfooter').show();
+            $('#userSelectList').hide().removeClass('show');
+            // ... rest of your existing logic ...
+            let participantsHtml = "";
+            if (ParticipantsJson && ParticipantsJson !== "[]") {
+                try {
+                    let users = JSON.parse(ParticipantsJson);
+                    // ... (rest of your logic for building participantsHtml) ...
+                    if (users.length > 0) {
+                        participantsHtml = `
+<div class="dropdown ms-auto">
+    <button class="btn btn-sm btn-light py-0 px-2 border-0" type="button" id="participantDrop" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+        <i class="bi bi-people-fill text-muted" style="font-size: 12px;"></i>
+        <span style="font-size: 10px;">View Participants</span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-0" aria-labelledby="participantDrop" style="font-size: 12px; min-width: 180px;">
+      <li class="d-flex justify-content-between align-items-center px-3 py-2 bg-light border-bottom" style="border-radius: 4px 4px 0 0;">
+    <span class="text-uppercase fw-bold text-muted" style="font-size: 10px;">Room Members</span>
+    <span onclick="closeParticipantsDropdown()"
+          style="cursor: pointer;
+                 width: 24px;
+                 height: 24px;
+                 background-color: #e9ecef;
+                 border-radius: 50%;
+                 display: flex;
+                 align-items: center;
+                 justify-content: center;
+                 transition: background-color 0.2s;"
+          onmouseover="this.style.backgroundColor='#dee2e6'"
+          onmouseout="this.style.backgroundColor='#e9ecef'">
+        <i class="bi bi-x" style="font-size: 18px; color: #6c757d; line-height: 1;"></i>
+    </span>
+</li>
+        <div style="max-height: 200px; overflow-y: auto;">
+            ${users.map(u => `<li><a class="dropdown-item py-2" href="javascript:void(0)"><i class="bi bi-person me-2"></i>${u.Username}</a></li>`).join('')}
+        </div>
+    </ul>
+</div>`;
+                    }
+                } catch (e) {
+                    console.error("JSON Parse Error:", e);
+                }
+            }
+
+            // Set Header Title
+            $('#chatTitle').html(`
+        <div class="d-flex align-items-center w-100">
+            <div onclick="backToRooms()" style="cursor:pointer;" class="me-2 text-secondary">
+                <i class="bi bi-arrow-left fs-5"></i>
+            </div>
+            <h6 class="mb-0 fw-bold" style="font-size: 14px;">${title}</h6>
+            ${participantsHtml}
+        </div>
+    `);
+
+           // Load history and join room
+if(typeof loadChatMessages === 'function') loadChatMessages(roomId);
+
+if ($.connection.hub.state === $.signalR.connectionState.connected) {
+    $.connection.chatHub.server.joinRoom(roomId, "@LoginUser.EmpId");
+}
+        }
+
+        function closeParticipantsDropdown() {
+            // Finds the button that toggled the current dropdown and hides the dropdown
+            var dropdownBtn = document.getElementById('participantDrop');
+            var instance = bootstrap.Dropdown.getInstance(dropdownBtn);
+            if (instance) {
+                instance.hide();
+            }
+        }
+
+
+function backToRooms() {
+    // Switch UI back
+    debugger;
+    $('#chatbotArea').hide().removeClass('show');
+    $('#chatbotRooms').show().addClass('show');
+    loadChatRooms();
+        }
+
+        function loadChatMessages(roomId) {
+    $('#loadChat').html('<div class="text-center mt-5"><small>Loading messages...</small></div>');
+
+    $.get('@Url.Action("GetChatHistory", "Chat", new { area = "BizOneUsers" })', { roomIdentifier: roomId }, function (messages) {
+        $('#loadChat').empty();
+        if (messages.length === 0) {
+            $('#loadChat').html('<div class="text-center mt-5 text-muted"><small>No messages yet. Say Hi!</small></div>');
+        } else {
+            messages.forEach(msg => {
+                appendMessage(msg.SendingDate, msg.SenderName, msg.MessageText, msg.SenderId == "@LoginUser.EmpId" ? "sent" : "received");
+            });
+        }
+    });
+}
+
+        function appendMessage(date, name, text, side) {
+            var isSent = (side === "sent");
+            var alignClass = isSent ? "justify-content-end" : "justify-content-start";
+            var bubbleClass = isSent ? "chat-sent" : "chat-received";
+
+            var html = `
+<div class="d-flex ${alignClass} mb-3">
+    <div class="chat-bubble ${bubbleClass}" style="max-width: 75%; position: relative; padding: 8px 12px; border-radius: 15px;">
+        <small style="display:block; font-weight:bold; font-size:10px; margin-bottom: 2px;">
+            ${isSent ? "You" : name}
+        </small>
+        <div style="font-size: 13px; line-height: 1.5;">${text}</div>
+        <small style="display:block; text-align:right; font-size:9px; opacity:0.7; margin-top: 4px;">
+            ${date}
+        </small>
+    </div>
+</div>`;
+
+            $('#loadChat').append(html);
+
+            // Auto-scroll to bottom every time a message is appended
+            var chatDiv = document.getElementById("loadChat");
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+        }
+
+    </script>
     <!-- / Layout wrapper -->
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->
-    <script src="@Url.Content("~/BizOneAssets/vendor/libs/jquery/jquery.js")"></script>
+    @*<script src="@Url.Content("~/BizOneAssets/vendor/libs/jquery/jquery.js")"></script>*@
     <script src="@Url.Content("~/BizOneAssets/vendor/libs/popper/popper.js")"></script>
     <script src="@Url.Content("~/BizOneAssets/vendor/js/bootstrap.js")"></script>
     <script src="@Url.Content("~/BizOneAssets/vendor/libs/node-waves/node-waves.js")"></script>
@@ -580,6 +1497,8 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+
+
     @RenderSection("scripts", required: false)
 </body>
 </html>

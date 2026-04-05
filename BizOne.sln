@@ -9,6 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BizOne.DAL", "..\BizOne.DAL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BizOne.Common", "..\BizOne.Common\BizOne.Common.csproj", "{657283B6-0AF7-473D-B9A9-8DBEC36F887B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BizOne.BLL", "..\BizOne.BLL\BizOne.BLL.csproj", "{E682220E-B964-44DE-9AA2-63182FAF2273}"
+	ProjectSection(ProjectDependencies) = postProject
+		{54F83283-5316-43B0-BF1C-1F7F91512A3E} = {54F83283-5316-43B0-BF1C-1F7F91512A3E}
+		{657283B6-0AF7-473D-B9A9-8DBEC36F887B} = {657283B6-0AF7-473D-B9A9-8DBEC36F887B}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +33,10 @@ Global
 		{657283B6-0AF7-473D-B9A9-8DBEC36F887B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{657283B6-0AF7-473D-B9A9-8DBEC36F887B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{657283B6-0AF7-473D-B9A9-8DBEC36F887B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E682220E-B964-44DE-9AA2-63182FAF2273}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E682220E-B964-44DE-9AA2-63182FAF2273}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E682220E-B964-44DE-9AA2-63182FAF2273}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E682220E-B964-44DE-9AA2-63182FAF2273}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

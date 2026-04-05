@@ -73,7 +73,7 @@
             $('#customeorders').html(loader);
 
             $.ajax({
-                url: '@Url.Action("GetCustomerOrderData", "AdminOrders")',
+                url: '@Url.Action("GetCustomerOrderData", "AdminOrders", new { Area = "Products"})',
                 type: 'GET',
                 data: { email: email },
                 success: function (res) {

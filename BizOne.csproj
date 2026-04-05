@@ -54,6 +54,12 @@
     <Reference Include="Google.Apis.Core, Version=1.73.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
       <HintPath>packages\Google.Apis.Core.1.73.0\lib\net462\Google.Apis.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.4.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.SignalR.Core.2.4.3\lib\net45\Microsoft.AspNet.SignalR.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.SystemWeb, Version=2.4.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.SignalR.SystemWeb.2.4.3\lib\net45\Microsoft.AspNet.SignalR.SystemWeb.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.AspNetCore.Authentication.Abstractions, Version=2.3.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.AspNetCore.Authentication.Abstractions.2.3.0\lib\netstandard2.0\Microsoft.AspNetCore.Authentication.Abstractions.dll</HintPath>
     </Reference>
@@ -145,8 +151,20 @@
     <Reference Include="Microsoft.Net.Http.Headers, Version=2.3.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Net.Http.Headers.2.3.0\lib\netstandard2.0\Microsoft.Net.Http.Headers.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Owin, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Owin.2.1.0\lib\net45\Microsoft.Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Owin.Host.SystemWeb.2.1.0\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Owin.Security.2.1.0\lib\net45\Microsoft.Owin.Security.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
+      <HintPath>packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.4.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -173,6 +191,7 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Security" />
     <Reference Include="System.Text.Encodings.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Text.Encodings.Web.8.0.0\lib\net462\System.Text.Encodings.Web.dll</HintPath>
     </Reference>
@@ -251,6 +270,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
+    <Compile Include="Areas\Admin\Controllers\ChatsController.cs" />
     <Compile Include="Areas\Admin\Controllers\DepartmentsController.cs" />
     <Compile Include="Areas\Admin\Controllers\OffDaysController.cs" />
     <Compile Include="Areas\Admin\Controllers\RightsController.cs" />
@@ -258,6 +278,7 @@
     <Compile Include="Areas\Admin\Controllers\ShiftTimmingsController.cs" />
     <Compile Include="Areas\BizOneUsers\BizOneUsersAreaRegistration.cs" />
     <Compile Include="Areas\BizOneUsers\Controllers\AuthenticationController.cs" />
+    <Compile Include="Areas\BizOneUsers\Controllers\ChatController.cs" />
     <Compile Include="Areas\CRM\CRMAreaRegistration.cs" />
     <Compile Include="Areas\DMS\Controllers\DocumentsController.cs" />
     <Compile Include="Areas\DMS\Controllers\FoldersController.cs" />
@@ -267,6 +288,7 @@
     <Compile Include="Areas\EMS\Controllers\LeavesController.cs" />
     <Compile Include="Areas\EMS\EMSAreaRegistration.cs" />
     <Compile Include="Areas\EndUser\Controllers\CartController.cs" />
+    <Compile Include="Areas\EndUser\Controllers\ChatsController.cs" />
     <Compile Include="Areas\EndUser\Controllers\CheckoutController.cs" />
     <Compile Include="Areas\EndUser\Controllers\LocalHomeController.cs" />
     <Compile Include="Areas\EndUser\Controllers\LoginController.cs" />
@@ -283,8 +305,10 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Hubs\ChatHub.cs" />
     <Compile Include="Models\LoginUser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="BizOneAssets\css\demo.css" />
@@ -493,12 +517,15 @@
     <Content Include="Areas\Products\Views\Orders\Orders.cshtml" />
     <Content Include="Areas\Products\Views\AdminOrders\ManageOrders.cshtml" />
     <Content Include="Areas\Products\Views\AdminOrders\OrderDetails.cshtml" />
+    <Content Include="Areas\Admin\Views\Chats\Chats.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
     <Content Include="Scripts\jquery-3.7.0.slim.js" />
     <Content Include="Scripts\jquery-3.7.0.slim.min.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery.signalR-2.4.3.js" />
+    <Content Include="Scripts\jquery.signalR-2.4.3.min.js" />
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
@@ -523,6 +550,7 @@
     <Folder Include="Areas\Admin\Data\" />
     <Folder Include="Areas\Admin\Views\Shared\" />
     <Folder Include="Areas\BizOneUsers\Data\" />
+    <Folder Include="Areas\BizOneUsers\Views\Chat\" />
     <Folder Include="Areas\CRM\Controllers\" />
     <Folder Include="Areas\CRM\Data\" />
     <Folder Include="Areas\CRM\Views\Shared\" />
@@ -532,6 +560,7 @@
     <Folder Include="Areas\EMS\Data\" />
     <Folder Include="Areas\EMS\Views\Shared\" />
     <Folder Include="Areas\EndUser\Data\" />
+    <Folder Include="Areas\EndUser\Views\Chats\" />
     <Folder Include="Areas\EndUser\Views\Shared\" />
     <Folder Include="Areas\Products\Data\" />
     <Folder Include="Areas\Products\Views\ExchangeRates\" />
@@ -566,6 +595,10 @@
     <Content Include="Scripts\jquery-3.7.0.min.map" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BizOne.BLL\BizOne.BLL.csproj">
+      <Project>{e682220e-b964-44de-9aa2-63182faf2273}</Project>
+      <Name>BizOne.BLL</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BizOne.Common\BizOne.Common.csproj">
       <Project>{657283b6-0af7-473d-b9a9-8dbec36f887b}</Project>
       <Name>BizOne.Common</Name>

@@ -219,6 +219,97 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-12 p-4">
+                        <h6 class="card-title">Customer Chats Rights</h6>
+                        <div class="row">
+                            <div class="col-12 col-md-6 col-lg-6">
+                                <div class="form-check border rounded p-3 mb-2">
+                                    <input class="form-check-input" type="checkbox" data-id="0" id="chkcuschats" name="CustomerChatsRights" value="RECEIVES_CUSTOMER_CHATS" />
+                                    <label class="form-check-label fw-bold" for="chkcuschats">
+                                        RECEIVES_CUSTOMER_CHATS
+                                        <div class="text-muted small">View Customers Chats</div>
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-12 p-4">
+                        <h6 class="card-title">Chatbot Access Rights</h6>
+
+
+                        <div class="row">
+
+                            <!-- All CRM Users Chat -->
+                            <div class="col-md-6">
+                                <div class="form-check border rounded p-3 mb-2">
+                                    <input class="form-check-input" type="checkbox"
+                                           name="ChatRights" value="CAN_CHAT_ALL_USERS">
+                                    <label class="form-check-label fw-bold">
+                                        CAN_CHAT_ALL_USERS
+                                        <div class="text-muted small">
+                                            Allows the user to participate in the global CRM chat where all users can communicate together.
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Team Chat -->
+                            <div class="col-md-6">
+                                <div class="form-check border rounded p-3 mb-2">
+                                    <input class="form-check-input" type="checkbox"
+                                           name="ChatRights" value="CAN_CHAT_TEAM">
+                                    <label class="form-check-label fw-bold">
+                                        CAN_CHAT_TEAM
+                                        <div class="text-muted small">
+                                            Allows the user to chat in team-based chat rooms with users from the same team assigned by Admins.
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check border rounded p-3 mb-2">
+                                    <input class="form-check-input" type="checkbox"
+                                           name="ChatRights" value="CAN_CHAT_PRIVATE_TEAM">
+                                    <label class="form-check-label fw-bold">
+                                        CAN_CHAT_PRIVATE_TEAM
+                                        <div class="text-muted small">
+                                            Allows the user to chat in team-based chat rooms with users created by user himself.
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Single Chat (Team Only) -->
+                            <div class="col-md-6">
+                                <div class="form-check border rounded p-3 mb-2">
+                                    <input class="form-check-input" type="checkbox"
+                                           name="ChatRights" value="CAN_CHAT_SINGLE_IN_TEAM">
+                                    <label class="form-check-label fw-bold">
+                                        CAN_CHAT_SINGLE_IN_TEAM
+                                        <div class="text-muted small">
+                                            Allows private chat with individual users who belong to the same team.
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Single Chat (All Users) -->
+                            <div class="col-md-6">
+                                <div class="form-check border rounded p-3 mb-2">
+                                    <input class="form-check-input" type="checkbox"
+                                           name="ChatRights" value="CAN_CHAT_SINGLE_IN_ALL">
+                                    <label class="form-check-label fw-bold">
+                                        CAN_CHAT_SINGLE_IN_ALL
+                                        <div class="text-muted small">
+                                            Allows private chat with any CRM user, regardless of team or role.
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
 
                     <div class="row">
                         <div class="col-12 text-end p-4">

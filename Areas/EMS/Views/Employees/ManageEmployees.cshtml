@@ -499,7 +499,6 @@
     </div>
 </div>
 
-
 <div class="modal fade" id="addFilesInfo" tabindex="-1" aria-modal="true" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -533,6 +532,7 @@
         </div>
     </div>
 </div>
+
 @section scripts{
     <script>
              $("#formAuthentication").on("submit", function (e) {
@@ -689,7 +689,7 @@ var $depdropdown = $("#departmentsList");
 
     });
 
-    function initRolesDropdown($roledropdown = null,$rolesundermedropdown = null, selectedRoleId = null, selectedRolesUnderMe = null) {
+    function initRolesDropdown($roledropdown = null, $rolesundermedropdown = null, selectedRoleId = null, selectedRolesUnderMe = null) {
     $.ajax({
         url: '@Url.Action("GetRolesDropdown", "Rights", new { area = "Admin" })',
         type: 'GET',
@@ -800,7 +800,7 @@ var $depdropdown = $("#departmentsList");
 
             $.each(list, function (i, l) {
                 $dropdown.append(
-                    `<option value="${l.Id}" ${selectedId && l.Id === selectedId ? "selected" : ""}>${dept.Name}</option>`
+                    `<option value="${l.Id}" ${selectedId && l.Id === selectedId ? "selected" : ""}>${l.Name}</option>`
                 );
             });
 
@@ -1016,10 +1016,30 @@ $(document).ready(function () {
         data: { empid: empId },
         success: function (response) {
             let data = response.data;
-            let empImage = (data.Files || []).find(f => f.FileTitle === "EmpImage");
-            let empCV = (data.Files || []).find(f => f.FileTitle === "EmpCV");
-            let otherDocs = (data.Files || []).filter(f => f.FileTitle !== "EmpImage" && f.FileTitle !== "EmpCV");
+            let empImage = null;
+            let empCV = null;
+            let otherDocs = [];
+            // Check if Files exists and has at least one item
+            if (data.Files && data.Files.length > 0) {
 
+                // 1. Find the Specific Employee Image
+                empImage = data.Files.find(f => f.FileTitle === "EmpImage");
+
+                // 2. Find the Specific Employee CV
+                empCV = data.Files.find(f => f.FileTitle === "EmpCV");
+
+                // 3. Filter everything else into an 'Other Documents' array
+                otherDocs = data.Files.filter(f => f.FileTitle !== "EmpImage" && f.FileTitle !== "EmpCV");
+
+                // Process your files here...
+                console.log("Image found:", empImage);
+                console.log("Other documents count:", otherDocs.length);
+
+            } else {
+                // Handle the case where no files exist
+                console.log("No files available for this employee.");
+
+            }
             let html = `
                 <!-- Personal Info -->
                 <div class="divider text-start-center divider-primary">
@@ -1184,10 +1204,32 @@ $(document).ready(function () {
         type: 'GET',
         data: { empid: empId },
         success: function (response) {
+           
             let data = response.data;
-            let empImage = (data.Files || []).find(f => f.FileTitle === "EmpImage");
-            let empCV = (data.Files || []).find(f => f.FileTitle === "EmpCV");
-            let otherDocs = (data.Files || []).filter(f => f.FileTitle !== "EmpImage" && f.FileTitle !== "EmpCV");
+            let empImage = null;
+            let empCV = null;
+            let otherDocs = [];
+            // Check if Files exists and has at least one item
+            if (data.Files && data.Files.length > 0) {
+
+                // 1. Find the Specific Employee Image
+                 empImage = data.Files.find(f => f.FileTitle === "EmpImage");
+
+                // 2. Find the Specific Employee CV
+                 empCV = data.Files.find(f => f.FileTitle === "EmpCV");
+
+                // 3. Filter everything else into an 'Other Documents' array
+                 otherDocs = data.Files.filter(f => f.FileTitle !== "EmpImage" && f.FileTitle !== "EmpCV");
+
+                // Process your files here...
+                console.log("Image found:", empImage);
+                console.log("Other documents count:", otherDocs.length);
+
+            } else {
+                // Handle the case where no files exist
+                console.log("No files available for this employee.");
+                
+            }
             let formateddateofbirth = formatDateForInput(data.DateOfBirthstring);
             let activeUser = (data.empCredentialslist || []).find(f => f.IsActive === true);
             let username = activeUser ? activeUser.Username : "";
@@ -1406,7 +1448,7 @@ $(document).ready(function () {
     <!-- Left column -->
     <div class="col-md-6">
     <p class="mt-2 mb-1"><b>Upload CV:</b></p>
-<input class="form-control mb-2" type="file" id="uploadCVedit" name="files" data-title="EmpCV" data-id="${empCV.FileId}">
+<input class="form-control mb-2" type="file" id="uploadCVedit" name="files" data-title="EmpCV" data-id="${empCV ? empCV.FileId : 0}">
 
         <p class="mt-2 mb-1"><b>Department:</b></p>
 <select class="form-control mb-2" id="Departmentedit"></select>

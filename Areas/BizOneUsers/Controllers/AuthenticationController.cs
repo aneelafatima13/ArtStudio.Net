@@ -30,15 +30,16 @@ namespace BizOne.Areas.BizOneUsers.Controllers
             List<string> rightsName = new List<string>();
             (empData, rightsName) = _employeeDAL.GetEmployeeData(model);
 
-            if (empData != null || (model.Username == "admin" && model.Password == "123"))
+            if (empData != null)
             {
-                if (empData.Password == model.Password || (model.Username == "admin" && model.Password == "123"))
+                if (empData.Password == model.Password)
                 {
                     Session["EmpId"] = empData.Id.ToString();
                     Session["EmpUsername"] = model.Username;
                     Session["EmpRole"] = empData.RoleName;
                     Session["EmpDepartmentName"] = empData.DepartmentName;
                     Session["EmpRightsList"] = rightsName;
+                    Session["UserData"] = empData;
                     RightsFlagsList rightsflags = setAllRightsFlags(rightsName);
                     Session["RightsFlags"] = rightsflags;
                     _employeeDAL.AddActivityLog(empData.Id, model.Username + " has login Application.");
@@ -60,7 +61,6 @@ namespace BizOne.Areas.BizOneUsers.Controllers
             if (rightsName == null)
                 rightsName = new List<string>();
 
-            // Using a HashSet for O(1) lookup performance to keep the app snappy
             var rights = new HashSet<string>(rightsName, StringComparer.OrdinalIgnoreCase);
 
             return new RightsFlagsList
@@ -91,7 +91,16 @@ namespace BizOne.Areas.BizOneUsers.Controllers
                 ORDER_VIEW = rights.Contains("ORDER_VIEW"),
 
                 // Document Rights
-                DOCUMENT_UPLOAD = rights.Contains("DOCUMENT_UPLOAD")
+                DOCUMENT_UPLOAD = rights.Contains("DOCUMENT_UPLOAD"),
+
+                RECEIVES_CUSTOMER_CHATS = rights.Contains("RECEIVES_CUSTOMER_CHATS"),
+
+                CAN_CHAT_ALL_USERS = rightsName.Contains("CAN_CHAT_ALL_USERS"),
+                CAN_CHAT_TEAM = rightsName.Contains("CAN_CHAT_TEAM"),
+                CAN_CHAT_PRIVATE_TEAM = rightsName.Contains("CAN_CHAT_PRIVATE_TEAM"),
+                CAN_CHAT_SINGLE_IN_TEAM = rightsName.Contains("CAN_CHAT_SINGLE_IN_TEAM"),
+                CAN_CHAT_SINGLE_IN_ALL = rightsName.Contains("CAN_CHAT_SINGLE_IN_ALL")
+
             };
         }
 
