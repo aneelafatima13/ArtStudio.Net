@@ -1,0 +1,232 @@
+﻿@{
+    ViewBag.Title = "Orders Reports";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+
+<style>
+    .filter-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #e9ecef;
+        margin-bottom: 2rem;
+    }
+
+    .filter-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #566a7f;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .status-card {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        height: 100%;
+    }
+
+    .month-selection-panel {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    .report-container {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        min-height: 600px;
+    }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold m-0"> Orders Reports</h4>
+        <div>
+            <button type="button" id="btnGenerate" class="btn btn-primary btn-lg shadow-sm me-2" onclick="GenerateReport()">
+                <i class="bx bx- Barrett-chart-alt-2"></i> Generate Report
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-lg" onclick="location.reload()">
+                Clear Filters
+            </button>
+        </div>
+    </div>
+
+    <div class="filter-section shadow-sm">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="status-card">
+                    <h6 class="fw-bold mb-3 border-bottom pb-2">Date Range</h6>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="filter-label">Start Date</label>
+                            <input type="date" id="start-date" class="form-control filter-input" />
+                        </div>
+                        <div class="col-6">
+                            <label class="filter-label">End Date</label>
+                            <input type="date" id="end-date" class="form-control filter-input" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="status-card">
+                    <h6 class="fw-bold mb-3 border-bottom pb-2">Geographics & Period</h6>
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <label class="filter-label">Year</label>
+                            <input type="number" id="Year" class="form-control" placeholder="2024" />
+                        </div>
+                        <div class="col-4">
+                            <label class="filter-label">City</label>
+                            <input type="text" id="City" class="form-control" placeholder="City" />
+                        </div>
+                        <div class="col-4">
+                            <label class="filter-label">Country</label>
+                            <input type="text" id="Country" class="form-control" placeholder="Country" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="month-selection-panel">
+                    <h6 class="fw-bold mb-2 text-uppercase text-muted" style="font-size: 0.7rem;">Select Months</h6>
+                    <div class="row g-1">
+                        @for (int i = 1; i <= 12; i++)
+                        {
+                            var monthName = new DateTime(2000, i, 1).ToString("MMM");
+                            <div class="col-4">
+                                <div class="form-check">
+                                    <input class="form-check-input month-filter" type="checkbox" name="selectedMonth" id="m@i" value="@i">
+                                    <label class="form-check-label small" for="m@i">@monthName</label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 mt-3">
+                <div class="status-card">
+                    <h6 class="fw-bold mb-3 border-bottom pb-2">Order Status Filters</h6>
+                    <div class="d-flex flex-wrap gap-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input status-checkbox" type="checkbox" id="AllOrders" value="All">
+                            <label class="form-check-label" for="AllOrders">All Orders</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input status-checkbox" type="checkbox" id="PaidOrders" value="Paid">
+                            <label class="form-check-label" for="PaidOrders">Paid</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input status-checkbox" type="checkbox" id="UnpaidOrders" value="Unpaid">
+                            <label class="form-check-label" for="UnpaidOrders">Unpaid</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input status-checkbox" type="checkbox" id="OrdersPlaced" value="Placed">
+                            <label class="form-check-label" for="OrdersPlaced">Placed</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input status-checkbox" type="checkbox" id="ShippedOrders" value="Shipped">
+                            <label class="form-check-label" for="ShippedOrders">Shipped</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input status-checkbox" type="checkbox" id="DeliveredOrders" value="Delivered">
+                            <label class="form-check-label" for="DeliveredOrders">Delivered</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input status-checkbox" type="checkbox" id="CanceledOrders" value="Canceled">
+                            <label class="form-check-label" for="CanceledOrders">Canceled</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="report-container position-relative p-3">
+        <div id="reportLoader" class="text-center" style="display:none; padding: 100px;">
+            <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h5 class="mt-4 text-primary">Compiling Data Assets...</h5>
+            <p class="text-muted">This may take a few moments depending on the date range.</p>
+        </div>
+
+        <iframe id="reportFrame" style="width:100%; height:800px; border:1px solid #eee; display:none; border-radius: 8px;"></iframe>
+
+        <div id="placeholderImg" class="text-center py-5">
+            <i class="bx bx-file-find text-light mb-3" style="font-size: 5rem;"></i>
+            <p class="text-muted">Set your filters above and click "Generate Report" to view data.</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Enable button only when basic filters are selected
+            $('.filter-input, .status-checkbox, .month-filter').on('change', function() {
+                $('#btnGenerate').prop('disabled', false);
+            });
+        });
+
+        function GenerateReport() {
+            // 1. Show Loader
+            $('#reportLoader').show();
+            $('#reportFrame').hide();
+            $('#placeholderImg').hide();
+
+            // 2. Gather Data
+            var startDate = $('#start-date').val() || "";
+            var endDate = $('#end-date').val() || "";
+            var selectedYear = $('#Year').val() || "";
+            var city = $('#City').val() || "";
+            var country = $('#Country').val() || "";
+
+            // Gather Statuses (Only those checked)
+            var selectedStatuses = [];
+            $('.status-checkbox:checked').each(function() {
+                selectedStatuses.push($(this).val());
+            });
+
+            // Gather Months
+            var monthsArray = [];
+            $('input[name="selectedMonth"]:checked').each(function () {
+                monthsArray.push($(this).val());
+            });
+
+            // 3. Construct URL
+            // Ensure you match the parameter names expected by your Controller action
+            var baseUrl = '@Url.Action("GetOrdersReports", "OrdersReports", new { area = "Reports" })';
+            var queryParams = $.param({
+                startDate: startDate,
+                endDate: endDate,
+                year: selectedYear,
+                city: city,
+                country: country,
+                months: monthsArray.join(','),
+                statuses: selectedStatuses.join(',')
+            });
+
+            var reportUrl = baseUrl + "?" + queryParams;
+
+            // 4. Load Iframe
+            var frame = $('#reportFrame');
+            frame.attr('src', reportUrl);
+
+            frame.on('load', function() {
+                $('#reportLoader').hide();
+                $(this).fadeIn();
+            });
+        }
+    </script>
+}

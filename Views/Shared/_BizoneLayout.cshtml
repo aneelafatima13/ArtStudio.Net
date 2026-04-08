@@ -96,8 +96,18 @@
                         data-bs-placement="right"
                         title="Dashboard">
                         <a href="@Url.Action("Chats", "Chats", new { area = "Admin" })" class="menu-link">
-                            <i class="menu-icon tf-icons mdi mdi-home-outline"></i>
+                            <i class="menu-icon tf-icons mdi mdi-message-alert-outline"></i>
                             <div data-i18n="chats">Chats</div>
+                        </a>
+                    </li>
+                    <li class="menu-item"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="right"
+                        title="Dashboard">
+                        <a href="@Url.Action("Reports", "Reports", new { area = "Reports" })" class="menu-link">
+                            <i class="menu-icon tf-icons mdi mdi-file-account-outline"></i>
+                            
+                            <div data-i18n="Reports">Reports</div>
                         </a>
                     </li>
 
@@ -112,7 +122,7 @@
                             data-bs-placement="right"
                             title="Add Rights">
                             <a href="@Url.Action("ManageProducts", "Products", new { area = "Products" })" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
+                                <i class="menu-icon tf-icons mdi mdi-package-check"></i>
                                 <div>Manage Products</div>
                             </a>
 
@@ -122,7 +132,7 @@
                             data-bs-placement="right"
                             title="Add Rights">
                             <a href="@Url.Action("ExchangeRateForms", "Products", new { area = "Products" })" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
+                                <i class="menu-icon tf-icons mdi mdi-currency-bdt"></i>
                                 <div>Manage Exchange Rates</div>
                             </a>
 
@@ -132,7 +142,7 @@
                             data-bs-placement="right"
                             title="Add Rights">
                             <a href="@Url.Action("ManageCoupens", "Coupens", new { area = "Products" })" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
+                                <i class="menu-icon tf-icons mdi mdi-counter"></i>
                                 <div>Manage Coupens</div>
                             </a>
 
@@ -160,7 +170,7 @@
                             data-bs-placement="right"
                             title="Add Rights">
                             <a href="@Url.Action("ManageOrders", "AdminOrders", new { area = "Products", returnType = 1})" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
+                                <i class="menu-icon tf-icons mdi mdi-order-alphabetical-ascending"></i>
                                 <div>Orders List</div>
                             </a>
 

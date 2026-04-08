@@ -1,0 +1,82 @@
+﻿@{
+    ViewBag.Title = "Reports";
+    Layout = "~/Views/Shared/_BizoneLayout.cshtml";
+}
+
+<style>
+    .report-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+        text-decoration: none !important;
+        color: inherit;
+    }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+    .card-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: #696cff; /* Adjust to match your theme */
+    }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">Reports</h4>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+        <div class="col">
+            <a href="@Url.Action("OrdersReports", "OrdersReports", new { area = "Reports" } )" class="card h-100 report-card">
+                <div class="card-body text-center">
+                    <div class="card-icon"><i class="bx bx-cart"></i></div>
+                    <h5 class="card-title">Orders Reports</h5>
+                    <p class="card-text text-muted small">View all sales, status updates, and revenue trends.</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="@Url.Action("OrdersReports", "OrdersReports", new { area = "Reports" } )" class="card h-100 report-card">
+                <div class="card-body text-center">
+                    <div class="card-icon"><i class="bx bx-user"></i></div>
+                    <h5 class="card-title">Customers</h5>
+                    <p class="card-text text-muted small">Manage client data and registration history.</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="@Url.Action("OrdersReports", "OrdersReports", new { area = "Reports" } )" class="card h-100 report-card">
+                <div class="card-body text-center">
+                    <div class="card-icon"><i class="bx bx-package"></i></div>
+                    <h5 class="card-title">Products</h5>
+                    <p class="card-text text-muted small">Check stock levels and product performance.</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="@Url.Action("OrdersReports", "OrdersReports", new { area = "Reports" } )" class="card h-100 report-card">
+                <div class="card-body text-center">
+                    <div class="card-icon"><i class="bx bx-shield-quarter"></i></div>
+                    <h5 class="card-title">BizzOne Users</h5>
+                    <p class="card-text text-muted small">Internal user activity and role assignments.</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="@Url.Action("OrdersReports", "OrdersReports", new { area = "Reports" } )" class="card h-100 report-card">
+                <div class="card-body text-center">
+                    <div class="card-icon"><i class="bx bx-customize"></i></div>
+                    <h5 class="card-title">Custom Orders</h5>
+                    <p class="card-text text-muted small">Special requests and bespoke order tracking.</p>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>

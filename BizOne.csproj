@@ -1,5 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="packages\FastReport.Data.MsSql.2026.2.0\build\net462\FastReport.Data.MsSql.props" Condition="Exists('packages\FastReport.Data.MsSql.2026.2.0\build\net462\FastReport.Data.MsSql.props')" />
+  <Import Project="packages\FastReport.OpenSource.2026.2.0\build\FastReport.OpenSource.props" Condition="Exists('packages\FastReport.OpenSource.2026.2.0\build\FastReport.OpenSource.props')" />
   <Import Project="packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -45,6 +47,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Accessibility" />
+    <Reference Include="FastReport, Version=2026.2.0.0, Culture=neutral, PublicKeyToken=5ceb240df42bf6e8, processorArchitecture=MSIL">
+      <HintPath>packages\FastReport.OpenSource.2026.2.0\lib\net462\FastReport.dll</HintPath>
+    </Reference>
+    <Reference Include="FastReport.Compat, Version=2026.2.0.0, Culture=neutral, PublicKeyToken=5ceb240df42bf6e8, processorArchitecture=MSIL">
+      <HintPath>packages\FastReport.Compat.2026.2.0\lib\net462\FastReport.Compat.dll</HintPath>
+    </Reference>
+    <Reference Include="FastReport.OpenSource.Export.PdfSimple, Version=2026.2.0.0, Culture=neutral, PublicKeyToken=b33a9a06fcc00c4c, processorArchitecture=MSIL">
+      <HintPath>packages\FastReport.OpenSource.Export.PdfSimple.2026.2.0\lib\net462\FastReport.OpenSource.Export.PdfSimple.dll</HintPath>
+    </Reference>
     <Reference Include="Google.Apis, Version=1.73.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
       <HintPath>packages\Google.Apis.1.73.0\lib\net462\Google.Apis.dll</HintPath>
     </Reference>
@@ -171,6 +183,9 @@
       <HintPath>packages\System.Buffers.4.6.0\lib\net462\System.Buffers.dll</HintPath>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.SqlClient, Version=4.6.1.6, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Data.SqlClient.4.8.6\lib\net461\System.Data.SqlClient.dll</HintPath>
+    </Reference>
     <Reference Include="System.Diagnostics.DiagnosticSource, Version=8.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Diagnostics.DiagnosticSource.8.0.1\lib\net462\System.Diagnostics.DiagnosticSource.dll</HintPath>
     </Reference>
@@ -207,6 +222,7 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
@@ -301,6 +317,9 @@
     <Compile Include="Areas\Products\Controllers\ProductsController.cs" />
     <Compile Include="Areas\Products\Controllers\ShopController.cs" />
     <Compile Include="Areas\Products\ProductsAreaRegistration.cs" />
+    <Compile Include="Areas\Reports\Controllers\OrdersReportsController.cs" />
+    <Compile Include="Areas\Reports\Controllers\ReportsController.cs" />
+    <Compile Include="Areas\Reports\ReportsAreaRegistration.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -518,6 +537,9 @@
     <Content Include="Areas\Products\Views\AdminOrders\ManageOrders.cshtml" />
     <Content Include="Areas\Products\Views\AdminOrders\OrderDetails.cshtml" />
     <Content Include="Areas\Admin\Views\Chats\Chats.cshtml" />
+    <Content Include="Areas\Reports\Views\web.config" />
+    <Content Include="Areas\Reports\Views\Reports\Reports.cshtml" />
+    <Content Include="Areas\Reports\Views\OrdersReports\OrdersReports.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -565,6 +587,8 @@
     <Folder Include="Areas\Products\Data\" />
     <Folder Include="Areas\Products\Views\ExchangeRates\" />
     <Folder Include="Areas\Products\Views\Shared\" />
+    <Folder Include="Areas\Reports\Data\" />
+    <Folder Include="Areas\Reports\Views\Shared\" />
     <Folder Include="Views\Base\" />
   </ItemGroup>
   <ItemGroup>
@@ -641,7 +665,11 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('packages\FastReport.OpenSource.2026.2.0\build\FastReport.OpenSource.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\FastReport.OpenSource.2026.2.0\build\FastReport.OpenSource.props'))" />
+    <Error Condition="!Exists('packages\FastReport.Data.MsSql.2026.2.0\build\net462\FastReport.Data.MsSql.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\FastReport.Data.MsSql.2026.2.0\build\net462\FastReport.Data.MsSql.props'))" />
+    <Error Condition="!Exists('packages\FastReport.Data.MsSql.2026.2.0\build\net462\FastReport.Data.MsSql.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\FastReport.Data.MsSql.2026.2.0\build\net462\FastReport.Data.MsSql.targets'))" />
   </Target>
+  <Import Project="packages\FastReport.Data.MsSql.2026.2.0\build\net462\FastReport.Data.MsSql.targets" Condition="Exists('packages\FastReport.Data.MsSql.2026.2.0\build\net462\FastReport.Data.MsSql.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

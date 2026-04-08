@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="04/07/2026 18:54:07" ReportInfo.Modified="04/08/2026 01:21:23" ReportInfo.CreatorVersion="2026.1.0.0">
+  <Dictionary>
+    <MsSqlDataConnection Name="Connection" ConnectionString="rijcmlq+rW0RkboK+/8CKGGYUID3ctBV8q9SvKYxl3iiE7vBnh7Tgou0+4WFf3NfmPSvHVFkIM7asldBLV2Wqi9GX7YVhFTmV2zZvtZOlroBuXdZpPZi9JyaK8F1LJjjoTty8gmnzIlPeL4NP/L/q0Bcy2kSo/jlrcpZmyQljfaOtgRAYPnFrtx+yvdgklD5G3dqYO2">
+      <ProcedureDataSource Name="GetOrdersReportData" DataType="System.Int32" Enabled="true" TableName="GetOrdersReportData" SelectCommand="GetOrdersReportData">
+        <Column Name="OrderNo" DataType="System.String"/>
+        <Column Name="OrderDate" DataType="System.DateTime"/>
+        <Column Name="CustomerName" DataType="System.String"/>
+        <Column Name="Email" DataType="System.String"/>
+        <Column Name="PhoneNumber" DataType="System.String"/>
+        <Column Name="City" DataType="System.String"/>
+        <Column Name="Country" DataType="System.String"/>
+        <Column Name="Subtotal" DataType="System.Decimal"/>
+        <Column Name="ShippingAmout" DataType="System.Decimal"/>
+        <Column Name="GrandTotal" DataType="System.Decimal"/>
+        <Column Name="PaymentMethod" DataType="System.Int32"/>
+        <Column Name="PaymentStatus" DataType="System.Int32"/>
+        <Column Name="CurrentStatus" DataType="System.Int32"/>
+        <Column Name="LastStatusUpdate" DataType="System.DateTime"/>
+        <Column Name="ProductName" DataType="System.String"/>
+        <Column Name="Quantity" DataType="System.Int32"/>
+        <Column Name="UnitPrice" DataType="System.Decimal"/>
+        <Column Name="ItemTotal" DataType="System.Decimal"/>
+        <Column Name="CoupenCode" DataType="System.String"/>
+        <Column Name="CoupenType" DataType="System.String"/>
+        <ProcedureParameter Name="@p_City" DataType="12" Expression="[p_City]" Direction="Input"/>
+        <ProcedureParameter Name="@p_Country" DataType="12" Expression="[p_Country]" Direction="Input"/>
+        <ProcedureParameter Name="@p_EndDate" DataType="12" Expression="[p_EndDate]" Direction="Input"/>
+        <ProcedureParameter Name="@p_Months" DataType="12" Expression="[p_Months]" Direction="Input"/>
+        <ProcedureParameter Name="@p_StartDate" DataType="12" Expression="[p_StartDate]" Direction="Input"/>
+        <ProcedureParameter Name="@p_Status" DataType="12" Expression="[p_Status]" Direction="Input"/>
+        <ProcedureParameter Name="@p_Year" DataType="8" Expression="[p_Year]" Direction="Input"/>
+      </ProcedureDataSource>
+    </MsSqlDataConnection>
+    <Parameter Name="p_StartDate" DataType="System.DateTime" AsString=""/>
+    <Parameter Name="p_EndDate" DataType="System.DateTime" AsString=""/>
+    <Parameter Name="p_Year" DataType="System.String" AsString=""/>
+    <Parameter Name="p_City" DataType="System.String" AsString=""/>
+    <Parameter Name="p_Country" DataType="System.String" AsString=""/>
+    <Parameter Name="p_Months" DataType="System.String" AsString=""/>
+    <Parameter Name="p_Status" DataType="System.String" AsString=""/>
+  </Dictionary>
+
+  <ReportPage Name="Page1" Watermark.Font="Arial, 60pt">
+    
+    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="66.15">
+      <TextObject Name="txtMainTitle" Left="0" Top="0" Width="718.2" Height="37.8" Text="MANAGEMENT ORDERS REPORT" HorzAlign="Center" VertAlign="Center" Font="Arial, 18pt, style=Bold" ForeColor="DarkSlateGray"/>
+      <TextObject Name="txtDateRange" Left="0" Top="37.8" Width="718.2" Height="18.9" Text="Period: [p_StartDate] - [p_EndDate]" HorzAlign="Center" Font="Arial, 9pt, style=Italic" ForeColor="Gray"/>
+      <LineObject Name="LineTop" Top="60.15" Width="718.2" Border.Width="2" Border.Color="DarkSlateGray"/>
+    </ReportTitleBand>
+
+    <GroupHeaderBand Name="GroupHeader1" Top="70.15" Width="718.2" Height="113.4" Condition="[GetOrdersReportData.OrderNo]" StartNewPage="true">
+      <ShapeObject Name="BoxHeader" Left="0" Top="0" Width="718.2" Height="75.6" Fill.Color="WhiteSmoke" Border.Color="Gainsboro" Shape="RoundRectangle"/>
+      
+      <TextObject Name="lblOrder" Left="18.9" Top="9.45" Width="189" Height="18.9" Text="ORDER NO: [GetOrdersReportData.OrderNo]" Font="Arial, 11pt, style=Bold" ForeColor="DarkBlue"/>
+      <TextObject Name="lblDate" Left="500.85" Top="9.45" Width="198.45" Height="18.9" Text="DATE: [GetOrdersReportData.OrderDate]" Format="Date" Format.Format="d" HorzAlign="Right" Font="Arial, 10pt"/>
+      
+      <TextObject Name="lblCust" Left="18.9" Top="37.8" Width="330.75" Height="18.9" Text="CUSTOMER: [GetOrdersReportData.CustomerName]" Font="Arial, 10pt"/>
+      <TextObject Name="lblEmail" Left="18.9" Top="52.6" Width="330.75" Height="18.9" Text="EMAIL: [GetOrdersReportData.Email]" Font="Arial, 9pt" ForeColor="DimGray"/>
+      
+      <TextObject Name="lblPayStatus" Left="500.85" Top="37.8" Width="198.45" Height="18.9" Text="PAYMENT: [GetOrdersReportData.PaymentStatus]" HorzAlign="Right" Font="Arial, 10pt, style=Bold"/>
+
+      <ShapeObject Name="TableHeaderBg" Left="0" Top="85.05" Width="718.2" Height="28.35" Fill.Color="DarkSlateGray"/>
+      <TextObject Name="hProduct" Left="0" Top="85.05" Width="321.3" Height="28.35" Text="PRODUCT DESCRIPTION" Padding="5, 0, 0, 0" VertAlign="Center" Font="Arial, 9pt, style=Bold" ForeColor="White"/>
+      <TextObject Name="hPrice" Left="321.3" Top="85.05" Width="103.95" Height="28.35" Text="PRICE" HorzAlign="Right" VertAlign="Center" Font="Arial, 9pt, style=Bold" ForeColor="White"/>
+      <TextObject Name="hQty" Left="425.25" Top="85.05" Width="75.6" Height="28.35" Text="QTY" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt, style=Bold" ForeColor="White"/>
+      <TextObject Name="hTotal" Left="500.85" Top="85.05" Width="113.4" Height="28.35" Text="TOTAL" HorzAlign="Right" VertAlign="Center" Font="Arial, 9pt, style=Bold" ForeColor="White"/>
+      <TextObject Name="hStatus" Left="614.25" Top="85.05" Width="103.95" Height="28.35" Text="STATUS" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt, style=Bold" ForeColor="White"/>
+    </GroupHeaderBand>
+
+    <DataBand Name="Data1" Top="187.55" Width="718.2" Height="28.35" DataSource="GetOrdersReportData">
+      <TextObject Name="dProduct" Left="0" Width="321.3" Height="28.35" Border.Lines="Bottom" Border.Color="Gainsboro" Text="[GetOrdersReportData.ProductName]" Padding="5, 0, 0, 0" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="dPrice" Left="321.3" Width="103.95" Height="28.35" Border.Lines="Bottom" Border.Color="Gainsboro" Text="[GetOrdersReportData.UnitPrice]" Format="Currency" Format.UseLocale="true" HorzAlign="Right" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="dQty" Left="425.25" Width="75.6" Height="28.35" Border.Lines="Bottom" Border.Color="Gainsboro" Text="[GetOrdersReportData.Quantity]" HorzAlign="Center" VertAlign="Center" Font="Arial, 9pt"/>
+      <TextObject Name="dTotal" Left="500.85" Width="113.4" Height="28.35" Border.Lines="Bottom" Border.Color="Gainsboro" Text="[GetOrdersReportData.ItemTotal]" Format="Currency" Format.UseLocale="true" HorzAlign="Right" VertAlign="Center" Font="Arial, 9pt, style=Bold"/>
+      <TextObject Name="dStatus" Left="614.25" Width="103.95" Height="28.35" Border.Lines="Bottom" Border.Color="Gainsboro" Text="[GetOrdersReportData.CurrentStatus]" HorzAlign="Center" VertAlign="Center" Font="Arial, 8pt" ForeColor="Green"/>
+    </DataBand>
+
+    <GroupFooterBand Name="GroupFooter1" Top="219.9" Width="718.2" Height="103.95">
+      <LineObject Name="LineSeparator" Top="9.45" Width="718.2" Border.Color="Gray"/>
+      
+      <TextObject Name="lblSub" Left="425.25" Top="18.9" Width="132.3" Height="18.9" Text="SUBTOTAL" Font="Arial, 9pt"/>
+      <TextObject Name="valSub" Left="557.55" Top="18.9" Width="141.75" Height="18.9" Text="[GetOrdersReportData.Subtotal]" Format="Currency" Format.UseLocale="true" HorzAlign="Right" Font="Arial, 9pt"/>
+      
+      <TextObject Name="lblShip" Left="425.25" Top="37.8" Width="132.3" Height="18.9" Text="SHIPPING" Font="Arial, 9pt"/>
+      <TextObject Name="valShip" Left="557.55" Top="37.8" Width="141.75" Height="18.9" Text="[GetOrdersReportData.ShippingAmout]" Format="Currency" Format.UseLocale="true" HorzAlign="Right" Font="Arial, 9pt"/>
+      
+      <ShapeObject Name="TotalBg" Left="425.25" Top="61.45" Width="283.5" Height="28.35" Fill.Color="AliceBlue" Border.Color="LightSteelBlue"/>
+      <TextObject Name="lblGrand" Left="434.7" Top="66.15" Width="122.85" Height="18.9" Text="GRAND TOTAL" VertAlign="Center" Font="Arial, 10pt, style=Bold" ForeColor="DarkBlue"/>
+      <TextObject Name="valGrand" Left="557.55" Top="66.15" Width="141.75" Height="18.9" Text="[GetOrdersReportData.GrandTotal]" Format="Currency" Format.UseLocale="true" HorzAlign="Right" VertAlign="Center" Font="Arial, 11pt, style=Bold" ForeColor="DarkBlue"/>
+    </GroupFooterBand>
+
+    <PageFooterBand Name="PageFooter1" Top="327.85" Width="718.2" Height="28.35">
+      <TextObject Name="txtFooter" Left="0" Top="9.45" Width="359.1" Height="18.9" Text="Generated on [Date]" Font="Arial, 8pt, style=Italic" ForeColor="Gray"/>
+      <TextObject Name="txtPage" Left="359.1" Top="9.45" Width="359.1" Height="18.9" Text="Page [PageN] of [TotalPages#]" HorzAlign="Right" Font="Arial, 8pt" ForeColor="Gray"/>
+    </PageFooterBand>
+  </ReportPage>
+</Report>
